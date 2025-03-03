@@ -22,7 +22,6 @@ export function useRequest<T>() {
       const params = args || [];
       const data = await requestFn(...params);
 
-      // Se houver erro no retorno da API, lançar uma exceção
       if ((data as any).error) {
         throw {
           error: (data as any).error,
@@ -40,7 +39,7 @@ export function useRequest<T>() {
         error: { error: error.error || "Erro desconhecido", statusCode: error.statusCode || 500 },
         loading: false,
       });
-      throw error; // Garantir que o erro seja propagado
+      throw error;
     }
   };
 

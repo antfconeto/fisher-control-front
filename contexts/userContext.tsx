@@ -10,6 +10,8 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
+import { AuthContext } from "./authContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserContextProps {
   user: User | null;
@@ -17,7 +19,6 @@ interface UserContextProps {
   setUser: (user: User | null) => void;
 }
 
-// Criando o contexto com valor padrão como undefined
 export const UserContext = createContext<UserContextProps | undefined>(
   undefined
 );
@@ -31,14 +32,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   //hook request
   const { data, error, loading, sendRequest } = useRequest();
-
   //consoler
   const consoler = new CustomConsole();
 
   useEffect(() => {
-    fetchUserData();
+      console.log("has token")
+      fetchUserData();
   }, []);
-
+  
   const fetchUserData = async () => {
     try {
       if (!user) {

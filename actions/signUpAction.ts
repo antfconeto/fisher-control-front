@@ -14,7 +14,7 @@ export const signUpAction = async (data: User): Promise<UserLoginResponse | Resp
   
   try {
     const response = await fetch(`${urlApi}/user/signUp`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -26,7 +26,10 @@ export const signUpAction = async (data: User): Promise<UserLoginResponse | Resp
       consoler.error(
         `Error to signUp user, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      return errorMessage;
+      return {
+        error: errorMessage.error,
+        statusCode: response.status,
+      };
     }
     console.log(response.status)
     const responseBody: UserLoginResponse = await response.json();
@@ -36,12 +39,14 @@ export const signUpAction = async (data: User): Promise<UserLoginResponse | Resp
     await cookieManager.createCookie('access_token', responseBody.token);
     return responseBody;
   } catch (error: any) {
+    const statusCode = error.statusCode || 500;
+    const errorMessage = error.message || "Erro desconhecido";
     consoler.error(
       `Error to fetch signpup for email: ${data.email}, error: ${error.message}, statusCode: ${error.statusCode || 500}`
     );
-    throw new CustomError(
-      error.message,
-      error.statusCode || 500
-    );
+    return {
+      error: errorMessage,
+      statusCode: statusCode,
+    };
   }
 };

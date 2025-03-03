@@ -14,7 +14,6 @@ export const getUserData = async (): Promise<Omit<User, 'password'> | ResponseEr
   //get token from cookie
   const token = (await cookies()).get('access_token')
   if(!token) {
-    consoler.warn(` Token not received`)
     return {
       error: " Token not received",
       statusCode: 401,
