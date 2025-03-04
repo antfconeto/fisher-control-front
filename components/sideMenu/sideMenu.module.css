@@ -1,0 +1,17 @@
+/* Sidebar.css */
+.sideItem {
+    transition: background-color 0.3s, color 0.3s ease;
+}
+.iconItem {
+    position: relative;
+    transition: all linear .1s;
+}
+
+.sideItem:hover .iconItem {
+    background-color: rgba(var(--bs-primary-rgb));
+    transform: translate(20%,0%);
+}
+
+/* .iconItem{
+    transition: all .3s ease;
+} */

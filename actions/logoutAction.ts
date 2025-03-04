@@ -14,7 +14,6 @@ export const logoutAction = async (): Promise<void | ResponseError> => {
   
   try {
     await cookieManager.removeCookie("access_token")
-
   } catch (error: any) {
     consoler.error(
       `Error to fetch logout error: ${error.message}, statusCode: ${error.statusCode || 500}`

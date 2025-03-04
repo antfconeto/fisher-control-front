@@ -36,7 +36,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const consoler = new CustomConsole();
 
   useEffect(() => {
-      console.log("has token")
       fetchUserData();
   }, []);
   

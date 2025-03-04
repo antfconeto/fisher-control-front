@@ -1,18 +1,15 @@
+import Sidebar from "@/components/sideMenu/sideMenu";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import "./globals.css";
-import { AuthProvider } from "@/contexts/authContext";
-import { UserProvider } from "@/contexts/userContext";
-import "bootstrap/dist/css/bootstrap.min.css";
 const poppins = Poppins({
   weight: ["200", "300", "500"],
   subsets: ["latin"],
 });
 export const metadata: Metadata = {
-  title: "🐟 Fisher Control",
+  title: "🐟 Fisher Control - Dashboard",
   description: "A project dedicate a pibic",
 };
-export default function RootLayout({
+export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -20,10 +17,10 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className={`${poppins.className}`}>
-        <AuthProvider>
-          <UserProvider>
-          {children}</UserProvider>
-        </AuthProvider>
+        <div className="d-flex flex-row flex-shrink-0 vh-100 vw-100">
+          <Sidebar />
+          {children}
+        </div>
       </body>
     </html>
   );

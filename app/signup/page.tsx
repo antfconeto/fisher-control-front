@@ -12,7 +12,7 @@ import { useError } from "@/hooks/useError";
 import { useUser } from "@/hooks/userHook";
 import { ErrorBox } from "@/components/ErrorBox";
 import { signUpAction } from "@/actions/signUpAction";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeClosed } from "lucide-react";
 
 export default function SignUpForm() {
   // Input states
@@ -51,7 +51,7 @@ export default function SignUpForm() {
         const userData = response as UserLoginResponse;
         setToken(userData.token);
         setUser(userData.user);
-        router.push("/home");
+        router.push("/dashboard");
       }
     } catch (err: any) {
       const errMsg = err?.error || "Erro desconhecido";
@@ -106,10 +106,10 @@ export default function SignUpForm() {
                 />
                 <button
                   type="button"
-                  className="btn btn-outline-primary"
+                  className="btn btn-primary"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ?   <Eye size={18} /> : <EyeClosed size={18} />}
                 </button>
               </div>
             </div>
@@ -124,14 +124,10 @@ export default function SignUpForm() {
                 />
                 <button
                   type="button"
-                  className="btn btn-outline-primary"
+                  className="btn btn-primary"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {showConfirmPassword ?  <Eye size={18} /> : <EyeClosed size={18} />}
                 </button>
               </div>
             </div>
@@ -148,7 +144,9 @@ export default function SignUpForm() {
             </Button>
           </form>
           <hr className="border border-primary border-3 opacity-75 rounded-pill" />
-          <Button otherClassName="position-relative top-0 start-50 translate-middle-x">
+          <Button onClick={()=>{
+            window.location.href = "/login";
+          }} otherClassName="position-relative top-0 start-50 translate-middle-x">
             Já possui conta? Então entre!
           </Button>
         </div>

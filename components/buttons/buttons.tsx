@@ -2,7 +2,7 @@
 import { AllHTMLAttributes } from "react";
 import styles from './button.module.css'
 interface ButtonProsp extends AllHTMLAttributes<HTMLButtonElement>{
-    variant?: "primary" | "secondary" | "tertiary";
+    variant?: "primary" | "secondary" | "tertiary" | "danger";
     sizeButton?: "small" | "medium" | "large";
     disabled?: boolean;
     type?: "button" | "submit" | "reset";

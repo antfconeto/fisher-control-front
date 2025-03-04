@@ -2,9 +2,7 @@
 import { ResponseError } from "@/types/types";
 import { UserCredentials, UserLoginResponse } from "@/types/user";
 import { CookieManager, ICookiesManager } from "@/utils/cookies-manager";
-import { CustomError } from "@/utils/customError";
 import { CustomConsole } from "@/utils/customLogger";
-import { NextApiRequest, NextApiResponse } from "next";
 
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:5000";

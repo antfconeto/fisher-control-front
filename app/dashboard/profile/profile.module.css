@@ -1,0 +1,9 @@
+.cardProfile{
+    transition: all .3s;
+    position: relative;
+    box-shadow: 2px 10px 10px rgba(0, 0, 0, 0.075);
+}
+.cardProfile:hover{
+    transform: translate(-0%,-5%);
+    box-shadow: 20px 20px 0px rgba(0, 0, 0, 0.288);
+}

@@ -1,26 +1,34 @@
-// app/middleware.ts
 import { NextResponse } from 'next/server';
 import { CustomConsole } from '@/utils/customLogger';
 import { cookies } from 'next/headers';
 import { isTokenExpirated } from './utils/authUtils';
-const consoler = new CustomConsole()
+
+const consoler = new CustomConsole();
 
 export async function middleware(request: Request) {
-  const cookiesService = cookies()
-    consoler.process(`🚦 Processing middleware for access: ${request.url}`)
-    const token = (await cookiesService).get('access_token')
+  const cookiesService = cookies();
+  consoler.process(`🚦 Processing middleware for access: ${request.url}`);
+  const token = (await cookiesService).get('access_token');
+
   if (!token) {
-    consoler.warn(`⚠️ Token not received, redirecting for /login...`)
+    consoler.warn(`⚠️ Token not received, redirecting for /login...`);
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  if(isTokenExpirated(token.value)) {
-    consoler.warn(`⚠️ Token was received, but its expirated, redirecting for /login...`)
+
+  if (isTokenExpirated(token!.value)) {
+    consoler.warn(`⚠️ Token was received, but it's expired, redirecting for /login...`);
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  consoler.success(`✅🚦Token received, passing...`)
+
+  if ((request.url.includes("/login") || request.url.includes("/signup")) && token) {
+    consoler.success(`✅🚦 Token received and valid, redirecting to /dashboard...`);
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  consoler.success(`✅🚦 Token received, passing...`);
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/home', '/board'],
+  matcher: ['/home', '/dashboard', '/login', '/signup'],
 };

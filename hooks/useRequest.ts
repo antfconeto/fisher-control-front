@@ -22,7 +22,7 @@ export function useRequest<T>() {
       const params = args || [];
       const data = await requestFn(...params);
 
-      if ((data as any).error) {
+      if ((data as any)?.error) {
         throw {
           error: (data as any).error,
           statusCode: (data as any).error.statusCode || 500,

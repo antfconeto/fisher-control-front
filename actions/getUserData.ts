@@ -24,14 +24,11 @@ export const getUserData = async (): Promise<Omit<User, 'password'> | ResponseEr
 
   try {
     const response = await fetch(`${urlApi}/user/getUserById?userId=${id}`, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token!.value}`,
-      },
-      body: JSON.stringify({
-        userId: id,
-      }),
+      }
     });
     
 
