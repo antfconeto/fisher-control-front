@@ -19,16 +19,11 @@ export async function middleware(request: Request) {
     consoler.warn(`⚠️ Token was received, but it's expired, redirecting for /login...`);
     return NextResponse.redirect(new URL('/login', request.url));
   }
-
-  if ((request.url.includes("/login") || request.url.includes("/signup")) && token) {
-    consoler.success(`✅🚦 Token received and valid, redirecting to /dashboard...`);
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
+  
   consoler.success(`✅🚦 Token received, passing...`);
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/home', '/dashboard', '/login', '/signup'],
+  matcher: ['/home', '/dashboard',],
 };
