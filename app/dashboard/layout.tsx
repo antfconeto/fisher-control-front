@@ -1,14 +1,18 @@
 import Sidebar from "@/components/sideMenu/sideMenu";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import "./dashboard.css";
+
 const poppins = Poppins({
-  weight: ["200", "300", "500"],
+  weight: ["200", "300", "400", "500", "600", "700"],
   subsets: ["latin"],
 });
+
 export const metadata: Metadata = {
   title: "🐟 Fisher Control - Dashboard",
-  description: "A project dedicate a pibic",
+  description: "Sistema de gerenciamento para piscicultura",
 };
+
 export default function Layout({
   children,
 }: Readonly<{
@@ -17,9 +21,9 @@ export default function Layout({
   return (
     <html lang="pt-br">
       <body className={`${poppins.className}`}>
-        <div className="d-flex flex-row flex-shrink-0 vh-100 vw-100">
+        <div className="dashboard-container">
           <Sidebar />
-          {children}
+          <main className="dashboard-content">{children}</main>
         </div>
       </body>
     </html>

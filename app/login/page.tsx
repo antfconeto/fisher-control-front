@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/actions/loginAction";
 import { useRequest } from "@/hooks/useRequest";
@@ -19,9 +19,9 @@ export default function LoginForm() {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   //global states of token
-  const { setToken, token } = useAuth();
-  const { user, setUser } = useUser();
-  const { data, error, loading, sendRequest } = useRequest<
+  const { setToken } = useAuth();
+  const { setUser } = useUser();
+  const { loading, sendRequest } = useRequest<
     UserLoginResponse | ResponseError
   >();
   //get router
@@ -44,8 +44,8 @@ export default function LoginForm() {
         //redirect for home
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      const errMsg = err?.error || "Erro desconhecido";
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Erro desconhecido";
       setErrorMessage(errMsg);
     }
   };
@@ -62,74 +62,94 @@ export default function LoginForm() {
         <></>
       )}
       <div
-        className="d-flex shadow-lg rounded-3 overflow-hidden"
+        className="d-flex flex-column shadow-lg rounded-3 overflow-hidden"
         style={{ maxWidth: "700px" }}
       >
-        {/* Lado da imagem */}
-        <div
-          className="bg-primary d-none d-md-flex align-items-center justify-content-around flex-column p-4"
-          style={{ width: "300px" }}
-        >
+        {/* Logo para Mobile (visível apenas em dispositivos móveis) */}
+        <div className="d-md-none bg-primary p-4 d-flex flex-column align-items-center">
           <Image
             src="logo.svg"
             priority={true}
             alt="Fisher control"
             style={{ color: "#fff" }}
-            width={200}
-            height={200}
+            width={150}
+            height={150}
           />
-          <h1 className="text text-light fs-4 text-center">
+          <h1 className="text text-light fs-4 text-center mt-2">
             Gerenciador de açudes
           </h1>
         </div>
 
-        {/* Lado do formulário */}
-        <div className="p-4 bg-white" style={{ width: "400px" }}>
-          <h3 className="text-primary d-flex align-items-center mb-4">
-            <span className="me-2">🐟</span> Fisher Control
-          </h3>
-          <form>
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-                className="form-control"
-                placeholder="Digite seu email"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Senha</label>
-              <div className="input-group">
+        <div className="d-flex">
+          {/* Lado da imagem (visível apenas em desktop) */}
+          <div
+            className="bg-primary d-none d-md-flex align-items-center justify-content-around flex-column p-4"
+            style={{ width: "300px" }}
+          >
+            <Image
+              src="logo.svg"
+              priority={true}
+              alt="Fisher control"
+              style={{ color: "#fff" }}
+              width={200}
+              height={200}
+            />
+            <h1 className="text text-light fs-4 text-center">
+              Gerenciador de açudes
+            </h1>
+          </div>
+
+          {/* Lado do formulário */}
+          <div className="p-4 bg-white" style={{ width: "400px" }}>
+            <h3 className="text-primary d-flex align-items-center mb-4">
+              <span className="me-2">🐟</span> Fisher Control
+            </h3>
+            <form>
+              <div className="mb-3">
+                <label className="form-label">Email</label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  onChange={(e) => setPassword(e.target.value)}
+                  type="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   className="form-control"
-                  placeholder="Digite sua senha"
+                  placeholder="Digite seu email"
                 />
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <Eye size={18} />:<EyeClosed size={18} />  }
-                </button>
               </div>
-            </div>
+              <div className="mb-3">
+                <label className="form-label">Senha</label>
+                <div className="input-group">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="form-control"
+                    placeholder="Digite sua senha"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
+                  </button>
+                </div>
+              </div>
+              <Button
+                type="submit"
+                otherClassName="w-100"
+                onClick={(e) => handleSubmit(e)}
+              >
+                {loading ? <DotLoader color="#fff" size={20} /> : "Entrar"}
+              </Button>
+            </form>
+            <hr className="border border-primary border-3 opacity-75 rounded-pill" />
             <Button
-              type="submit"
-              otherClassName="w-100"
-              onClick={(e) => handleSubmit(e)}
+              onClick={() => {
+                window.location.href = "/signup";
+              }}
+              otherClassName="position-relative top-0 start-50 translate-middle-x"
             >
-              {loading ? <DotLoader color="#fff" size={20} /> : "Entrar"}
+              Não possui conta? Crie uma!
             </Button>
-          </form>
-          <hr className="border border-primary border-3 opacity-75 rounded-pill" />
-          <Button onClick={()=>{
-            window.location.href = "/signup";
-          }} otherClassName="position-relative top-0 start-50 translate-middle-x">
-            Não possui conta? Crie uma!
-          </Button>
+          </div>
         </div>
       </div>
     </div>
