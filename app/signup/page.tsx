@@ -26,7 +26,7 @@ export default function SignUpForm() {
   // Global states
   const { setToken } = useAuth();
   const { setUser } = useUser();
-  const { data, error, loading, sendRequest } = useRequest<
+  const {loading, sendRequest } = useRequest<
     UserLoginResponse | ResponseError
   >();
   const { errorMessage, setErrorMessage } = useError();

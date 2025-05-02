@@ -1,17 +1,292 @@
 /* Sidebar.css */
 .sideItem {
-    transition: background-color 0.3s, color 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 10px;
+  margin: 6px 12px !important;
+  overflow: hidden;
 }
+
 .iconItem {
-    position: relative;
-    transition: all linear .1s;
+  position: relative;
+  transition: all 0.3s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 12px 16px;
+  border-left: 0px solid transparent;
+  font-size: 0.95rem;
 }
 
 .sideItem:hover .iconItem {
-    background-color: rgba(var(--bs-primary-rgb));
-    transform: translate(20%,0%);
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(3px);
+  color: white;
 }
 
-/* .iconItem{
-    transition: all .3s ease;
-} */
+.activeItem {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.05)
+  );
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.activeItem .iconItem {
+  border-left: 4px solid white;
+  color: white;
+  font-weight: 600;
+}
+
+/* Logo e cabeçalho */
+.logoContainer {
+  padding: 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.05)
+  );
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logoIcon {
+  margin-right: 12px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.1)
+  );
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para Desktop */
+.desktopSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  z-index: 500;
+  height: 100vh;
+  overflow-y: auto;
+  background: linear-gradient(145deg, #0a58ca 0%, #084298 100%);
+  background-image: linear-gradient(145deg, #0a58ca 0%, #084298 100%),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><path fill="rgba(255, 255, 255, 0.03)" d="M769 229L1037 260.9M927 880L731 737 520 660 309 538 40 599 295 764 126.5 879.5 40 599-197 493 102 382-31 229 126.5 79.5-69-63"></path></svg>');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktopSidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.desktopSidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.desktopSidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.desktopSidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* Menu Footer */
+.menuFooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  margin-top: auto;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-align: center;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.05));
+  backdrop-filter: blur(5px);
+}
+
+/* Menu Mobile */
+.mobileMenuToggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: linear-gradient(145deg, #0a58ca 0%, #084298 100%);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.mobileMenuToggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(13, 110, 253, 0.4);
+}
+
+.mobileSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 300px;
+  z-index: 1090;
+  height: 100vh;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(145deg, #0a58ca 0%, #084298 100%);
+  background-image: linear-gradient(145deg, #0a58ca 0%, #084298 100%),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><path fill="rgba(255, 255, 255, 0.03)" d="M769 229L1037 260.9M927 880L731 737 520 660 309 538 40 599 295 764 126.5 879.5 40 599-197 493 102 382-31 229 126.5 79.5-69-63"></path></svg>');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1080;
+  animation: fadeIn 0.3s ease;
+}
+
+.mobileSidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mobileSidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.mobileSidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+/* Container do menu */
+.menuContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+
+/* Categorias no menu */
+.menuCategory {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 20px;
+  margin: 18px 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Animações */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.navMenu {
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards;
+  animation-delay: 0.2s;
+}
+
+/* Decorações */
+.menuDecoration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 35%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255, 255, 255, 0.05)" fill-opacity="1" d="M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,138.7C672,139,768,181,864,181.3C960,181,1056,139,1152,133.3C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: cover;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.8;
+}

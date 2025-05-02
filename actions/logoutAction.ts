@@ -4,7 +4,6 @@ import { User, UserCredentials, UserLoginResponse } from "@/types/user";
 import { CookieManager, ICookiesManager } from "@/utils/cookies-manager";
 import { CustomError } from "@/utils/customError";
 import { CustomConsole } from "@/utils/customLogger";
-import { cookies } from "next/headers";
 
 const consoler = new CustomConsole();
 const cookieManager:ICookiesManager = await new CookieManager()

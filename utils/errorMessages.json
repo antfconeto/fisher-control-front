@@ -1,0 +1,39 @@
+{
+    "userErros": {
+        "login": {
+            "statusCode": {
+                "404": "O usuário não foi encontrado!",
+                "400": "Dados incompletos",
+                "401": "Senha inválida"
+            }
+        },
+        "signup": {
+            "statusCode": {
+                "409": "O email já foi cadrastrado em outra conta",
+                "400": "Dados incompletos",
+                "422": "É necessário prover um email com domínio acadêmico do IFMA"
+            }
+        },
+        "getData":{
+            "500": "Error ao tentar se comunicar com o servidor!"
+        }
+    },
+    "animalErros":{
+        "createAnimal":{
+            "statusCode":{
+                "400":"Dados incompletos",
+                "404":"Tanque não encontrado",
+                "409":"Já existe um animal com o Código fornecido"
+            }
+        },
+        "listAnimals":{
+            "500": "Error ao tentar se comunicar com o servidor!"
+        }
+    },
+    "fishManager":{
+        "requestToJoin":{
+            "404":"Fish Manager não foi encontrado!",
+            "409":"O usuário já enviou uma requisição de participação!"
+        }
+    }
+}
