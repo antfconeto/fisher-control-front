@@ -54,10 +54,6 @@ export default function AnimalsPage() {
   );
   //States for filter by tank
   const [tankFilter, setTankFilter] = useState<string>('');
-  //States for edit animal code
-  const [editingAnimalCode, setEditingAnimalCode] = useState<string | null>(
-    null
-  );
 
   const { sendRequest } = useRequest<Animal | ResponseError>();
   const { errorMessage, setErrorMessage } = useError();
@@ -101,7 +97,7 @@ export default function AnimalsPage() {
           setCurrentPage(1);
         }
   
-    } catch (error:any) {
+    } catch (error:any ) {
       const errMsg = error?.message || "Erro Desconhecido";
       setErrorMessage(errMsg);
       return false
@@ -128,7 +124,6 @@ export default function AnimalsPage() {
     setCurrentAnimal({
       ...animal,
     });
-    setEditingAnimalCode(animal.codeAnimal);
     setShowModal(true);
   };
 
@@ -141,11 +136,10 @@ export default function AnimalsPage() {
       currentAnimal.tankId
     ) {
       if (modalMode == ModalMode.CREATE) {
-        let response = await handleCreateAnimal()
+        const response = await handleCreateAnimal()
         if(response){
           await fetchAnimals();
           setShowModal(false);
-          setEditingAnimalCode(null);
         }
       }
 
@@ -154,7 +148,7 @@ export default function AnimalsPage() {
 
   const handleCreateAnimal = async ():Promise<boolean> => {
     try {
-      let response = await sendRequest(createAnimal, currentAnimal);
+      await sendRequest(createAnimal, currentAnimal);
       return true
     } catch (err: any) {
       const errMsg = err?.error || "Erro desconhecido";
@@ -162,13 +156,13 @@ export default function AnimalsPage() {
       return false
     }
   };
-  const handleDeleteAnimal = (code: string) => {
+  const handleDeleteAnimal = (code: string):void => {
     if (confirm("Tem certeza que deseja excluir este animal?")) {
       setAnimals(animals.filter((animal) => animal.codeAnimal !== code));
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date):string => {
     return new Date(date).toLocaleDateString("pt-BR");
   };
   

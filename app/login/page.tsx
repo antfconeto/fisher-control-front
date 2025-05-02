@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/actions/loginAction";
 import { useRequest } from "@/hooks/useRequest";
@@ -19,9 +19,9 @@ export default function LoginForm() {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   //global states of token
-  const { setToken, token } = useAuth();
-  const { user, setUser } = useUser();
-  const { data, error, loading, sendRequest } = useRequest<
+  const { setToken } = useAuth();
+  const {setUser } = useUser();
+  const { loading, sendRequest } = useRequest<
     UserLoginResponse | ResponseError
   >();
   //get router
