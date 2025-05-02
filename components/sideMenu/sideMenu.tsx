@@ -112,7 +112,7 @@ const Sidebar = () => {
             <Nav className={`flex-column ${styles.navMenu}`}>
               {section.items.map((item, index) => (
                 <Nav.Item key={index} className="w-100">
-                  <Link href={item.link} passHref legacyBehavior>
+                  <Link href={item.link} prefetch={true} passHref legacyBehavior>
                     <Nav.Link
                       className={`text-white ${styles.sideItem} ${
                         isActive(item.link) ? styles.activeItem : ""

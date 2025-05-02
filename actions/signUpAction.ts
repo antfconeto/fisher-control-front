@@ -4,9 +4,10 @@ import { User, UserCredentials, UserLoginResponse } from "@/types/user";
 import { CookieManager, ICookiesManager } from "@/utils/cookies-manager";
 import { CustomError } from "@/utils/customError";
 import { CustomConsole } from "@/utils/customLogger";
+import * as errorMessages from "@/utils/errorMessages.json"
 
 const consoler = new CustomConsole();
-const urlApi = process.env.API_URL || "http://localhost:5000";
+const urlApi = process.env.API_URL || "http://localhost:4000";
 const cookieManager:ICookiesManager = await new CookieManager()
 
 export const signUpAction = async (data: User): Promise<UserLoginResponse | ResponseError> => {
@@ -27,11 +28,10 @@ export const signUpAction = async (data: User): Promise<UserLoginResponse | Resp
         `Error to signUp user, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
       return {
-        error: errorMessage.error,
+        error: getUserErrorMessage('signup', response.status),
         statusCode: response.status,
       };
     }
-    console.log(response.status)
     const responseBody: UserLoginResponse = await response.json();
     
     consoler.success(`User signpup  successfully with email: ${data.email}`);
@@ -44,9 +44,16 @@ export const signUpAction = async (data: User): Promise<UserLoginResponse | Resp
     consoler.error(
       `Error to fetch signpup for email: ${data.email}, error: ${error.message}, statusCode: ${error.statusCode || 500}`
     );
-    return {
-      error: errorMessage,
-      statusCode: statusCode,
-    };
+    throw new CustomError(getUserErrorMessage('signup', error.statusCode || 500), error.statusCode || 500);
   }
 };
+
+
+function getUserErrorMessage(context: string, statusCode: number): string {
+  const userErrors = errorMessages.userErros as any
+
+  return (
+    userErrors[context]?.statusCode?.[statusCode] ||
+    'Erro desconhecido.'
+  );
+}

@@ -26,7 +26,7 @@ export default function SignUpForm() {
   // Global states
   const { setToken } = useAuth();
   const { setUser } = useUser();
-  const { loading, sendRequest } = useRequest<
+  const { data, error, loading, sendRequest } = useRequest<
     UserLoginResponse | ResponseError
   >();
   const { errorMessage, setErrorMessage } = useError();
@@ -53,8 +53,8 @@ export default function SignUpForm() {
         setUser(userData.user);
         router.push("/dashboard");
       }
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : "Erro desconhecido";
+    } catch (err: any) {
+      const errMsg = err?.error || "Erro desconhecido";
       setErrorMessage(errMsg);
     }
   };
@@ -109,7 +109,7 @@ export default function SignUpForm() {
                   className="btn btn-primary"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
+                  {showPassword ?   <Eye size={18} /> : <EyeClosed size={18} />}
                 </button>
               </div>
             </div>
@@ -127,11 +127,7 @@ export default function SignUpForm() {
                   className="btn btn-primary"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? (
-                    <Eye size={18} />
-                  ) : (
-                    <EyeClosed size={18} />
-                  )}
+                  {showConfirmPassword ?  <Eye size={18} /> : <EyeClosed size={18} />}
                 </button>
               </div>
             </div>
@@ -148,12 +144,9 @@ export default function SignUpForm() {
             </Button>
           </form>
           <hr className="border border-primary border-3 opacity-75 rounded-pill" />
-          <Button
-            onClick={() => {
-              window.location.href = "/login";
-            }}
-            otherClassName="position-relative top-0 start-50 translate-middle-x"
-          >
+          <Button onClick={()=>{
+            window.location.href = "/login";
+          }} otherClassName="position-relative top-0 start-50 translate-middle-x">
             Já possui conta? Então entre!
           </Button>
         </div>

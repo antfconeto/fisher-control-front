@@ -21,3 +21,44 @@ export type DecodedToken = {
   iat: number;
   exp: number;
 };
+
+
+export type AnimalPagination = { 
+  currentPage: number; 
+  totalPages: number; 
+  totalItems: number; 
+  animals: Animal[]; 
+}
+
+
+export interface Animal {
+  codeAnimal: string;
+  _id:string;
+  specie:string;
+  birthDate: Date;
+  gender: "M" | "F";
+  matriz_code: string;
+  tankId:string;
+}
+
+export interface Tank {
+  _id: string;
+  name:string;
+  capacity: number;
+  size:{
+      width: number;
+      height: number;
+  }
+  fishManagerId:string;
+}
+
+export type FishManager = {
+    _id:string;
+    name:string;
+    description:string;
+    userRequireApprove:string[];
+    users:string[];
+    createdAt:Date;
+    ownerId:string;
+    updatedAt:Date;
+}

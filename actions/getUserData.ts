@@ -5,9 +5,10 @@ import { decodeToken } from "@/utils/authUtils";
 import { CustomError } from "@/utils/customError";
 import { CustomConsole } from "@/utils/customLogger";
 import { cookies } from "next/headers";
+import * as errorMessages from "@/utils/errorMessages.json"
 
 const consoler = new CustomConsole();
-const urlApi = process.env.API_URL || "http://localhost:5000";
+const urlApi = process.env.API_URL || "http://localhost:4000";
 
 export const getUserData = async (): Promise<Omit<User, 'password'> | ResponseError> => {
   consoler.process(`🔁 Initing process to get UserData`);
@@ -31,28 +32,35 @@ export const getUserData = async (): Promise<Omit<User, 'password'> | ResponseEr
       }
     });
     
-
     //verify if response was ok
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();
       consoler.error(
         `Error to get user data, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      return errorMessage;
+      return {
+        error: getUserErrorMessage('getData', response.status),
+        statusCode: response.status,
+      };
     }
     //get info as json
     const responseBody: User = await response.json();
     consoler.success(`Getted data from user: ${responseBody.username}`);
- 
     return responseBody;
   } catch (error: any) {
     // Captura de erros em qualquer ponto
     consoler.error(
       `Error to fetch data user, error: ${error.message}, statusCode: ${error.statusCode || 500}`
     );
-    throw new CustomError(
-      error.message,
-      error.statusCode || 500
-    );
-  }
+    throw new CustomError(getUserErrorMessage('getData', error.statusCode || 500), error.statusCode || 500);
 };
+}
+
+function getUserErrorMessage(context: string, statusCode: number): string {
+  const userErrors = errorMessages.userErros as any
+
+  return (
+    userErrors[context]?.statusCode?.[statusCode] ||
+    'Erro desconhecido.'
+  );
+}
