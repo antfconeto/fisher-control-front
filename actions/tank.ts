@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:4000";
 
-export const listAllTanks = async (): Promise<Tank[] | ResponseError> => {
+export const getTanks = async (tankName?:string): Promise<Tank[] | ResponseError> => {
     console.log(`🔁 Initing process to list All Tanks`);
     //get token from cookie
     const token = (await cookies()).get('access_token')
@@ -20,12 +20,17 @@ export const listAllTanks = async (): Promise<Tank[] | ResponseError> => {
         }
     }
     try {
-        const response = await fetch(`${urlApi}/tank/getAllTanks`, {
-            method: "GET",
+        const response = await fetch(`${urlApi}/tank/getTanks`, {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token!.value}`,
             },
+            body:JSON.stringify(
+                {
+                    tankName:tankName
+                }
+            )
         });
         //verify if response was ok
         if (!response.ok) {
@@ -37,7 +42,7 @@ export const listAllTanks = async (): Promise<Tank[] | ResponseError> => {
         }
         //get info as json
         const responseBody: Tank[] = await response.json();
-
+        console.log(`✅ Getted all tanks: `, responseBody.length)
         return responseBody;
     } catch (error: any) {
         // Captura de erros em qualquer ponto
