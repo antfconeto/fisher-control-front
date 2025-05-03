@@ -9,6 +9,7 @@ import {
   BsSearch,
   BsInfoCircle,
   BsFilter,
+  BsRulers,
 } from "react-icons/bs";
 import {
   FaChevronLeft,
@@ -309,7 +310,7 @@ export default function TanksPage() {
 
                     <div className={styles.tankCardStat}>
                       <div className={styles.tankCardStatIcon}>
-                        <BsDropletFill />
+                        <BsRulers />
                       </div>
                       <div className={styles.tankCardStatContent}>
                         <div className={styles.tankCardStatLabel}>
