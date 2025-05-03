@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./animals.module.css";
 import {
   BsSearch,
@@ -28,11 +28,16 @@ import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
 import { getTanks } from "@/actions/tank";
+import { AnimalTable } from "@/components/tables";
+import DynamicFilters from "@/components/dynamicFilter/dynamicFilters";
+import { FilterFieldConfig } from "@/types/components";
 
 enum ModalMode {
   CREATE = "create",
   UPDATE = "update",
 }
+
+
 
 export default function AnimalsPage() {
   //Animals
@@ -44,24 +49,14 @@ export default function AnimalsPage() {
   //States for define status of modal
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
   //States for filter by code
-  const [codeFilter, setCodeFilter] = useState<string>('');
-  //States for filter by specie
-  const [specieFilter, setSpecieFilter] = useState<string>(
-    ''
-  );
-  //States for filter by gender
-  const [genderFilter, setGenderFilter] = useState<"M" | "F" | undefined>(
-    undefined
-  );
-  const [tanks, setTanks] = useState<Tank[]>([])
-  //States for filter by tank
-  const [tankFilter, setTankFilter] = useState<string>('');
-
-  const { sendRequest } = useRequest<Animal | ResponseError>();
-  const { errorMessage, setErrorMessage } = useError();
-  const [loading, setLoading] = useState<boolean>(true)
-  //States for current animal selected
-  const [currentAnimal, setCurrentAnimal] = useState<Animal>({
+  const [filters, setFilters] = useState({
+    codeAnimal: '',
+    specie: '',
+    gender: undefined as "M" | "F" | undefined,
+    tankId: '',
+  });
+  //default values for animal
+  const defaultAnimal: Animal = {
     codeAnimal: "",
     _id: "",
     specie: "",
@@ -69,38 +64,115 @@ export default function AnimalsPage() {
     gender: "M",
     matriz_code: "",
     tankId: "",
-  });
+  };
+  
+  //Tanks
+  const [tanks, setTanks] = useState<Tank[]>([])
+
+  const { sendRequest } = useRequest<Animal | ResponseError>();
+  const { errorMessage, setErrorMessage } = useError();
+  const [loading, setLoading] = useState<boolean>(true)
+  //States for current animal selected
+  const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
   //States for current page selected
   const [currentPage, setCurrentPage] = useState(1);
   //Total items per page
   const itemsPerPage = 5;
 
+
+  const filterFields: FilterFieldConfig[] = [
+    {
+      key: "code",
+      label: "Código do animal",
+      icon: BsSearch,
+      type: "text",
+      size: "medium",
+      placeholder: "Código do animal",
+      value: filters.codeAnimal,
+      onChange: (val) => {
+        setCurrentPage(1);
+        setFilters((prev) => ({ ...prev, codeAnimal: val as string }));
+      },
+    },
+    {
+      key: "species",
+      label: "Espécie",
+      icon: FaFish,
+      type: "text",
+      size: "medium",
+      placeholder: "Espécie",
+      value: filters.specie,
+      onChange: (val) => {
+        setCurrentPage(1);
+        setFilters((prev) => ({ ...prev, specie: val as string }));
+      },
+    },
+    {
+      key: "gender",
+      label: "Sexo",
+      icon: FaVenusMars,
+      type: "select",
+      size: "small",
+      placeholder: "Sexo",
+      selectOptions: [
+        { label: "Todos", value: "" },
+        { label: "Macho", value: "M" },
+        { label: "Fêmea", value: "F" },
+      ],
+      value: filters.gender,
+      onChange: (val) => {
+        setCurrentPage(1);
+        setFilters((prev) => ({ ...prev, gender: val as "M" | "F" | undefined }));
+      },
+    },
+    {
+      key: "tank",
+      label: "Tanque",
+      icon: FaWater,
+      type: "select",
+      size: "medium",
+      placeholder: "Tanque",
+      selectOptions: [
+        ...tanks.map((tank) => ({
+        label: tank.name,
+        value: tank._id,
+      })),
+      {
+      label:"Tanque",
+      value:""
+      }],
+      value: filters.tankId,
+      onChange: (val) => {
+        setCurrentPage(1);
+        setFilters((prev) => ({ ...prev, tankId: val as string }));
+      },
+    },
+  ];
+
   useEffect(() => {
-    //Fetch animals when load page
-    setLoading(true);
-    fetchAnimals();
-    fetchTanks();
-    setLoading(false);
-  }, [currentPage, codeFilter, genderFilter, specieFilter, tankFilter]);
+    (async () => await fetchTanks())();
+  }, []);
+
+  //Update animal data every time when filter is modified
+  useEffect(() => {
+    const loadAnimals = async () => {
+      setLoading(true);
+      await fetchAnimals();
+      setLoading(false);
+    };
+    loadAnimals();
+  }, [currentPage, filters]);
+  
   //Function who fetch load animals in pagination
   const fetchAnimals = async () => {
-    try {
-  
-      const response = await listAnimals(currentPage, itemsPerPage, {
-        codeAnimal: codeFilter,
-        gender: genderFilter,
-        specie: specieFilter,
-        tankId: tankFilter,
-      }) as AnimalPagination;
 
-        setAnimals(response.animals);
-        setTotalPages(response.totalPages);
-        //Case the current page is beggert than totalPages retrieve from back-end, its back to first page
-        if (response.totalPages < currentPage) {
-          setCurrentPage(1);
-        }
-  
-    } catch (error:any ) {
+    try {
+      const response = await listAnimals(currentPage, itemsPerPage, filters) as AnimalPagination;
+
+      setAnimals(response.animals);
+      setTotalPages(response.totalPages);
+
+    } catch (error: any) {
       const errMsg = error?.message || "Erro Desconhecido";
       setErrorMessage(errMsg);
       return false
@@ -108,19 +180,11 @@ export default function AnimalsPage() {
   };
 
   //Function who open a creating modal
-  const openCreateModal = () => {
+  const openCreateModal = useCallback(() => {
     setModalMode(ModalMode.CREATE);
-    setCurrentAnimal({
-      codeAnimal: "",
-      _id: "",
-      specie: "",
-      birthDate: new Date(),
-      gender: "M",
-      matriz_code: "",
-      tankId: "",
-    });
+    setCurrentAnimal(defaultAnimal);
     setShowModal(true);
-  };
+  }, []);
   //Function who open a updating modal
   const openUpdateModal = (animal: Animal) => {
     setModalMode(ModalMode.UPDATE);
@@ -137,21 +201,22 @@ export default function AnimalsPage() {
       currentAnimal.gender &&
       currentAnimal.birthDate &&
       currentAnimal.tankId
-    ) {
+    )
+    {
       if (modalMode == ModalMode.CREATE) {
-        const response = await handleCreateAnimal()
-        if(response){
+        const response = await handleCreateAnimal(currentAnimal)
+        if (response) {
           await fetchAnimals();
           setShowModal(false);
         }
-      }
+    }
 
     }
   };
 
-  const handleCreateAnimal = async ():Promise<boolean> => {
+  const handleCreateAnimal = async (animal: Animal): Promise<boolean> => {
     try {
-      await sendRequest(createAnimal, currentAnimal);
+      await sendRequest(createAnimal, animal);
       return true
     } catch (err: any) {
       const errMsg = err?.error || "Erro desconhecido";
@@ -159,27 +224,22 @@ export default function AnimalsPage() {
       return false
     }
   };
-  const handleDeleteAnimal = (code: string):void => {
+  const handleDeleteAnimal = (codeAnimal: string): void => {
     if (confirm("Tem certeza que deseja excluir este animal?")) {
-      setAnimals(animals.filter((animal) => animal.codeAnimal !== code));
+      setAnimals(animals.filter((animal) => animal.codeAnimal !== codeAnimal));
     }
   };
 
-  const fetchTanks = async ()=>{
+  const fetchTanks = async () => {
     try {
       const response = await getTanks();
-      setTanks(response as Tank[])  
-    } catch (error:any ) {
+      setTanks(response as Tank[])
+    } catch (error: any) {
       const errMsg = error?.message || "Erro Desconhecido";
       setErrorMessage(errMsg);
       return false
     }
   }
-
-  const formatDate = (date: Date):string => {
-    return new Date(date).toLocaleDateString("pt-BR");
-  };
-  
 
   return (
     <>
@@ -190,187 +250,61 @@ export default function AnimalsPage() {
           otherClassName=""
         />
       )}
-    { loading && animals.length == 0?  
-      <div className="loading-container">
-        <ClockLoader color="#0a58ca" size={60} />
-        <p className="loading-text">Carregando animais...</p>
-      </div>
- : 
- <div className="page-container">
- <div className="content-container">
-   <div className="content-card">
-     {/* Cabeçalho com título e botão de criar */}
-     <div className="d-flex justify-content-between align-items-center mb-4">
-       <h2 className="card-title mb-0">
-         <FaFish className="me-2 text-primary" /> Gestão de Animais
-       </h2>
-       <button className={styles.createButton} onClick={openCreateModal}>
-         <FaPlus /> Cadastrar Novo Animal
-       </button>
-     </div>
+      {loading && animals.length == 0 ?
+        <div className="loading-container">
+          <ClockLoader color="#0a58ca" size={60} />
+          <p className="loading-text">Carregando animais...</p>
+        </div>
+        :
+        <div className="page-container">
+          <div className="content-container">
+            <div className="content-card">
+              {/* Cabeçalho com título e botão de criar */}
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="card-title mb-0">
+                  <FaFish className="me-2 text-primary" /> Gestão de Animais
+                </h2>
+                <button className={styles.createButton} onClick={openCreateModal}>
+                  <FaPlus /> Cadastrar Novo Animal
+                </button>
+              </div>
+              <section className={styles.filterSection}>
+                <DynamicFilters filters={filterFields} name="Filtro de Animais" />
+              </section>
 
-     {/* Filtros */}
-     <section className={styles.filterSection}>
-       <div className={styles.filterLabel}>
-         <BsFilter /> Filtro por animais
-       </div>
-       <div className={styles.filterContainer}>
-         <div className={styles.searchInput}>
-           <BsSearch className={styles.filterIcon} />
-           <input
-             type="text"
-             placeholder="Código do animal"
-             value={codeFilter}
-             onChange={(e) => {
-               setCurrentPage(1);
-               setCodeFilter(e.target.value);
-             }}
-           />
-         </div>
-         <div className={styles.filterInput}>
-           <FaFish className={styles.filterIcon} />
-           <input
-             type="text"
-             placeholder="Espécie"
-             value={specieFilter}
-             onChange={(e) => {
-               setCurrentPage(1);
-               setSpecieFilter(e.target.value);
-             }}
-           />
-         </div>
-         <div className={styles.filterInput}>
-           <FaVenusMars className={styles.filterIcon} />
-           <select
-             value={genderFilter}
-             onChange={(e) => {
-               setCurrentPage(1);
-               setGenderFilter(e.target.value as "M" | "F" | undefined);
-             }}
-             className={styles.filterSelect}
-           >
-             <option value="">Todos</option>
-             <option value="M">Macho</option>
-             <option value="F">Fêmea</option>
-           </select>
-         </div>
-         <div className={styles.filterInput}>
-            <FaWater className={styles.filterIcon} />
-            <select
-              value={tankFilter}
-              onChange={(e) => {
-                setCurrentPage(1); 
-                setTankFilter(e.target.value);
-              }}
-              className={styles.filterSelect}
-            >
-              <option value="">Todos os Tanques</option>
-              {tanks.map((tank) => (
-                <option key={tank._id} value={tank._id}>
-                  {tank.name}
-                </option>
-              ))}
-            </select>
+              {/* Tabela de animais */}
+              <div className={styles.tableContainer}>
+                <AnimalTable animals={animals} tanks={tanks} onDelete={handleDeleteAnimal} onEdit={openUpdateModal} />
+              </div>
+
+              {/* Paginação */}
+              {totalPages > 0 && (
+                <div className={styles.pagination}>
+                  <button
+                    className={styles.paginationButton}
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <FaChevronLeft /> Anterior
+                  </button>
+                  <div className={styles.paginationInfo}>
+                    Página {currentPage} de {totalPages}
+                  </div>
+                  <button
+                    className={styles.paginationButton}
+                    onClick={() =>
+                      setCurrentPage(Math.min(totalPages, currentPage + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    Próxima <FaChevronRight />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-       </div>
-     </section>
-
-     {/* Tabela de animais */}
-     <div className={styles.tableContainer}>
-       <table className={styles.table}>
-         <thead>
-           <tr>
-             <th className={styles.tableHeader}>Código</th>
-             <th className={styles.tableHeader}>Espécie</th>
-             <th className={styles.tableHeader}>Data de Nascimento</th>
-             <th className={styles.tableHeader}>Gênero</th>
-             <th className={styles.tableHeader}>Matriz</th>
-             <th className={styles.tableHeader}>Tanque</th>
-             <th className={styles.tableHeader}>Ações</th>
-           </tr>
-         </thead>
-         <tbody>
-           {animals.map((animal: Animal) => (
-             <tr key={animal.codeAnimal} className={styles.tableRow}>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaBarcode /> {animal.codeAnimal}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaFish /> {animal.specie}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaCalendarAlt /> {formatDate(animal.birthDate)}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaVenusMars />{" "}
-                   {animal.gender == "M" ? "Macho" : "Fêmea"}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>{animal.matriz_code}</td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaWater /> {(tanks.find((tank)=>tank._id == animal.tankId))?.name}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.actionsCell}>
-                   <button
-                     className={styles.updateButton}
-                     onClick={() => openUpdateModal(animal)}
-                   >
-                     <BsPencil /> Atualizar
-                   </button>
-                   <button
-                     className={styles.deleteButton}
-                     onClick={() =>
-                       handleDeleteAnimal(animal.codeAnimal)
-                     }
-                   >
-                     <BsTrash /> Deletar
-                   </button>
-                 </div>
-               </td>
-             </tr>
-           ))}
-         </tbody>
-       </table>
-     </div>
-
-     {/* Paginação */}
-     {totalPages > 0 && (
-       <div className={styles.pagination}>
-         <button
-           className={styles.paginationButton}
-           onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-           disabled={currentPage === 1}
-         >
-           <FaChevronLeft /> Anterior
-         </button>
-         <div className={styles.paginationInfo}>
-           Página {currentPage} de {totalPages}
-         </div>
-         <button
-           className={styles.paginationButton}
-           onClick={() =>
-             setCurrentPage(Math.min(totalPages, currentPage + 1))
-           }
-           disabled={currentPage === totalPages}
-         >
-           Próxima <FaChevronRight />
-         </button>
-       </div>
-     )}
-   </div>
- </div>
-</div>
- }
+        </div>
+      }
       {/* Modal de Criação/Atualização */}
       {showModal && (
         <div className={styles.modal}>
@@ -479,24 +413,24 @@ export default function AnimalsPage() {
                   <FaWater /> Selecione o Tanque
                 </label>
                 <div className={styles.filterInput}>
-                <select
-              value={(tanks.find((tank)=>tank._id == currentAnimal._id)?.name)}
-              onChange={(e) => {
-                setCurrentAnimal({
-                  ...currentAnimal,
-                  tankId: e.target.value,
-                })
-              }}
-              className={styles.filterSelect}
-            >
-              <option value="">Todos os Tanques</option>
-              {tanks.map((tank) => (
-                <option key={tank._id} value={tank._id}>
-                  {tank.name}
-                </option>
-              ))}
-            </select>
-            </div>
+                  <select
+                    value={(tanks.find((tank) => tank._id == currentAnimal._id)?.name)}
+                    onChange={(e) => {
+                      setCurrentAnimal({
+                        ...currentAnimal,
+                        tankId: e.target.value,
+                      })
+                    }}
+                    className={styles.filterSelect}
+                  >
+                    <option value="">Todos os Tanques</option>
+                    {tanks.map((tank) => (
+                      <option key={tank._id} value={tank._id}>
+                        {tank.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className={styles.infoBox}>
                 <h4 className={styles.infoTitle}>
