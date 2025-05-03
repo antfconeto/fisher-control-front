@@ -12,7 +12,14 @@ import {
   BsFilter,
 } from "react-icons/bs";
 import { FaWater, FaFish, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  PieLabelRenderProps,
+} from "recharts";
 
 interface Animal {
   code_animal: string;
@@ -284,9 +291,13 @@ export default function TankDetailsPage() {
                         outerRadius={120}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) =>
-                          `${name}: ${(percent * 100).toFixed(0)}%`
-                        }
+                        label={({
+                          name,
+                          percent,
+                        }: {
+                          name: string;
+                          percent: number;
+                        }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                         labelLine={true}
                       >
                         {speciesData.map((entry, index) => (
@@ -297,7 +308,7 @@ export default function TankDetailsPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value) => [
+                        formatter={(value: number) => [
                           `${value} animais`,
                           "Quantidade",
                         ]}
