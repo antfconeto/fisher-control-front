@@ -14,6 +14,7 @@ export const ErrorBox = ({
   return (
     <div
       className={`position-fixed top-0 start-50 translate-middle-x mt-3 zindex-tooltip ${otherClassName}`}
+      style={{ zIndex: 9999 }}
     >
       <div
         className="alert alert-danger alert-dismissible fade show"

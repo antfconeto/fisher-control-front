@@ -83,7 +83,7 @@
   top: 0;
   left: 0;
   width: 260px;
-  z-index: 1000;
+  z-index: 500;
   height: 100vh;
   overflow-y: auto;
   background: linear-gradient(145deg, #0a58ca 0%, #084298 100%);
@@ -151,7 +151,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1100;
+  z-index: 1000;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
