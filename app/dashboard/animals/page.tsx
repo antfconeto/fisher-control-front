@@ -21,12 +21,13 @@ import {
   FaBarcode,
   FaWater,
 } from "react-icons/fa";
-import { Animal, AnimalPagination, ResponseError } from "@/types/types";
+import { Animal, AnimalPagination, ResponseError, Tank } from "@/types/types";
 import { createAnimal, listAnimals } from "@/actions/animal";
 import { useRequest } from "@/hooks/useRequest";
 import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
+import { getTanks } from "@/actions/tank";
 
 enum ModalMode {
   CREATE = "create",
@@ -52,6 +53,7 @@ export default function AnimalsPage() {
   const [genderFilter, setGenderFilter] = useState<"M" | "F" | undefined>(
     undefined
   );
+  const [tanks, setTanks] = useState<Tank[]>([])
   //States for filter by tank
   const [tankFilter, setTankFilter] = useState<string>('');
 
@@ -77,6 +79,7 @@ export default function AnimalsPage() {
     //Fetch animals when load page
     setLoading(true);
     fetchAnimals();
+    fetchTanks();
     setLoading(false);
   }, [currentPage, codeFilter, genderFilter, specieFilter, tankFilter]);
   //Function who fetch load animals in pagination
@@ -162,6 +165,17 @@ export default function AnimalsPage() {
     }
   };
 
+  const fetchTanks = async ()=>{
+    try {
+      const response = await getTanks();
+      setTanks(response as Tank[])  
+    } catch (error:any ) {
+      const errMsg = error?.message || "Erro Desconhecido";
+      setErrorMessage(errMsg);
+      return false
+    }
+  }
+
   const formatDate = (date: Date):string => {
     return new Date(date).toLocaleDateString("pt-BR");
   };
@@ -241,17 +255,23 @@ export default function AnimalsPage() {
            </select>
          </div>
          <div className={styles.filterInput}>
-           <FaWater className={styles.filterIcon} />
-           <input
-             type="text"
-             placeholder="ID do Tanque"
-             value={tankFilter}
-             onChange={(e) => {
-               setCurrentPage(1);
-               setTankFilter(e.target.value);
-             }}
-           />
-         </div>
+            <FaWater className={styles.filterIcon} />
+            <select
+              value={tankFilter}
+              onChange={(e) => {
+                setCurrentPage(1); 
+                setTankFilter(e.target.value);
+              }}
+              className={styles.filterSelect}
+            >
+              <option value="">Todos os Tanques</option>
+              {tanks.map((tank) => (
+                <option key={tank._id} value={tank._id}>
+                  {tank.name}
+                </option>
+              ))}
+            </select>
+          </div>
        </div>
      </section>
 
@@ -296,7 +316,7 @@ export default function AnimalsPage() {
                <td className={styles.tableCell}>{animal.matriz_code}</td>
                <td className={styles.tableCell}>
                  <div className={styles.cellContent}>
-                   <FaWater /> {animal.tankId}
+                   <FaWater /> {(tanks.find((tank)=>tank._id == animal.tankId))?.name}
                  </div>
                </td>
                <td className={styles.tableCell}>
@@ -426,11 +446,11 @@ export default function AnimalsPage() {
                 </label>
                 <select
                   className={styles.formInput}
-                  value={currentAnimal.gender}
+                  value={currentAnimal.gender == "M" ? "Macho" : "Fêmea"}
                   onChange={(e) =>
                     setCurrentAnimal({
                       ...currentAnimal,
-                      gender: e.target.value as any,
+                      gender: e.target.value == "Macho" ? "M" : "F" as any,
                     })
                   }
                 >
@@ -456,20 +476,27 @@ export default function AnimalsPage() {
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
-                  <FaWater /> ID do Tanque
+                  <FaWater /> Selecione o Tanque
                 </label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={currentAnimal.tankId}
-                  onChange={(e) =>
-                    setCurrentAnimal({
-                      ...currentAnimal,
-                      tankId: e.target.value,
-                    })
-                  }
-                  placeholder="Digite o ID do tanque"
-                />
+                <div className={styles.filterInput}>
+                <select
+              value={(tanks.find((tank)=>tank._id == currentAnimal._id)?.name)}
+              onChange={(e) => {
+                setCurrentAnimal({
+                  ...currentAnimal,
+                  tankId: e.target.value,
+                })
+              }}
+              className={styles.filterSelect}
+            >
+              <option value="">Todos os Tanques</option>
+              {tanks.map((tank) => (
+                <option key={tank._id} value={tank._id}>
+                  {tank.name}
+                </option>
+              ))}
+            </select>
+            </div>
               </div>
               <div className={styles.infoBox}>
                 <h4 className={styles.infoTitle}>
