@@ -19,7 +19,7 @@ import { useRequest } from "@/hooks/useRequest";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
 import { AnimalTable } from "@/components/Tables";
-import { DynamicFilters } from "@/components/DynamicFilter/DynamicFilters";
+import { DynamicFilters } from "@/components/dynamicFilter/DynamicFilters";
 import { FilterFieldConfig } from "@/types/components";
 import { useAnimalsPagination } from "@/hooks/useAnimalPagination";
 import { useTanks } from "@/hooks/useTanks";
