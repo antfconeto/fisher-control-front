@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/authContext";
 import { UserProvider } from "@/contexts/userContext";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ErrorProvider } from "@/contexts/errorContext";
 const poppins = Poppins({
   weight: ["200", "300", "500"],
   subsets: ["latin"],
@@ -21,7 +22,9 @@ export default function RootLayout({
     <html lang="pt-br">
       <body className={`${poppins.className}`}>
         <AuthProvider>
-          <UserProvider>{children}</UserProvider>
+        <ErrorProvider>
+            <UserProvider>{children}</UserProvider>
+        </ErrorProvider>
         </AuthProvider>
       </body>
     </html>

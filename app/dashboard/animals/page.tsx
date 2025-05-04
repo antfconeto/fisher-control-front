@@ -22,26 +22,25 @@ import {
   FaWater,
 } from "react-icons/fa";
 import { Animal, AnimalPagination, ResponseError, Tank } from "@/types/types";
-import { createAnimal, listAnimals } from "@/actions/animal";
+import { createAnimal, listAnimals, updateAnimal } from "@/actions/animal";
 import { useRequest } from "@/hooks/useRequest";
 import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
 import { getTanks } from "@/actions/tank";
-import { AnimalTable } from "@/components/tables";
-import DynamicFilters from "@/components/dynamicFilter/dynamicFilters";
+import { AnimalTable } from "@/components/Tables";
+import { DynamicFilters } from "@/components/DynamicFilter";
 import { FilterFieldConfig } from "@/types/components";
 import { useAnimalsPagination } from "@/hooks/useAnimalPagination";
-
+import { useTanks } from "@/hooks/useTanks";
+import { CustomModalForm } from "@/components/Forms/CustomModalForm";
+import { useErrorContext } from "@/contexts/errorContext";
 enum ModalMode {
   CREATE = "create",
   UPDATE = "update",
 }
 
-
-
 export default function AnimalsPage() {
-  //Animals
   //States for  change visibility modal
   const [showModal, setShowModal] = useState(false);
   //States for define status of modal
@@ -63,20 +62,19 @@ export default function AnimalsPage() {
     matriz_code: "",
     tankId: "",
   };
-
-  //Tanks
-  const [tanks, setTanks] = useState<Tank[]>([])
-
   const { sendRequest } = useRequest<Animal | ResponseError>();
-  const { errorMessage, setErrorMessage } = useError();
+  const {errorMessage, setErrorMessage} = useErrorContext()
 
   //States for current animal selected
   const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
 
   //Total items per page
   const itemsPerPage = 5;
+  //Animals filtered 
   const { animals, setCurrentPage, currentPage, error, loading, totalPages } = useAnimalsPagination({ filters, itemsPerPage })
-
+  //Tanks feched
+  const { tanks, loading: tanksLoading } = useTanks();
+  //Filter info for animasl
   const filterFields: FilterFieldConfig[] = [
     {
       key: "code",
@@ -146,12 +144,6 @@ export default function AnimalsPage() {
     },
   ];
 
-  useEffect(() => {
-    (async () => await fetchTanks())();
-  }, []);
-
-
-
   //Function who open a creating modal
   const openCreateModal = useCallback(() => {
     setModalMode(ModalMode.CREATE);
@@ -169,18 +161,21 @@ export default function AnimalsPage() {
 
   const handleSaveAnimal = async () => {
     if (
-      currentAnimal.codeAnimal &&
-      currentAnimal.specie &&
-      currentAnimal.gender &&
-      currentAnimal.birthDate &&
-      currentAnimal.tankId
+      !currentAnimal.codeAnimal ||
+      !currentAnimal.specie ||
+      !currentAnimal.gender ||
+      !currentAnimal.birthDate ||
+      !currentAnimal.tankId
     ) {
-      if (modalMode == ModalMode.CREATE) {
-        const response = await handleCreateAnimal(currentAnimal)
-        if (response) {
-          setShowModal(false);
-        }
-      }
+      setErrorMessage(`Dados Necessário estão faltando!`)
+      return;
+    }
+      let response = modalMode == ModalMode.CREATE ? await handleCreateAnimal(currentAnimal) : await handleUpdateAnimal(currentAnimal)
+      if(response) {
+        console.log(`✅ Animal ${modalMode == ModalMode.CREATE ? 'created' : 'updated'} with success`, currentAnimal)
+        setShowModal(false)
+        setCurrentAnimal(defaultAnimal)
+      
 
     }
   };
@@ -190,27 +185,29 @@ export default function AnimalsPage() {
       await sendRequest(createAnimal, animal);
       return true
     } catch (err: any) {
-      const errMsg = err?.error || "Erro desconhecido";
+      const errMsg = err?.message || "Erro desconhecido";
       setErrorMessage(errMsg);
       return false
     }
   };
+
+  const handleUpdateAnimal = async (animal: Animal): Promise<boolean> => {
+    try {
+      await sendRequest(updateAnimal, animal);
+      return true
+    } catch (err: any) {
+      const errMsg = err?.message || "Erro desconhecido";
+      setErrorMessage(errMsg);
+      return false
+    }
+  };
+
   const handleDeleteAnimal = (codeAnimal: string): void => {
     if (confirm("Tem certeza que deseja excluir este animal?")) {
       //setAnimals(animals.filter((animal) => animal.codeAnimal !== codeAnimal));
     }
   };
 
-  const fetchTanks = async () => {
-    try {
-      const response = await getTanks();
-      setTanks(response as Tank[])
-    } catch (error: any) {
-      const errMsg = error?.message || "Erro Desconhecido";
-      setErrorMessage(errMsg);
-      return false
-    }
-  }
 
   return (
     <>
@@ -278,165 +275,85 @@ export default function AnimalsPage() {
         </div>
       </div>
       {/* Modal de Criação/Atualização */}
-      {showModal && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>
-                {modalMode === ModalMode.CREATE
-                  ? "Cadastrar Novo Animal"
-                  : "Atualizar Animal"}
-              </h2>
-              <button
-                className={styles.modalCloseButton}
-                onClick={() => setShowModal(false)}
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  <FaBarcode /> Código do Animal
-                </label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={currentAnimal.codeAnimal}
-                  onChange={(e) =>
-                    setCurrentAnimal({
-                      ...currentAnimal,
-                      codeAnimal: e.target.value,
-                    })
-                  }
-                  placeholder="Digite o código do animal"
-                  disabled={modalMode === ModalMode.UPDATE}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  <FaFish /> Espécie
-                </label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={currentAnimal.specie}
-                  onChange={(e) =>
-                    setCurrentAnimal({
-                      ...currentAnimal,
-                      specie: e.target.value,
-                    })
-                  }
-                  placeholder="Digite a espécie do animal"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  <FaCalendarAlt /> Data de Nascimento
-                </label>
-                <input
-                  type="date"
-                  className={styles.formInput}
-                  value={currentAnimal.birthDate.toISOString().split("T")[0]}
-                  onChange={(e) =>
-                    setCurrentAnimal({
-                      ...currentAnimal,
-                      birthDate: new Date(e.target.value),
-                    })
-                  }
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  <FaVenusMars /> Gênero
-                </label>
-                <select
-                  className={styles.formInput}
-                  value={currentAnimal.gender == "M" ? "Macho" : "Fêmea"}
-                  onChange={(e) =>
-                    setCurrentAnimal({
-                      ...currentAnimal,
-                      gender: e.target.value == "Macho" ? "M" : "F" as any,
-                    })
-                  }
-                >
-                  <option value="">Selecione um gênero</option>
-                  <option value="Macho">Macho</option>
-                  <option value="Fêmea">Fêmea</option>
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Código da Matriz</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={currentAnimal.matriz_code}
-                  onChange={(e) =>
-                    setCurrentAnimal({
-                      ...currentAnimal,
-                      matriz_code: e.target.value,
-                    })
-                  }
-                  placeholder="Digite o código da matriz (opcional)"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  <FaWater /> Selecione o Tanque
-                </label>
-                <div className={styles.filterInput}>
-                  <select
-                    value={(tanks.find((tank) => tank._id == currentAnimal._id)?.name)}
-                    onChange={(e) => {
-                      setCurrentAnimal({
-                        ...currentAnimal,
-                        tankId: e.target.value,
-                      })
-                    }}
-                    className={styles.filterSelect}
-                  >
-                    <option value="">Todos os Tanques</option>
-                    {tanks.map((tank) => (
-                      <option key={tank._id} value={tank._id}>
-                        {tank.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className={styles.infoBox}>
-                <h4 className={styles.infoTitle}>
-                  <BsInfoCircle /> Informações
-                </h4>
-                <ul className={styles.infoList}>
-                  <li className={styles.infoListItem}>
-                    O código do animal deve ser único no sistema.
-                  </li>
-                  <li className={styles.infoListItem}>
-                    É necessário especificar o tanque onde o animal está
-                    alocado.
-                  </li>
-                  <li className={styles.infoListItem}>
-                    O código da matriz é opcional e se refere ao animal
-                    progenitor.
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className={styles.modalFooter}>
-              <button
-                className={styles.cancelButton}
-                onClick={() => setShowModal(false)}
-              >
-                <FaTimes /> Cancelar
-              </button>
-              <button className={styles.saveButton} onClick={handleSaveAnimal}>
-                <FaSave /> Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showModal ?
+        <CustomModalForm
+          title={modalMode == ModalMode.CREATE ? "Cadastrar Novo Animal" : "Atualizar Animal"}
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSaveAnimal}
+          fields={[
+            {
+              name: "codeAnimal",
+              label: "Código do Animal",
+              type: "text",
+              value: currentAnimal.codeAnimal,
+              placeholder: "Digite o código do animal",
+              onChange: (val) => setCurrentAnimal({ ...currentAnimal, codeAnimal: val }),
+              disabled: modalMode == ModalMode.UPDATE,
+            },
+            {
+              name: "specie",
+              label: "Espécie",
+              type: "text",
+              value: currentAnimal.specie,
+              placeholder: "Digite a espécie do animal",
+              onChange: (val) => setCurrentAnimal({ ...currentAnimal, specie: val }),
+            },
+            {
+              name: "birthDate",
+              label: "Data de Nascimento",
+              type: "date",
+              value: new Date(currentAnimal.birthDate).toISOString().split("T")[0],
+              onChange: (val) =>
+                setCurrentAnimal({ ...currentAnimal, birthDate: new Date(val) }),
+            },
+            {
+              name: "gender",
+              label: "Gênero",
+              type: "select",
+              value: currentAnimal.gender === "M" ? "Macho" : "Fêmea",
+              options: [
+                { label: "Macho", value: "Macho" },
+                { label: "Fêmea", value: "Fêmea" },
+              ],
+              onChange: (val) =>
+                setCurrentAnimal({ ...currentAnimal, gender: val === "Macho" ? "M" : "F" }),
+            },
+            {
+              name: "matriz_code",
+              label: "Código da Matriz",
+              type: "text",
+              value: currentAnimal.matriz_code,
+              placeholder: "Digite o código da matriz (opcional)",
+              onChange: (val) => setCurrentAnimal({ ...currentAnimal, matriz_code: val }),
+            },
+            {
+              name: "tankId",
+              label: "Selecione o Tanque",
+              type: "select",
+              value: currentAnimal.tankId,
+              options: tanks.map((tank) => ({
+                label: tank.name,
+                value: tank._id,
+              })),
+              onChange: (val) => setCurrentAnimal({ ...currentAnimal, tankId: val }),
+            },
+          ]}
+          infoBox={
+            <>
+              <h4 className={styles.infoTitle}>ℹ️ Informações</h4>
+              <ul className={styles.infoList}>
+                <li>O código do animal deve ser único no sistema.</li>
+                <li>É necessário especificar o tanque onde o animal está alocado.</li>
+                <li>
+                  O código da matriz é opcional e se refere ao animal progenitor.
+                </li>
+              </ul>
+            </>
+          } />
+        :
+        <></>
+      }
+
     </>
   );
 }

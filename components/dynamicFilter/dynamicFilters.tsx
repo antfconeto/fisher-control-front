@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "@/components/dynamicFilter/dynamicFilters.module.css"; 
+import styles from "@/components/dynamicFilter/DynamicFilters.module.css"; 
 import classNames from "classnames";
 import { FilterFieldConfig, FilterOption } from "@/types/components"
 
@@ -56,4 +56,4 @@ const DynamicFilters: React.FC<DynamicFiltersProps> = ({ filters,name }) => {
   );
 };
 
-export default DynamicFilters;
+export {DynamicFilters};

@@ -1,3 +1,3 @@
-import DynamicFilters from "./dynamicFilters";
+import {DynamicFilters} from "@/components/DynamicFilter/DynamicFilters"
 
 export {DynamicFilters}

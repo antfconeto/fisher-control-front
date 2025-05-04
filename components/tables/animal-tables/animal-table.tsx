@@ -1,8 +1,8 @@
-import { CustomTable, TableColumn } from '@/components/tables/customTable';
+import { CustomTable, TableColumn } from '@/components/Tables/CustomTable';
 import { FaBarcode, FaFish, FaCalendarAlt, FaVenusMars, FaWater } from 'react-icons/fa';
 import { BsPencil, BsTrash } from 'react-icons/bs';
 import { formatDate } from '@/utils/dateFunctions';
-import styles from './animal-table.module.css';
+import styles from './Animal-table.module.css';
 import { Animal, Tank } from '@/types/types';
 
 interface AnimalTableProps {

@@ -5,7 +5,7 @@ import { useRequest } from "@/hooks/useRequest";
 import { Role, UserLoginResponse } from "@/types/user";
 import { useAuth } from "@/hooks/useAuth";
 import { ResponseError } from "@/types/types";
-import { Button } from "@/components/buttons";
+import { Button } from "@/components/Buttons";
 import { DotLoader } from "react-spinners";
 import Image from "next/image";
 import { useError } from "@/hooks/useError";

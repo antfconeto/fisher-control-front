@@ -22,7 +22,14 @@
         "createAnimal":{
             "statusCode":{
                 "400":"Dados incompletos",
-                "404":"Tanque não encontrado",
+                "404":"Animal não encontrado",
+                "409":"Já existe um animal com o Código fornecido"
+            }
+        },
+        "updateAnimal":{
+            "statusCode":{
+                "400":"Dados incompletos",
+                "404":"Animal não encontrado",
                 "409":"Já existe um animal com o Código fornecido"
             }
         },

@@ -1,7 +1,5 @@
 "use server";
 import { Animal, AnimalPagination, ResponseError } from "@/types/types";
-import { User } from "@/types/user";
-import { decodeToken } from "@/utils/authUtils";
 import { CustomError } from "@/utils/customError";
 import { CustomConsole } from "@/utils/customLogger";
 import { cookies } from "next/headers";
@@ -51,6 +49,50 @@ export const createAnimal = async (animal:Animal): Promise<Animal | ResponseErro
             `Error to create animal, error: ${error.message}, statusCode: ${error.statusCode || 500}`
         );
         throw new CustomError(getAnimalErrorMessage('createAnimal', error.statusCode || 500), error.statusCode || 500);
+    }
+};
+
+export const updateAnimal = async (animal:Animal): Promise<Animal | ResponseError> => {
+    console.log(`🔁 Initing process to update Animal`, {animal:animal});
+    //get token from cookie
+    const token = (await cookies()).get('access_token')
+    if (!token) {
+        return {
+            error: " Token not received",
+            statusCode: 401,
+        }
+    }
+    try {
+        const response = await fetch(`${urlApi}/animal/updateAnimal`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token!.value}`,
+            },
+            body:JSON.stringify({animal:animal})
+        });
+        //verify if response was ok
+        if (!response.ok) {
+            const errorMessage: ResponseError = await response.json();
+            consoler.error(
+                `Error to update animal, error: ${errorMessage?.error}, statusCode: ${response.status}`
+            );
+            console.log(errorMessage)
+            return {
+                error: getAnimalErrorMessage('updateAnimal', response.status),
+                statusCode: response.status,
+              };
+        }
+        //get info as json
+        const responseBody: Animal = await response.json();
+        consoler.success(`Updated animal with code: ${responseBody.codeAnimal}`);
+        return responseBody;
+    } catch (error: any) {
+        // Captura de erros em qualquer ponto
+        consoler.error(
+            `Error to update animal, error: ${error.message}, statusCode: ${error.statusCode || 500}`
+        );
+        throw new CustomError(getAnimalErrorMessage('updateAnimal', error.statusCode || 500), error.statusCode || 500);
     }
 };
 

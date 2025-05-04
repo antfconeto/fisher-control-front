@@ -1,3 +1,3 @@
-import { AnimalTable } from "./animal-tables/animal-table";
+import { AnimalTable } from "./Animal-tables/Animal-table";
 
 export {AnimalTable}
