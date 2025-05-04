@@ -1,56 +1,5 @@
 
-.table {
-    width: 100%;
-    min-width: 650px;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-  
-  .tableHeader {
-    background-color: #4299e1;
-    color: white;
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    border: none;
-    white-space: nowrap;
-  }
-  
-  .tableHeader:first-child {
-    border-top-left-radius: 0.5rem;
-  }
-  
-  .tableHeader:last-child {
-    border-top-right-radius: 0.5rem;
-  }
-  
-  .tableRow {
-    transition: background-color 0.2s ease;
-  }
-  
-  .tableRow:hover .tableCell {
-    background-color: #ebf8ff;
-  }
-  
-  .tableCell {
-    padding: 1rem;
-    background-color: white;
-    border-bottom: 1px solid #e2e8f0;
-    transition: background-color 0.2s ease;
-  }
-  
-  .tableRow:last-child .tableCell {
-    border-bottom: none;
-  }
-  
-  .tableRow:last-child .tableCell:first-child {
-    border-bottom-left-radius: 0.5rem;
-  }
-  
-  .tableRow:last-child .tableCell:last-child {
-    border-bottom-right-radius: 0.5rem;
-  }
-  
+
   
 .actionsCell {
     display: flex;

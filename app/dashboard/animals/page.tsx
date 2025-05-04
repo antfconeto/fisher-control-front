@@ -31,6 +31,7 @@ import { getTanks } from "@/actions/tank";
 import { AnimalTable } from "@/components/tables";
 import DynamicFilters from "@/components/dynamicFilter/dynamicFilters";
 import { FilterFieldConfig } from "@/types/components";
+import { useAnimalsPagination } from "@/hooks/useAnimalPagination";
 
 enum ModalMode {
   CREATE = "create",
@@ -41,9 +42,6 @@ enum ModalMode {
 
 export default function AnimalsPage() {
   //Animals
-  const [animals, setAnimals] = useState<Animal[]>([]);
-  //Total pages getted from back-en
-  const [totalPages, setTotalPages] = useState(1);
   //States for  change visibility modal
   const [showModal, setShowModal] = useState(false);
   //States for define status of modal
@@ -65,20 +63,19 @@ export default function AnimalsPage() {
     matriz_code: "",
     tankId: "",
   };
-  
+
   //Tanks
   const [tanks, setTanks] = useState<Tank[]>([])
 
   const { sendRequest } = useRequest<Animal | ResponseError>();
   const { errorMessage, setErrorMessage } = useError();
-  const [loading, setLoading] = useState<boolean>(true)
+
   //States for current animal selected
   const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
-  //States for current page selected
-  const [currentPage, setCurrentPage] = useState(1);
+
   //Total items per page
   const itemsPerPage = 5;
-
+  const { animals, setCurrentPage, currentPage, error, loading, totalPages } = useAnimalsPagination({ filters, itemsPerPage })
 
   const filterFields: FilterFieldConfig[] = [
     {
@@ -134,13 +131,13 @@ export default function AnimalsPage() {
       placeholder: "Tanque",
       selectOptions: [
         ...tanks.map((tank) => ({
-        label: tank.name,
-        value: tank._id,
-      })),
-      {
-      label:"Tanque",
-      value:""
-      }],
+          label: tank.name,
+          value: tank._id,
+        })),
+        {
+          label: "Tanque",
+          value: ""
+        }],
       value: filters.tankId,
       onChange: (val) => {
         setCurrentPage(1);
@@ -153,31 +150,7 @@ export default function AnimalsPage() {
     (async () => await fetchTanks())();
   }, []);
 
-  //Update animal data every time when filter is modified
-  useEffect(() => {
-    const loadAnimals = async () => {
-      setLoading(true);
-      await fetchAnimals();
-      setLoading(false);
-    };
-    loadAnimals();
-  }, [currentPage, filters]);
-  
-  //Function who fetch load animals in pagination
-  const fetchAnimals = async () => {
 
-    try {
-      const response = await listAnimals(currentPage, itemsPerPage, filters) as AnimalPagination;
-
-      setAnimals(response.animals);
-      setTotalPages(response.totalPages);
-
-    } catch (error: any) {
-      const errMsg = error?.message || "Erro Desconhecido";
-      setErrorMessage(errMsg);
-      return false
-    }
-  };
 
   //Function who open a creating modal
   const openCreateModal = useCallback(() => {
@@ -201,15 +174,13 @@ export default function AnimalsPage() {
       currentAnimal.gender &&
       currentAnimal.birthDate &&
       currentAnimal.tankId
-    )
-    {
+    ) {
       if (modalMode == ModalMode.CREATE) {
         const response = await handleCreateAnimal(currentAnimal)
         if (response) {
-          await fetchAnimals();
           setShowModal(false);
         }
-    }
+      }
 
     }
   };
@@ -226,7 +197,7 @@ export default function AnimalsPage() {
   };
   const handleDeleteAnimal = (codeAnimal: string): void => {
     if (confirm("Tem certeza que deseja excluir este animal?")) {
-      setAnimals(animals.filter((animal) => animal.codeAnimal !== codeAnimal));
+      //setAnimals(animals.filter((animal) => animal.codeAnimal !== codeAnimal));
     }
   };
 
@@ -250,61 +221,62 @@ export default function AnimalsPage() {
           otherClassName=""
         />
       )}
-      {loading && animals.length == 0 ?
-        <div className="loading-container">
-          <ClockLoader color="#0a58ca" size={60} />
-          <p className="loading-text">Carregando animais...</p>
-        </div>
-        :
-        <div className="page-container">
-          <div className="content-container">
-            <div className="content-card">
-              {/* Cabeçalho com título e botão de criar */}
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="card-title mb-0">
-                  <FaFish className="me-2 text-primary" /> Gestão de Animais
-                </h2>
-                <button className={styles.createButton} onClick={openCreateModal}>
-                  <FaPlus /> Cadastrar Novo Animal
-                </button>
-              </div>
-              <section className={styles.filterSection}>
-                <DynamicFilters filters={filterFields} name="Filtro de Animais" />
-              </section>
 
-              {/* Tabela de animais */}
-              <div className={styles.tableContainer}>
-                <AnimalTable animals={animals} tanks={tanks} onDelete={handleDeleteAnimal} onEdit={openUpdateModal} />
-              </div>
-
-              {/* Paginação */}
-              {totalPages > 0 && (
-                <div className={styles.pagination}>
-                  <button
-                    className={styles.paginationButton}
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <FaChevronLeft /> Anterior
-                  </button>
-                  <div className={styles.paginationInfo}>
-                    Página {currentPage} de {totalPages}
-                  </div>
-                  <button
-                    className={styles.paginationButton}
-                    onClick={() =>
-                      setCurrentPage(Math.min(totalPages, currentPage + 1))
-                    }
-                    disabled={currentPage === totalPages}
-                  >
-                    Próxima <FaChevronRight />
-                  </button>
-                </div>
-              )}
+      <div className="page-container">
+        <div className="content-container">
+          <div className="content-card">
+            {/* Cabeçalho com título e botão de criar */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="card-title mb-0">
+                <FaFish className="me-2 text-primary" /> Gestão de Animais
+              </h2>
+              <button className={styles.createButton} onClick={openCreateModal}>
+                <FaPlus /> Cadastrar Novo Animal
+              </button>
             </div>
+            <section className={styles.filterSection}>
+              <DynamicFilters filters={filterFields} name="Filtro de Animais" />
+            </section>
+            {loading ?
+              <div className="loading-container">
+                <ClockLoader color="#0a58ca" size={60} />
+                <p className="loading-text">Carregando animais...</p>
+              </div>
+              :
+              (
+                <>
+                  <div className={styles.tableContainer}>
+                    <AnimalTable animals={animals} tanks={tanks} onDelete={handleDeleteAnimal} onEdit={openUpdateModal} />
+                  </div>
+                  {totalPages > 0 && (
+                    <div className={styles.pagination}>
+                      <button
+                        className={styles.paginationButton}
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <FaChevronLeft /> Anterior
+                      </button>
+                      <div className={styles.paginationInfo}>
+                        Página {currentPage} de {totalPages}
+                      </div>
+                      <button
+                        className={styles.paginationButton}
+                        onClick={() =>
+                          setCurrentPage(Math.min(totalPages, currentPage + 1))
+                        }
+                        disabled={currentPage === totalPages}
+                      >
+                        Próxima <FaChevronRight />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )
+            }
           </div>
         </div>
-      }
+      </div>
       {/* Modal de Criação/Atualização */}
       {showModal && (
         <div className={styles.modal}>

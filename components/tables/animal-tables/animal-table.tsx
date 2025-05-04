@@ -1,86 +1,83 @@
+import { CustomTable, TableColumn } from '@/components/tables/customTable';
+import { FaBarcode, FaFish, FaCalendarAlt, FaVenusMars, FaWater } from 'react-icons/fa';
+import { BsPencil, BsTrash } from 'react-icons/bs';
+import { formatDate } from '@/utils/dateFunctions';
+import styles from './animal-table.module.css';
+import { Animal, Tank } from '@/types/types';
 
-import styles from "@/components/tables/animal-tables/animal-table.module.css"
-import { Animal, Tank } from "@/types/types";
-import { FaBarcode, FaCalendarAlt, FaFish, FaVenusMars, FaWater } from "react-icons/fa";
-import { BsPencil, BsTrash } from "react-icons/bs";
-
-export interface AnimalTableProps {
-  animals:Animal[];
-  tanks:Tank[];
-  onEdit:(animal:Animal)=>void;
-  onDelete:(codeAnimal:string)=>void;
+interface AnimalTableProps {
+  animals: Animal[];
+  tanks: Tank[];
+  onEdit: (animal: Animal) => void;
+  onDelete: (codeAnimal: string) => void;
 }
 
-const formatDate = (date: Date):string => {
-  return new Date(date).toLocaleDateString("pt-BR");
-};
-
-
 export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, onEdit, onDelete }) => {
-  return (
-<table className={styles.table}>
-         <thead>
-           <tr>
-             <th className={styles.tableHeader}>Código</th>
-             <th className={styles.tableHeader}>Espécie</th>
-             <th className={styles.tableHeader}>Data de Nascimento</th>
-             <th className={styles.tableHeader}>Gênero</th>
-             <th className={styles.tableHeader}>Matriz</th>
-             <th className={styles.tableHeader}>Tanque</th>
-             <th className={styles.tableHeader}>Ações</th>
-           </tr>
-         </thead>
-         <tbody>
-           {animals.map((animal: Animal) => (
-             <tr key={animal.codeAnimal} className={styles.tableRow}>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaBarcode /> {animal.codeAnimal}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaFish /> {animal.specie}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaCalendarAlt /> {formatDate(animal.birthDate)}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaVenusMars />{" "}
-                   {animal.gender == "M" ? "Macho" : "Fêmea"}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>{animal.matriz_code}</td>
-               <td className={styles.tableCell}>
-                 <div className={styles.cellContent}>
-                   <FaWater /> {(tanks.find((tank)=>tank._id == animal.tankId))?.name}
-                 </div>
-               </td>
-               <td className={styles.tableCell}>
-                 <div className={styles.actionsCell}>
-                   <button
-                     className={styles.updateButton}
-                     onClick={()=>onEdit(animal)}
-                   >
-                     <BsPencil /> Atualizar
-                   </button>
-                   <button
-                     className={styles.deleteButton}
-                     onClick={() =>
-                       onDelete(animal.codeAnimal)
-                     }
-                   >
-                     <BsTrash /> Deletar
-                   </button>
-                 </div>
-               </td>
-             </tr>
-           ))}
-         </tbody>
-       </table>
-    );
-  }
+  const columns: TableColumn<Animal>[] = [
+    {
+      header: 'Código',
+      render: (animal) => (
+        <div className={styles.cellContent}>
+          <FaBarcode /> {animal.codeAnimal}
+        </div>
+      ),
+    },
+    {
+      header: 'Espécie',
+      render: (animal) => (
+        <div className={styles.cellContent}>
+          <FaFish /> {animal.specie}
+        </div>
+      ),
+    },
+    {
+      header: 'Data de Nascimento',
+      render: (animal) => (
+        <div className={styles.cellContent}>
+          <FaCalendarAlt /> {formatDate(animal.birthDate)}
+        </div>
+      ),
+    },
+    {
+      header: 'Gênero',
+      render: (animal) => (
+        <div className={styles.cellContent}>
+          <FaVenusMars /> {animal.gender === 'M' ? 'Macho' : 'Fêmea'}
+        </div>
+      ),
+    },
+    {
+      header: 'Matriz',
+      render: (animal) => animal.matriz_code,
+    },
+    {
+      header: 'Tanque',
+      render: (animal) => (
+        <div className={styles.cellContent}>
+          <FaWater /> {tanks.find((tank) => tank._id === animal.tankId)?.name}
+        </div>
+      ),
+    },
+    {
+      header: 'Ações',
+      render: (animal) => (
+        <div className={styles.actionsCell}>
+          <button
+            className={styles.updateButton}
+            onClick={() => onEdit(animal)}
+          >
+            <BsPencil /> Atualizar
+          </button>
+          <button
+            className={styles.deleteButton}
+            onClick={() => onDelete(animal.codeAnimal)}
+          >
+            <BsTrash /> Deletar
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  return <CustomTable columns={columns} data={animals} />;
+};
