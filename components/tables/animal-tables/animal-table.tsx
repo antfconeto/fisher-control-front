@@ -1,4 +1,4 @@
-import { CustomTable, TableColumn } from '@/components/Tables/CustomTable';
+import { CustomTable, TableColumn } from '@/components/tables/customTable';
 import { FaBarcode, FaFish, FaCalendarAlt, FaVenusMars, FaWater } from 'react-icons/fa';
 import { BsPencil, BsTrash } from 'react-icons/bs';
 import { formatDate } from '@/utils/dateFunctions';

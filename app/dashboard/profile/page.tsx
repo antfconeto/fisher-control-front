@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/buttons/Buttons";
+import { Button } from "@/components/buttons/buttons";
 import { useUser } from "@/hooks/userHook";
 import { Role } from "@/types/user";
 import { Check, LogOut, Mail, User as UserIcon } from "lucide-react";

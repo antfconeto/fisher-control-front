@@ -1,2 +1,2 @@
-import { Button } from "@/components/buttons/Buttons";
+import { Button } from "@/components/buttons/buttons";
 export {Button}
