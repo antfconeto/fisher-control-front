@@ -97,6 +97,50 @@ export const updateAnimal = async (animal:Animal): Promise<Animal | ResponseErro
 };
 
 
+export const deleteAnimal = async (codeAnimal:string): Promise<Boolean | ResponseError> => {
+    console.log(`🔁 Initing process to delete Animal`, {codeAnimal:codeAnimal});
+    //get token from cookie
+    const token = (await cookies()).get('access_token')
+    if (!token) {
+        return {
+            error: " Token not received",
+            statusCode: 401,
+        }
+    }
+    try {
+        const response = await fetch(`${urlApi}/animal/deleteAnimal`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token!.value}`,
+            },
+            body:JSON.stringify({animalCode:codeAnimal})
+        });
+        //verify if response was ok
+        if (!response.ok) {
+            const errorMessage: ResponseError = await response.json();
+            consoler.error(
+                `Error to delete animal, error: ${errorMessage?.error}, statusCode: ${response.status}`
+            );
+            console.log(errorMessage)
+            return {
+                error: getAnimalErrorMessage('deleteAnimal', response.status),
+                statusCode: response.status,
+              };
+        }
+        //get info as json
+        const responseBody: {isDeleted:boolean} = await response.json();
+        consoler.success(`Deleted animal with code: ${responseBody.isDeleted}`);
+        return responseBody.isDeleted;
+    } catch (error: any) {
+        // Captura de erros em qualquer ponto
+        consoler.error(
+            `Error to update animal, error: ${error.message}, statusCode: ${error.statusCode || 500}`
+        );
+        throw new CustomError(getAnimalErrorMessage('updateAnimal', error.statusCode || 500), error.statusCode || 500);
+    }
+};
+
 export const listAnimals = async (page:number,pageSize:number,   filter?:{
     tankId?:string,
     codeAnimal?:string,

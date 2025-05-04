@@ -22,7 +22,7 @@ import {
   FaWater,
 } from "react-icons/fa";
 import { Animal, AnimalPagination, ResponseError, Tank } from "@/types/types";
-import { createAnimal, listAnimals, updateAnimal } from "@/actions/animal";
+import { createAnimal, deleteAnimal, listAnimals, updateAnimal } from "@/actions/animal";
 import { useRequest } from "@/hooks/useRequest";
 import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
@@ -35,6 +35,7 @@ import { useAnimalsPagination } from "@/hooks/useAnimalPagination";
 import { useTanks } from "@/hooks/useTanks";
 import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { useErrorContext } from "@/contexts/errorContext";
+import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 enum ModalMode {
   CREATE = "create",
   UPDATE = "update",
@@ -43,15 +44,18 @@ enum ModalMode {
 export default function AnimalsPage() {
   //States for  change visibility modal
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   //States for define status of modal
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
-  //States for filter by code
-  const [filters, setFilters] = useState({
+
+  const defaultFilters = {
     codeAnimal: '',
     specie: '',
     gender: undefined as "M" | "F" | undefined,
     tankId: '',
-  });
+  }
+  //States for filter by code
+  const [filters, setFilters] = useState(defaultFilters);
   //default values for animal
   const defaultAnimal: Animal = {
     codeAnimal: "",
@@ -175,7 +179,8 @@ export default function AnimalsPage() {
         console.log(`✅ Animal ${modalMode == ModalMode.CREATE ? 'created' : 'updated'} with success`, currentAnimal)
         setShowModal(false)
         setCurrentAnimal(defaultAnimal)
-      
+        //Reset filters
+        setFilters(defaultFilters)
 
     }
   };
@@ -202,9 +207,15 @@ export default function AnimalsPage() {
     }
   };
 
-  const handleDeleteAnimal = (codeAnimal: string): void => {
-    if (confirm("Tem certeza que deseja excluir este animal?")) {
-      //setAnimals(animals.filter((animal) => animal.codeAnimal !== codeAnimal));
+  const handleDeleteAnimal = async (codeAnimal: string): Promise<boolean> => {
+    try {
+      let response = await deleteAnimal(codeAnimal);
+      setFilters(defaultFilters)
+      return response as boolean
+    } catch (err: any) {
+      const errMsg = err?.message || "Erro desconhecido";
+      setErrorMessage(errMsg);
+      return false
     }
   };
 
@@ -243,7 +254,7 @@ export default function AnimalsPage() {
               (
                 <>
                   <div className={styles.tableContainer}>
-                    <AnimalTable animals={animals} tanks={tanks} onDelete={handleDeleteAnimal} onEdit={openUpdateModal} />
+                    <AnimalTable animals={animals} tanks={tanks} onDelete={()=>setShowConfirmModal(true)} onEdit={openUpdateModal} />
                   </div>
                   {totalPages > 0 && (
                     <div className={styles.pagination}>
@@ -349,11 +360,19 @@ export default function AnimalsPage() {
                 </li>
               </ul>
             </>
-          } />
+        }/>
         :
         <></>
       }
-
+      {/* Confirm Delete Modal */}
+      {showConfirmModal && (
+        <ConfirmModal
+          title="Confirmar Exclusão"
+          message="Tem certeza de que deseja excluir este animal? Esta ação não pode ser desfeita."
+          onConfirm={()=>handleDeleteAnimal}
+          onCancel={()=>setShowConfirmModal(false)}
+        />
+      )}
     </>
   );
 }
