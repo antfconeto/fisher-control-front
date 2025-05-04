@@ -20,10 +20,16 @@ export async function middleware(request: Request) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   
+  const pathname = request.url
+  
+  // Se for /login ou /signup, redireciona para /dashboard
+  if (pathname.includes('/login') || pathname.includes('/signup')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
   consoler.success(`✅🚦 Token received, passing...`);
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/home', '/dashboard',],
+  matcher: ['/home', '/dashboard','/login', '/signup']
 };
