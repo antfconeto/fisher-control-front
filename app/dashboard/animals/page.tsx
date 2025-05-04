@@ -207,10 +207,11 @@ export default function AnimalsPage() {
     }
   };
 
-  const handleDeleteAnimal = async (codeAnimal: string): Promise<boolean> => {
+  const handleDeleteAnimal = async (): Promise<boolean> => {
     try {
-      let response = await deleteAnimal(codeAnimal);
+      let response = await deleteAnimal(currentAnimal.codeAnimal);
       setFilters(defaultFilters)
+      setShowConfirmModal(false)
       return response as boolean
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
@@ -254,7 +255,10 @@ export default function AnimalsPage() {
               (
                 <>
                   <div className={styles.tableContainer}>
-                    <AnimalTable animals={animals} tanks={tanks} onDelete={()=>setShowConfirmModal(true)} onEdit={openUpdateModal} />
+                    <AnimalTable animals={animals} tanks={tanks} onDelete={(codeAnimal:string)=>{
+                      setCurrentAnimal({...currentAnimal, codeAnimal:codeAnimal})
+                      setShowConfirmModal(true)  
+                    }} onEdit={openUpdateModal} />
                   </div>
                   {totalPages > 0 && (
                     <div className={styles.pagination}>
@@ -369,7 +373,7 @@ export default function AnimalsPage() {
         <ConfirmModal
           title="Confirmar Exclusão"
           message="Tem certeza de que deseja excluir este animal? Esta ação não pode ser desfeita."
-          onConfirm={()=>handleDeleteAnimal}
+          onConfirm={handleDeleteAnimal}
           onCancel={()=>setShowConfirmModal(false)}
         />
       )}
