@@ -1,33 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import styles from "./animals.module.css";
 import {
   BsSearch,
-  BsFilter,
-  BsInfoCircle,
-  BsPencil,
-  BsTrash,
 } from "react-icons/bs";
 import {
   FaChevronLeft,
   FaChevronRight,
   FaPlus,
-  FaSave,
-  FaTimes,
   FaFish,
   FaVenusMars,
-  FaCalendarAlt,
-  FaBarcode,
   FaWater,
 } from "react-icons/fa";
-import { Animal, AnimalPagination, ResponseError, Tank } from "@/types/types";
-import { createAnimal, deleteAnimal, listAnimals, updateAnimal } from "@/actions/animal";
+import { Animal, ResponseError } from "@/types/types";
+import { createAnimal, deleteAnimal, updateAnimal } from "@/actions/animal";
 import { useRequest } from "@/hooks/useRequest";
-import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
-import { getTanks } from "@/actions/tank";
 import { AnimalTable } from "@/components/Tables";
 import { DynamicFilters } from "@/components/DynamicFilter";
 import { FilterFieldConfig } from "@/types/components";
@@ -75,9 +65,9 @@ export default function AnimalsPage() {
   //Total items per page
   const itemsPerPage = 5;
   //Animals filtered 
-  const { animals, setCurrentPage, currentPage, error, loading, totalPages } = useAnimalsPagination({ filters, itemsPerPage })
+  const { animals, setCurrentPage, currentPage, loading, totalPages } = useAnimalsPagination({ filters, itemsPerPage })
   //Tanks feched
-  const { tanks, loading: tanksLoading } = useTanks();
+  const { tanks } = useTanks();
   //Filter info for animasl
   const filterFields: FilterFieldConfig[] = [
     {
@@ -174,7 +164,7 @@ export default function AnimalsPage() {
       setErrorMessage(`Dados Necessário estão faltando!`)
       return;
     }
-      let response = modalMode == ModalMode.CREATE ? await handleCreateAnimal(currentAnimal) : await handleUpdateAnimal(currentAnimal)
+      const response = modalMode == ModalMode.CREATE ? await handleCreateAnimal(currentAnimal) : await handleUpdateAnimal(currentAnimal)
       if(response) {
         console.log(`✅ Animal ${modalMode == ModalMode.CREATE ? 'created' : 'updated'} with success`, currentAnimal)
         setShowModal(false)
@@ -209,7 +199,7 @@ export default function AnimalsPage() {
 
   const handleDeleteAnimal = async (): Promise<boolean> => {
     try {
-      let response = await deleteAnimal(currentAnimal.codeAnimal);
+      const response = await deleteAnimal(currentAnimal.codeAnimal);
       setFilters(defaultFilters)
       setShowConfirmModal(false)
       return response as boolean
