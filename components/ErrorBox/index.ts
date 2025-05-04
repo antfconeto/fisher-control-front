@@ -1,3 +1,3 @@
-import { ErrorBox } from "@/components/ErrorBox/ErrorBox";
+import { ErrorBox } from "@/components/ErrorBox/errorBox";
 
 export {ErrorBox}

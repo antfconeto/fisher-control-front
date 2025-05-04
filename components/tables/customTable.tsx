@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/components/tables/CustomTable.module.css';
+import styles from '@/components/tables/customTable.module.css';
 
 export interface TableColumn<T> {
   header: string;

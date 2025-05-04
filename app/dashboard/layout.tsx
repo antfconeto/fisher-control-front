@@ -1,4 +1,4 @@
-import Sidebar from "@/components/SideMenu/SideMenu";
+import Sidebar from "@/components/sideMenu/sideMenu";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./dashboard.css";

@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "@/components/dynamicFilter/DynamicFilters.module.css"; 
+import styles from "@/components/dynamicFilter/dynamicFilters.module.css"; 
 import classNames from "classnames";
 import { FilterFieldConfig, FilterOption } from "@/types/components"
 

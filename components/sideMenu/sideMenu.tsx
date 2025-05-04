@@ -2,7 +2,7 @@
 import { Droplet, FishIcon, Home, User, Egg, Menu, X } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Nav } from "react-bootstrap";
-import styles from "./SideMenu.module.css";
+import styles from "./sideMenu.module.css";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
