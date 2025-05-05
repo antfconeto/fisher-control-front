@@ -27,6 +27,7 @@ export type AnimalPagination = {
   currentPage: number; 
   totalPages: number; 
   totalItems: number; 
+  totalAnimals:number;
   animals: Animal[]; 
 }
 

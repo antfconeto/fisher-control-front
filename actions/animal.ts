@@ -193,6 +193,46 @@ export const listAnimals = async (page:number,pageSize:number,   filter?:{
     }
 };
 
+export const getAllAnimalsFromTank = async (tankId:string): Promise<Animal[] | ResponseError> => {
+    console.log("🔁 Fetching all animals...", tankId);
+    const token = (await cookies()).get("access_token");
+    if (!token) {
+        return {
+            error: "Token not received",
+            statusCode: 401,
+        };
+    }
+    try {
+        let url = `${urlApi}/animal/getAllAnimalsFromTank?tankId=${tankId}`
+        console.log(url)
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token.value}`,
+                "Content-Type": "application/json",
+            }
+        });
+        if (!response.ok) {
+            const errorMessage: ResponseError = await response.json();
+            consoler.error(
+                `Error fetching animals, error: ${errorMessage?.error}, statusCode: ${response.status}`
+            );
+            return {
+                error: getAnimalErrorMessage('listAnimals', response.status),
+                statusCode: response.status,
+              };
+        }
+        const responseBody: Animal[] = await response.json();
+        consoler.success(`Fetched ${responseBody} animals successfully.`);
+        return responseBody;
+    } catch (error: any) {
+        consoler.error(
+            `Error fetching animals, error: ${error.message}, statusCode: ${error.statusCode || 500}`
+        );
+        throw new CustomError(getAnimalErrorMessage('listAnimals', error.statusCode || 500), error.statusCode || 500);
+    }
+};
+
 function getAnimalErrorMessage(context: string, statusCode: number): string {
   const animalErros = errorMessages.animalErros as any
 

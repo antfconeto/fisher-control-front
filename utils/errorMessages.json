@@ -28,7 +28,7 @@
         },
         "updateAnimal":{
             "statusCode":{
-                "400":"Dados incompletos",
+                "400":"Dados incompletos para atualizar o animal",
                 "404":"Animal não encontrado",
                 "409":"Já existe um animal com o Código fornecido"
             }
@@ -41,6 +41,13 @@
         "requestToJoin":{
             "404":"Fish Manager não foi encontrado!",
             "409":"O usuário já enviou uma requisição de participação!"
+        }
+    },
+    "tankErros":{
+        "getTankById":{
+            "404":"Tank não encontrado",
+            "400": "Dados incompletos para carregar o tanque",
+            "500": "Error ao tentar se comunicar com o servidor!"
         }
     }
 }

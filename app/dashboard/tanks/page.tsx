@@ -22,17 +22,10 @@ import {
   FaChartBar,
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { useTanks } from "@/hooks/useTanks";
+import { Tank } from "@/types/types";
+import { ClockLoader } from "react-spinners";
 
-interface Tank {
-  id: string;
-  capacity: number;
-  size: {
-    width: number;
-    height: number;
-  };
-  // Propriedades calculadas a partir de dados de outros endpoints
-  animalsCount?: number;
-}
 
 enum ModalMode {
   CREATE = "create",
@@ -42,68 +35,7 @@ enum ModalMode {
 export default function TanksPage() {
   const router = useRouter();
 
-  const [tanks, setTanks] = useState<Tank[]>([
-    {
-      id: "1",
-      capacity: 1000,
-      size: { width: 20, height: 2 },
-      animalsCount: 24,
-    },
-    {
-      id: "2",
-      capacity: 2000,
-      size: { width: 25, height: 2.5 },
-      animalsCount: 42,
-    },
-    {
-      id: "3",
-      capacity: 1500,
-      size: { width: 18, height: 1.8 },
-      animalsCount: 30,
-    },
-    {
-      id: "4",
-      capacity: 3000,
-      size: { width: 30, height: 3 },
-      animalsCount: 58,
-    },
-    {
-      id: "5",
-      capacity: 2500,
-      size: { width: 28, height: 2.8 },
-      animalsCount: 48,
-    },
-    {
-      id: "6",
-      capacity: 1000,
-      size: { width: 20, height: 2 },
-      animalsCount: 18,
-    },
-    {
-      id: "7",
-      capacity: 2000,
-      size: { width: 25, height: 2.5 },
-      animalsCount: 35,
-    },
-    {
-      id: "8",
-      capacity: 1500,
-      size: { width: 18, height: 1.8 },
-      animalsCount: 28,
-    },
-    {
-      id: "9",
-      capacity: 3000,
-      size: { width: 30, height: 3 },
-      animalsCount: 60,
-    },
-    {
-      id: "10",
-      capacity: 2500,
-      size: { width: 28, height: 2.8 },
-      animalsCount: 45,
-    },
-  ]);
+  const {tanks,errorMessage,loading} = useTanks()
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
@@ -121,13 +53,16 @@ export default function TanksPage() {
       width: 0,
       height: 0,
     },
+    _id:'',
+    fishManagerId:'',
+    name:''
   });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; // Aumentado para exibir mais cards por página
 
   const filteredTanks = tanks.filter((tank) => {
-    const tankName = `Tanque ${tank.id}`;
+    const tankName = `Tanque ${tank._id}`;
     return (
       tankName.toLowerCase().includes(nameFilter.toLowerCase()) &&
       (capacityFilter === "" ||
@@ -150,21 +85,27 @@ export default function TanksPage() {
         width: 0,
         height: 0,
       },
+      _id:'',
+      fishManagerId:'',
+      name:''
     });
     setShowModal(true);
   };
 
   const openUpdateModal = (tank: Tank, event: React.MouseEvent) => {
-    event.stopPropagation(); // Previne navegação ao clicar no botão de editar
+    event.stopPropagation();
     setModalMode(ModalMode.UPDATE);
     setCurrentTank({
-      capacity: tank.capacity,
+      capacity: 0,
       size: {
-        width: tank.size.width,
-        height: tank.size.height,
+        width: 0,
+        height: 0,
       },
+      _id:'',
+      fishManagerId:'',
+      name:''
     });
-    setEditingTankId(tank.id);
+    setEditingTankId(tank._id);
     setShowModal(true);
   };
 
@@ -174,49 +115,19 @@ export default function TanksPage() {
       currentTank.size.width > 0 &&
       currentTank.size.height > 0
     ) {
-      if (modalMode === ModalMode.CREATE) {
-        // Em uma implementação real, este ID seria gerado pelo backend
-        const newId = String(
-          Math.max(...tanks.map((t) => Number(t.id)), 0) + 1
-        );
-        setTanks([
-          ...tanks,
-          {
-            ...currentTank,
-            id: newId,
-            animalsCount: 0,
-          },
-        ]);
-      } else {
-        if (editingTankId !== null) {
-          setTanks(
-            tanks.map((tank) =>
-              tank.id === editingTankId
-                ? {
-                    ...tank,
-                    capacity: currentTank.capacity,
-                    size: currentTank.size,
-                  }
-                : tank
-            )
-          );
-        }
-      }
-
       setShowModal(false);
       setEditingTankId(null);
     }
   };
 
   const handleDeleteTank = (id: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Previne navegação ao clicar no botão de deletar
+    event.stopPropagation();
     if (confirm("Tem certeza que deseja excluir este tanque?")) {
-      setTanks(tanks.filter((tank) => tank.id !== id));
     }
   };
 
   const navigateToTankDetails = (tankId: string) => {
-    // Navega para a página de detalhes do tanque
+
     router.push(`/dashboard/tanks/${tankId}`);
   };
 
@@ -263,89 +174,98 @@ export default function TanksPage() {
             </section>
 
             {/* Cards de tanques */}
-            <div className={styles.cardsContainer}>
-              {paginatedTanks.map((tank) => (
-                <div
-                  key={tank.id}
-                  className={styles.tankCard}
-                  onClick={() => navigateToTankDetails(tank.id)}
-                >
-                  <div className={styles.tankCardHeader}>
-                    <h3 className={styles.tankCardTitle}>
-                      <BsDropletFill className={styles.tankCardIcon} /> Tanque{" "}
-                      {tank.id}
-                    </h3>
-                    <div className={styles.tankCardActions}>
-                      <button
-                        className={styles.updateButton}
-                        onClick={(e) => openUpdateModal(tank, e)}
-                        aria-label="Editar tanque"
-                      >
-                        <BsPencil />
-                      </button>
-                      <button
-                        className={styles.deleteButton}
-                        onClick={(e) => handleDeleteTank(tank.id, e)}
-                        aria-label="Excluir tanque"
-                      >
-                        <BsTrash />
-                      </button>
-                    </div>
+            {loading ? (
+          <div className="loading-container">
+          <ClockLoader color="#0a58ca" size={60} />
+          <p className="loading-text">Carregando todos os tanks...</p>
+        </div>
+            )
+          :
+          <div className={styles.cardsContainer}>
+          {paginatedTanks.map((tank) => (
+            <div
+              key={tank._id}
+              className={styles.tankCard}
+              onClick={() => navigateToTankDetails(tank._id)}
+            >
+              <div className={styles.tankCardHeader}>
+                <h3 className={styles.tankCardTitle}>
+                  <BsDropletFill className={styles.tankCardIcon} /> Tanque{" "}
+                  {tank.name}
+                </h3>
+                <div className={styles.tankCardActions}>
+                  <button
+                    className={styles.updateButton}
+                    onClick={(e) => openUpdateModal(tank, e)}
+                    aria-label="Editar tanque"
+                  >
+                    <BsPencil />
+                  </button>
+                  <button
+                    className={styles.deleteButton}
+                    onClick={(e) => handleDeleteTank(tank._id, e)}
+                    aria-label="Excluir tanque"
+                  >
+                    <BsTrash />
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.tankCardBody}>
+                <div className={styles.tankCardStat}>
+                  <div className={styles.tankCardStatIcon}>
+                    <BsDropletFill />
                   </div>
-
-                  <div className={styles.tankCardBody}>
-                    <div className={styles.tankCardStat}>
-                      <div className={styles.tankCardStatIcon}>
-                        <BsDropletFill />
-                      </div>
-                      <div className={styles.tankCardStatContent}>
-                        <div className={styles.tankCardStatLabel}>
-                          Capacidade:
-                        </div>
-                        <div className={styles.tankCardStatValue}>
-                          {tank.capacity} L
-                        </div>
-                      </div>
+                  <div className={styles.tankCardStatContent}>
+                    <div className={styles.tankCardStatLabel}>
+                      Capacidade:
                     </div>
-
-                    <div className={styles.tankCardStat}>
-                      <div className={styles.tankCardStatIcon}>
-                        <BsRulers />
-                      </div>
-                      <div className={styles.tankCardStatContent}>
-                        <div className={styles.tankCardStatLabel}>
-                          Dimensões:
-                        </div>
-                        <div className={styles.tankCardStatValue}>
-                          {tank.size.width}×{tank.size.height} m
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.tankCardStat}>
-                      <div className={styles.tankCardStatIcon}>
-                        <FaFish />
-                      </div>
-                      <div className={styles.tankCardStatContent}>
-                        <div className={styles.tankCardStatLabel}>Animais:</div>
-                        <div className={styles.tankCardStatValue}>
-                          {tank.animalsCount || 0}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.tankCardFooter}>
-                    <div className={styles.viewDetailsButton}>
-                      Ver detalhes <FaChartBar />
+                    <div className={styles.tankCardStatValue}>
+                      {tank.capacity} L
                     </div>
                   </div>
                 </div>
-              ))}
+
+                <div className={styles.tankCardStat}>
+                  <div className={styles.tankCardStatIcon}>
+                    <BsRulers />
+                  </div>
+                  <div className={styles.tankCardStatContent}>
+                    <div className={styles.tankCardStatLabel}>
+                      Dimensões:
+                    </div>
+                    <div className={styles.tankCardStatValue}>
+                      {tank.size.width}×{tank.size.height} m
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.tankCardStat}>
+                  <div className={styles.tankCardStatIcon}>
+                    <FaFish />
+                  </div>
+                  <div className={styles.tankCardStatContent}>
+                    <div className={styles.tankCardStatLabel}>Animais:</div>
+                    <div className={styles.tankCardStatValue}>
+                       {0}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.tankCardFooter}>
+                <div className={styles.viewDetailsButton}>
+                  Ver detalhes <FaChartBar />
+                </div>
+              </div>
             </div>
+          ))}
+        </div>
+          }
+
 
             {/* Mensagem quando não há tanques */}
-            {filteredTanks.length === 0 && (
+            {filteredTanks.length === 0 && loading === false && (
               <div className={styles.noResults}>
                 <BsInfoCircle size={32} />
                 <p>Nenhum tanque encontrado com os filtros aplicados.</p>

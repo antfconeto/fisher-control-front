@@ -18,6 +18,7 @@ export function useAnimalsPagination({
 }: UseAnimalsPaginationProps) {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalAnimals, setTotalAnimals] = useState(0)
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export function useAnimalsPagination({
 
         setAnimals(response.animals);
         setTotalPages(response.totalPages);
+        setTotalAnimals(response.totalAnimals);
       } catch (err: any) {
         setError(err?.message || "Erro ao buscar animais");
       } finally {
@@ -49,6 +51,8 @@ export function useAnimalsPagination({
     animals,
     totalPages,
     currentPage,
+    totalAnimals,
+    setAnimals,
     setCurrentPage,
     loading,
     error,
