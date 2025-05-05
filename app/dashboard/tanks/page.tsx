@@ -35,7 +35,7 @@ enum ModalMode {
 export default function TanksPage() {
   const router = useRouter();
 
-  const {tanks,errorMessage,loading} = useTanks()
+  const {tanks,loading} = useTanks()
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);

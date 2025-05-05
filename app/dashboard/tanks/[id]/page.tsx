@@ -15,10 +15,9 @@ import {
 import { FaWater, FaFish, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { Animal, Tank } from "@/types/types";
-import { useAnimalsPagination } from "@/hooks/useAnimalPagination";
 import { getTankById } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
-import { getAllAnimalsFromTank, listAnimals } from "@/actions/animal";
+import { getAllAnimalsFromTank } from "@/actions/animal";
 
 
 // Cores para gráficos
