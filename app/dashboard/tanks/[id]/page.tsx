@@ -30,7 +30,7 @@ export default function TankDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const tankId = params.id as string;
-  const { errorMessage, setErrorMessage } = useErrorContext()
+  const { setErrorMessage } = useErrorContext()
   const [loadingTank, setLoadingTank] = useState(true)
   const [tankFullInfo, setTankFullInfo] = useState<TankFullInfo | null>(null)
   const [specieList, setSpecieList] = useState<string[]>([])
