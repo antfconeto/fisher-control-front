@@ -26,6 +26,8 @@ import { useTanks } from "@/hooks/useTanks";
 import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
+import { useSpecie } from "@/hooks/useSpecies";
+
 enum ModalMode {
   CREATE = "create",
   UPDATE = "update",
@@ -57,7 +59,7 @@ export default function AnimalsPage() {
     tankId: "",
   };
   const { sendRequest } = useRequest<Animal | ResponseError>();
-  const {errorMessage, setErrorMessage} = useErrorContext()
+  const { errorMessage, setErrorMessage } = useErrorContext()
 
   //States for current animal selected
   const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
@@ -68,6 +70,7 @@ export default function AnimalsPage() {
   const { animals, setCurrentPage, currentPage, loading, totalPages } = useAnimalsPagination({ filters, itemsPerPage })
   //Tanks feched
   const { tanks } = useTanks();
+  const { species } = useSpecie();
   //Filter info for animasl
   const filterFields: FilterFieldConfig[] = [
     {
@@ -87,9 +90,18 @@ export default function AnimalsPage() {
       key: "species",
       label: "Espécie",
       icon: FaFish,
-      type: "text",
+      type: "select",
       size: "medium",
       placeholder: "Espécie",
+      selectOptions: [
+        ...species.map((specie) => ({
+          label: specie.name,
+          value: specie._id,
+        })),
+        {
+          label: "Todas",
+          value: ""
+        }],
       value: filters.specie,
       onChange: (val) => {
         setCurrentPage(1);
@@ -143,7 +155,7 @@ export default function AnimalsPage() {
     setModalMode(ModalMode.CREATE);
     setCurrentAnimal(defaultAnimal);
     setShowModal(true);
-  }, []);
+  },[defaultAnimal]);
   //Function who open a updating modal
   const openUpdateModal = (animal: Animal) => {
     setModalMode(ModalMode.UPDATE);
@@ -164,13 +176,13 @@ export default function AnimalsPage() {
       setErrorMessage(`Dados Necessário estão faltando!`)
       return;
     }
-      const response = modalMode == ModalMode.CREATE ? await handleCreateAnimal(currentAnimal) : await handleUpdateAnimal(currentAnimal)
-      if(response) {
-        console.log(`✅ Animal ${modalMode == ModalMode.CREATE ? 'created' : 'updated'} with success`, currentAnimal)
-        setShowModal(false)
-        setCurrentAnimal(defaultAnimal)
-        //Reset filters
-        setFilters(defaultFilters)
+    const response = modalMode == ModalMode.CREATE ? await handleCreateAnimal(currentAnimal) : await handleUpdateAnimal(currentAnimal)
+    if (response) {
+      console.log(`✅ Animal ${modalMode == ModalMode.CREATE ? 'created' : 'updated'} with success`, currentAnimal)
+      setShowModal(false)
+      setCurrentAnimal(defaultAnimal)
+      //Reset filters
+      setFilters(defaultFilters)
 
     }
   };
@@ -180,7 +192,8 @@ export default function AnimalsPage() {
       await sendRequest(createAnimal, animal);
       return true
     } catch (err: any) {
-      const errMsg = err?.message || "Erro desconhecido";
+      console.log(`✍️✍️✍️ Error creating animal`, err)
+      const errMsg = err?.error || "Erro desconhecido";
       setErrorMessage(errMsg);
       return false
     }
@@ -245,10 +258,17 @@ export default function AnimalsPage() {
               (
                 <>
                   <div className={styles.tableContainer}>
-                    <AnimalTable animals={animals} tanks={tanks} onDelete={(codeAnimal:string)=>{
-                      setCurrentAnimal({...currentAnimal, codeAnimal:codeAnimal})
-                      setShowConfirmModal(true)  
-                    }} onEdit={openUpdateModal} />
+                    {animals.length === 0 && !loading ? (
+                      <div className={styles.noDataContainer}>
+                        <h3 className={styles.noDataText}>Nenhum animal encontrado.</h3>
+                      </div>
+                    ) : (
+                      <AnimalTable animals={animals} tanks={tanks} species={species} onDelete={(codeAnimal: string) => {
+                        setCurrentAnimal({ ...currentAnimal, codeAnimal: codeAnimal })
+                        setShowConfirmModal(true)
+                      }} onEdit={openUpdateModal} />
+                    )}
+
                   </div>
                   {totalPages > 0 && (
                     <div className={styles.pagination}>
@@ -298,7 +318,17 @@ export default function AnimalsPage() {
             {
               name: "specie",
               label: "Espécie",
-              type: "text",
+              type: "select",
+              options:[
+                ...species.map((specie) => ({
+                  label: specie.name,
+                  value: specie._id,
+                })),
+                {
+                  label: "Selecione a Espécie",
+                  value: "",
+                }
+              ],
               value: currentAnimal.specie,
               placeholder: "Digite a espécie do animal",
               onChange: (val) => setCurrentAnimal({ ...currentAnimal, specie: val }),
@@ -354,7 +384,7 @@ export default function AnimalsPage() {
                 </li>
               </ul>
             </>
-        }/>
+          } />
         :
         <></>
       }
@@ -362,9 +392,9 @@ export default function AnimalsPage() {
       {showConfirmModal && (
         <ConfirmModal
           title="Confirmar Exclusão"
-          message="Tem certeza de que deseja excluir este animal? Esta ação não pode ser desfeita."
+          message="Tem certeza de que deseja excluir este animal? Todos os animais dessa espécie serão excluidos."
           onConfirm={handleDeleteAnimal}
-          onCancel={()=>setShowConfirmModal(false)}
+          onCancel={() => setShowConfirmModal(false)}
         />
       )}
     </>

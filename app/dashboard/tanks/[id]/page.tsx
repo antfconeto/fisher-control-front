@@ -18,10 +18,10 @@ import { Animal, Tank } from "@/types/types";
 import { getTankById } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
 import { getAllAnimalsFromTank } from "@/actions/animal";
+import { ErrorBox } from "@/components/ErrorBox";
+import { useSpecie } from "@/hooks/useSpecies";
 
 
-// Cores para gráficos
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 export interface TankFullInfo extends Tank {
   animals: Animal[]
 }
@@ -30,10 +30,9 @@ export default function TankDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const tankId = params.id as string;
-  const { setErrorMessage } = useErrorContext()
+  const {errorMessage, setErrorMessage } = useErrorContext()
   const [loadingTank, setLoadingTank] = useState(true)
   const [tankFullInfo, setTankFullInfo] = useState<TankFullInfo | null>(null)
-  const [specieList, setSpecieList] = useState<string[]>([])
   //Default filters
   const defaultFilters = {
     codeAnimal: '',
@@ -45,6 +44,7 @@ export default function TankDetailsPage() {
   const [filters, setFilters] = useState(defaultFilters);
   const [animals, setAnimals] = useState<Animal[]>([])
   const [loadingAnimals, setLoadingAnimals] = useState(true)
+  const {species} = useSpecie()
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [paginatedAnimals, setPaginatedAnimals] = useState<Animal[]>([])
@@ -62,7 +62,6 @@ export default function TankDetailsPage() {
     try {
       const response = await getTankById(tankId) as Tank
       setTankFullInfo({ ...response, animals:animals as any})
-      buildDataGraphSpecies();
       setLoadingTank(false)
     } catch (error: any) {
       const errMsg = error?.message || "Erro desconhecido";
@@ -82,12 +81,7 @@ export default function TankDetailsPage() {
   }
 
 
-  // Obter lista única de espécies para o filtro
-  const buildDataGraphSpecies = () => {
-    setSpecieList(tankFullInfo?.animals
-      ? Array.from(new Set(tankFullInfo?.animals.map((animal) => animal.specie)))
-      : [])
-  }
+
 
   const paginationAnimals = ()=>{
     console.log(animals.slice(
@@ -103,18 +97,31 @@ export default function TankDetailsPage() {
     ))
   }
 
+  // Função para gerar cores dinamicamente
+const generateColors = (count: number): string[] => {
+  const colors: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const hue = (i * 360) / count; // Distribui as cores uniformemente no espectro
+    colors.push(`hsl(${hue}, 70%, 50%)`); // Usa o modelo de cor HSL
+  }
+  return colors;
+};
+
   // Dados para gráfico de pizza - espécies de animais
-  const speciesData =
-    animals?.reduce((acc: { name: string; value: number }[], animal) => {
-      const existingSpecie = acc.find((a) => a.name === animal.specie);
+const speciesData =
+  animals?.reduce((acc: { name: string; value: number }[], animal) => {
+    const specieName = species.find((specie) => specie._id === animal.specie)?.name;
+    if (specieName) {
+      const existingSpecie = acc.find((a) => a.name === specieName);
       if (existingSpecie) {
         existingSpecie.value += 1;
       } else {
-        acc.push({ name: animal.specie, value: 1 });
+        acc.push({ name: specieName, value: 1 });
       }
-      return acc;
-    }, []) || [];
-
+    }
+    return acc;
+  }, []) || [];
+  const dynamicColors = generateColors(speciesData.length);
 
   if (loadingTank) {
     return(
@@ -154,7 +161,16 @@ export default function TankDetailsPage() {
     );
   }
 
-  return (
+  return (<>
+  
+
+          {errorMessage && (
+            <ErrorBox
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              otherClassName=""
+            />
+          )}
     <div className="page-container">
       <div className="content-container">
         {/* Cabeçalho */}
@@ -255,7 +271,7 @@ export default function TankDetailsPage() {
                       {speciesData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
+                          fill={dynamicColors[index % dynamicColors.length]}
                         />
                       ))}
                     </Pie>
@@ -305,9 +321,9 @@ export default function TankDetailsPage() {
                     className={styles.selectFilter}
                   >
                     <option value="">Todas as espécies</option>
-                    {specieList.map((specie, index) => (
-                      <option key={index} value={specie}>
-                        {specie}
+                    {species.map((specie, index) => (
+                      <option key={index} value={specie._id}>
+                        {specie.name}
                       </option>
                     ))}
                   </select>
@@ -353,7 +369,7 @@ export default function TankDetailsPage() {
                         <td className={styles.tableCell}>
                           {animal.codeAnimal}
                         </td>
-                        <td className={styles.tableCell}>{animal.specie}</td>
+                        <td className={styles.tableCell}>{species.find((specie)=>specie._id === animal.specie)?.name}</td>
                         <td className={styles.tableCell}>
                           {animal.gender === "M" ? "Macho" : "Fêmea"}
                         </td>
@@ -441,5 +457,6 @@ export default function TankDetailsPage() {
 
       </div>
     </div>
+    </>
   );
 }

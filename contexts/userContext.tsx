@@ -5,13 +5,11 @@ import { User } from "@/types/user";
 import { CustomConsole } from "@/utils/customLogger";
 import React, {
   createContext,
-  useContext,
   useState,
   ReactNode,
   useEffect,
 } from "react";
-import { AuthContext } from "./authContext";
-import { useAuth } from "@/hooks/useAuth";
+import { useErrorContext } from "./errorContext";
 
 interface UserContextProps {
   user: User | null;
@@ -32,6 +30,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   //hook request
   const { data, error, loading, sendRequest } = useRequest();
+  const {errorMessage,setErrorMessage} = useErrorContext()
   //consoler
   const consoler = new CustomConsole();
 
@@ -52,6 +51,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
       }
     } catch (error: any) {
+     setErrorMessage(error.message || 'Erro Desconhecido')
     }
   };
   return (

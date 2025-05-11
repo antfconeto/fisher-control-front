@@ -1,18 +1,19 @@
 import { CustomTable, TableColumn } from '@/components/tables/customTable';
-import { FaBarcode, FaFish, FaCalendarAlt, FaVenusMars, FaWater } from 'react-icons/fa';
+import { FaBarcode, FaCalendarAlt, FaVenusMars, FaWater } from 'react-icons/fa';
 import { BsPencil, BsTrash } from 'react-icons/bs';
 import { formatDate } from '@/utils/dateFunctions';
 import styles from './animal-table.module.css';
-import { Animal, Tank } from '@/types/types';
+import { Animal, Specie, Tank } from '@/types/types';
 
 interface AnimalTableProps {
   animals: Animal[];
+  species: Specie[];
   tanks: Tank[];
   onEdit: (animal: Animal) => void;
   onDelete: (codeAnimal: string) => void;
 }
 
-export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, onEdit, onDelete }) => {
+export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, species, onEdit, onDelete }) => {
   const columns: TableColumn<Animal>[] = [
     {
       header: 'Código',
@@ -26,7 +27,8 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, onEdit
       header: 'Espécie',
       render: (animal) => (
         <div className={styles.cellContent}>
-          <FaFish /> {animal.specie}
+          <FaWater /> 
+          {species.find((specie) => specie._id === animal.specie)?.name}
         </div>
       ),
     },

@@ -14,40 +14,67 @@
                 "422": "É necessário prover um email com domínio acadêmico do IFMA"
             }
         },
-        "getData":{
+        "getData": {
+            "500": "Error ao tentar se comunicar com o servidor!",
+            "fetch failed": "Erro ao se comunicar com os servidors"
+        }
+    },
+    "animalErros": {
+        "createAnimal": {
+            "statusCode": {
+                "400": "Dados incompletos",
+                "404": "Animal não encontrado",
+                "409": "Já existe um animal com o Código fornecido"
+            }
+        },
+        "updateAnimal": {
+            "statusCode": {
+                "400": "Dados incompletos para atualizar o animal",
+                "404": "Animal não encontrado",
+                "409": "Já existe um animal com o Código fornecido"
+            }
+        },
+        "listAnimals": {
             "500": "Error ao tentar se comunicar com o servidor!"
         }
     },
-    "animalErros":{
-        "createAnimal":{
-            "statusCode":{
-                "400":"Dados incompletos",
-                "404":"Animal não encontrado",
-                "409":"Já existe um animal com o Código fornecido"
-            }
-        },
-        "updateAnimal":{
-            "statusCode":{
-                "400":"Dados incompletos para atualizar o animal",
-                "404":"Animal não encontrado",
-                "409":"Já existe um animal com o Código fornecido"
-            }
-        },
-        "listAnimals":{
-            "500": "Error ao tentar se comunicar com o servidor!"
+    "fishManager": {
+        "requestToJoin": {
+            "404": "Fish Manager não foi encontrado!",
+            "409": "O usuário já enviou uma requisição de participação!"
         }
     },
-    "fishManager":{
-        "requestToJoin":{
-            "404":"Fish Manager não foi encontrado!",
-            "409":"O usuário já enviou uma requisição de participação!"
-        }
-    },
-    "tankErros":{
-        "getTankById":{
-            "404":"Tank não encontrado",
+    "tankErros": {
+        "getTankById": {
+            "404": "Tank não encontrado",
             "400": "Dados incompletos para carregar o tanque",
             "500": "Error ao tentar se comunicar com o servidor!"
+        }
+    },
+    "specieErros": {
+        "createSpecie": {
+            "statusCode": {
+                "400": "Dados incompletos",
+                "409": "Já existe uma especie com o mesmo nome fornecido"
+            }
+        },
+        "updateSpecie": {
+            "statusCode": {
+                "400": "Dados incompletos para atualizar a especie",
+                "404": "Especie não encontrado",
+                "409": "Já existe uma especie com o nome fornecido"
+            }
+        },
+        "getSpecieById": {
+            "statusCode": {
+                "400": "Dados incompletos para carregar a expécie",
+                "404": "Especie não encontrado"
+            }
+        },
+        "getAllSpecies": {
+            "statusCode": {
+                "500": "Error ao tentar se comunicar com o servidor!"
+            }
         }
     }
 }

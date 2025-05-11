@@ -1,0 +1,62 @@
+
+
+  
+.actionsCell {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .updateButton {
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  
+  .updateButton:hover {
+    background-color: #2c5282;
+    transform: translateY(-1px);
+  }
+  
+  .deleteButton {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  
+  .deleteButton:hover {
+    background-color: #c53030;
+    transform: translateY(-1px);
+  }
+  
+.cellContent {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Media queries para dispositivos móveis */
+@media (max-width: 768px) {
+  
+    .actionsCell {
+      flex-direction: column;
+    }
+  }

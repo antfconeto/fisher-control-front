@@ -6,6 +6,7 @@ import styles from "./sideMenu.module.css";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { LuFilePenLine } from "react-icons/lu";
 
 const menuItems = [
   {
@@ -30,6 +31,11 @@ const menuItems = [
         name: "Animais",
         icon: <FishIcon size={18} />,
         link: "/dashboard/animals",
+      },
+      {
+        name: "Espécies",
+        icon: <LuFilePenLine size={18}/>,
+        link: "/dashboard/species",
       },
       {
         name: "Desovas",

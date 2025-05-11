@@ -63,3 +63,11 @@ export type FishManager = {
     ownerId:string;
     updatedAt:Date;
 }
+
+export type Specie = {
+  _id:string;
+  name:string;
+  quantity:number;
+  description:string;
+  color:string;
+}

@@ -183,7 +183,7 @@ export const listAnimals = async (page:number,pageSize:number,   filter?:{
               };
         }
         const responseBody: AnimalPagination = await response.json();
-        consoler.success(`Fetched ${responseBody} animals successfully.`);
+        consoler.success(`Fetched animals successfully.`);
         return responseBody;
     } catch (error: any) {
         consoler.error(
@@ -223,7 +223,7 @@ export const getAllAnimalsFromTank = async (tankId:string): Promise<Animal[] | R
               };
         }
         const responseBody: Animal[] = await response.json();
-        consoler.success(`Fetched ${responseBody} animals successfully.`);
+        consoler.success(`Fetched animals successfully.`);
         return responseBody;
     } catch (error: any) {
         consoler.error(
