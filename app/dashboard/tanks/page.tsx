@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./tanks.module.css";
 import {
   BsDropletFill,
@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { useTanks } from "@/hooks/useTanks";
 import { Tank } from "@/types/types";
 import { ClockLoader } from "react-spinners";
+import { getAllAnimalsFromTank } from "@/actions/animal";
 
 
 enum ModalMode {
@@ -35,7 +36,7 @@ enum ModalMode {
 export default function TanksPage() {
   const router = useRouter();
 
-  const {tanks,loading} = useTanks()
+  const {tanks,loading, createTank, updateTank, deleteTank} = useTanks()
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
@@ -61,10 +62,32 @@ export default function TanksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; // Aumentado para exibir mais cards por página
 
+  const [tankAnimals, setTankAnimals] = useState<{ [key: string]: number }>({});
+
+  useEffect(() => {
+    const fetchTankAnimals = async () => {
+      const animalsCount: { [key: string]: number } = {};
+      for (const tank of tanks) {
+        try {
+          const animals = await getAllAnimalsFromTank(tank._id);
+          if (!('error' in animals)) {
+            animalsCount[tank._id] = animals.length;
+          }
+        } catch (error) {
+          console.error(`Erro ao buscar animais do tanque ${tank._id}:`, error);
+        }
+      }
+      setTankAnimals(animalsCount);
+    };
+
+    if (tanks.length > 0) {
+      fetchTankAnimals();
+    }
+  }, [tanks]);
+
   const filteredTanks = tanks.filter((tank) => {
-    const tankName = `Tanque ${tank._id}`;
     return (
-      tankName.toLowerCase().includes(nameFilter.toLowerCase()) &&
+      tank.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
       (capacityFilter === "" ||
         tank.capacity.toString().includes(capacityFilter))
     );
@@ -109,20 +132,37 @@ export default function TanksPage() {
     setShowModal(true);
   };
 
-  const handleSaveTank = () => {
+  const handleSaveTank = async () => {
     if (
       currentTank.capacity > 0 &&
       currentTank.size.width > 0 &&
       currentTank.size.height > 0
     ) {
+      try {
+        if (modalMode === ModalMode.CREATE) {
+          await createTank(currentTank);
+        } else if (modalMode === ModalMode.UPDATE && editingTankId) {
+          await updateTank({ ...currentTank, _id: editingTankId });
+        }
       setShowModal(false);
       setEditingTankId(null);
+      } catch (error: any) {
+        console.error("Erro ao salvar tanque:", error);
+      }
     }
   };
 
-  const handleDeleteTank = (id: string, event: React.MouseEvent) => {
+  const handleDeleteTank = async (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
     if (confirm("Tem certeza que deseja excluir este tanque?")) {
+      try {
+        const success = await deleteTank(id);
+        if (success) {
+          console.log("Tanque excluído com sucesso");
+        }
+      } catch (error: any) {
+        console.error("Erro ao excluir tanque:", error);
+      }
     }
   };
 
@@ -190,8 +230,7 @@ export default function TanksPage() {
             >
               <div className={styles.tankCardHeader}>
                 <h3 className={styles.tankCardTitle}>
-                  <BsDropletFill className={styles.tankCardIcon} /> Tanque{" "}
-                  {tank.name}
+                  <BsDropletFill className={styles.tankCardIcon} /> {tank.name}
                 </h3>
                 <div className={styles.tankCardActions}>
                   <button
@@ -247,7 +286,7 @@ export default function TanksPage() {
                   <div className={styles.tankCardStatContent}>
                     <div className={styles.tankCardStatLabel}>Animais:</div>
                     <div className={styles.tankCardStatValue}>
-                       {0}
+                      {tankAnimals[tank._id] || 0}
                     </div>
                   </div>
                 </div>
@@ -338,11 +377,14 @@ export default function TanksPage() {
                   id="tankName"
                   type="text"
                   className={styles.formInput}
-                  value={
-                    editingTankId ? `Tanque ${editingTankId}` : "Novo Tanque"
+                  value={currentTank.name}
+                  onChange={(e) =>
+                    setCurrentTank({
+                      ...currentTank,
+                      name: e.target.value,
+                    })
                   }
-                  disabled
-                  placeholder="Nome gerado automaticamente"
+                  placeholder="Digite o nome do tanque"
                 />
               </div>
               <div className={styles.formGroup}>
@@ -365,7 +407,7 @@ export default function TanksPage() {
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel} htmlFor="width">
-                  Largura (Metros)
+                  Largura (metros)
                 </label>
                 <input
                   id="width"
@@ -386,7 +428,7 @@ export default function TanksPage() {
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel} htmlFor="height">
-                  Altura (Metros)
+                  Altura (metros)
                 </label>
                 <input
                   id="height"

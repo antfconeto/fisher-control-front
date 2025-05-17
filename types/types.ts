@@ -51,6 +51,7 @@ export interface Tank {
       height: number;
   }
   fishManagerId:string;
+  animals?: Animal[];
 }
 
 export type FishManager = {

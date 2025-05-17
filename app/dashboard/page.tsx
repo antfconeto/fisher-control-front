@@ -15,44 +15,30 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import { useDashboard } from "@/hooks/useDashboard";
 
 export default function Dashboard() {
-  // Dados fictícios
-  const stats = {
-    totalUsers: 12,
-    totalTanks: 28,
-    totalAnimals: 156,
-    totalSpawns: 42,
-    tankOccupation: 78, // porcentagem
-    upcomingSpawns: 5,
-  };
-
-  // Número de animais por espécie (dados fictícios)
-  const speciesData = [
-    { name: "Tilápia", value: 68 },
-    { name: "Tambaqui", value: 45 },
-    { name: "Pacu", value: 23 },
-    { name: "Pintado", value: 20 },
-  ];
-
-  // Dados de desovas por mês (dados fictícios)
-  const spawnsData = [
-    { month: "Jan", spawns: 3 },
-    { month: "Fev", spawns: 4 },
-    { month: "Mar", spawns: 5 },
-    { month: "Abr", spawns: 6 },
-    { month: "Mai", spawns: 4 },
-    { month: "Jun", spawns: 3 },
-    { month: "Jul", spawns: 2 },
-    { month: "Ago", spawns: 3 },
-    { month: "Set", spawns: 5 },
-    { month: "Out", spawns: 4 },
-    { month: "Nov", spawns: 2 },
-    { month: "Dez", spawns: 1 },
-  ];
+  const { loading, stats, speciesData, spawnsData } = useDashboard();
 
   // Cores para o gráfico de pizza
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+  if (loading) {
+    return (
+      <div className="page-container">
+        <div className="content-container">
+          <div className="content-card">
+            <div className="loading-container">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Carregando...</span>
+              </div>
+              <p className="loading-text mt-3">Carregando dados do dashboard...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -178,10 +164,27 @@ export default function Dashboard() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={spawnsData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
+                        <XAxis 
+                          dataKey="month" 
+                          tickFormatter={(month) => {
+                            const months = [
+                              'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                              'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+                            ];
+                            return months[month - 1];
+                          }}
+                        />
                         <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="spawns" fill="#FFBB28" />
+                        <Tooltip 
+                          labelFormatter={(month) => {
+                            const months = [
+                              'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                            ];
+                            return months[month - 1];
+                          }}
+                        />
+                        <Bar dataKey="spawns" fill="#FFBB28" name="Desovas" />
                       </BarChart>
                     </ResponsiveContainer>
                   </Card.Body>
