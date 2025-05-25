@@ -5,7 +5,7 @@ import styles from "./CustomModalForm.module.css";
 export interface CustomFormField {
   name: string;
   label: string;
-  type: "text" | "date" | "select" | "number";
+  type: "text" | "date" | "select" | "number" | "email";
   value: any;
   placeholder?: string;
   options?: { label: string; value: string }[]; // para select

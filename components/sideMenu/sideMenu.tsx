@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { LuFilePenLine } from "react-icons/lu";
+import { FaRegUser } from "react-icons/fa6";
 
 const menuItems = [
   {
@@ -41,6 +42,11 @@ const menuItems = [
         name: "Desovas",
         icon: <Egg size={18} />,
         link: "/dashboard/spawining",
+      },
+            {
+        name: "Usuários",
+        icon: <FaRegUser size={18} />,
+        link: "/dashboard/users",
       },
     ],
   },

@@ -16,13 +16,19 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useDashboard } from "@/hooks/useDashboard";
+import {generateColors} from "@/utils/graphUtils"
+
+
+
 
 export default function Dashboard() {
-  const { loading, stats, speciesData, spawnsData } = useDashboard();
-
+  const { loading, stats, specieDescription } = useDashboard();
+  const speciesData = (specieDescription || []).map((item) => ({
+    name: item.specie.name,
+    value: item.animals.length,
+  }));
   // Cores para o gráfico de pizza
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
+  const dynamicColors = generateColors(speciesData.length);
   if (loading) {
     return (
       <div className="page-container">
@@ -62,7 +68,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h6 className="mb-0">Usuários</h6>
-                      <h3 className="mb-0">{stats.totalUsers}</h3>
+                      <h3 className="mb-0">{stats.totalUsers || 0}</h3>
                     </div>
                   </Card.Body>
                 </Card>
@@ -76,10 +82,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h6 className="mb-0">Tanques</h6>
-                      <h3 className="mb-0">{stats.totalTanks}</h3>
-                      <small className="text-muted">
-                        {stats.tankOccupation}% ocupados
-                      </small>
+                      <h3 className="mb-0">{stats.totalTanks || 0}</h3>
                     </div>
                   </Card.Body>
                 </Card>
@@ -93,7 +96,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h6 className="mb-0">Animais</h6>
-                      <h3 className="mb-0">{stats.totalAnimals}</h3>
+                      <h3 className="mb-0">{stats.totalAnimals || 0}</h3>
                     </div>
                   </Card.Body>
                 </Card>
@@ -107,10 +110,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h6 className="mb-0">Desovas</h6>
-                      <h3 className="mb-0">{stats.totalSpawns}</h3>
-                      <small className="text-muted">
-                        {stats.upcomingSpawns} programadas
-                      </small>
+                      <h3 className="mb-0">{stats.totalSpawns || 0}</h3>
                     </div>
                   </Card.Body>
                 </Card>
@@ -127,31 +127,43 @@ export default function Dashboard() {
                   <Card.Header className="bg-white">
                     <h5 className="mb-0">Distribuição por Espécie</h5>
                   </Card.Header>
-                  <Card.Body className="d-flex justify-content-center align-items-center">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={speciesData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
-                          }
-                        >
-                          {speciesData.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Card.Body>
+  <Card.Body className="d-flex justify-content-center align-items-center">
+        <ResponsiveContainer width="100%" height={300}>
+          {!speciesData || speciesData.length === 0 ? (
+            <div className="w-100 h-100 d-flex justify-content-center align-items-center">
+              <span className="text-muted fs-5">Sem dados</span>
+            </div>
+          ) : (
+            <PieChart>
+              <Pie
+                data={speciesData}
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+                label={({ name, percent }) =>
+                  `${name}: ${(percent * 100).toFixed(0)}%`
+                }
+              >
+                {speciesData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={dynamicColors[index % dynamicColors.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value, name, props) => [
+                  `${value} animais`,
+                  props.payload.name,
+                ]}
+              />
+            </PieChart>
+          )}
+        </ResponsiveContainer>
+      </Card.Body>
                 </Card>
               </Col>
 
@@ -162,10 +174,10 @@ export default function Dashboard() {
                   </Card.Header>
                   <Card.Body>
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={spawnsData}>
+                      <BarChart data={[]}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="month" 
+                        <XAxis
+                          dataKey="month"
                           tickFormatter={(month) => {
                             const months = [
                               'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
@@ -175,7 +187,7 @@ export default function Dashboard() {
                           }}
                         />
                         <YAxis />
-                        <Tooltip 
+                        <Tooltip
                           labelFormatter={(month) => {
                             const months = [
                               'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',

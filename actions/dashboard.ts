@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { CustomConsole } from "@/utils/customLogger";
 import { CustomError } from "@/utils/customError";
 import * as errorMessages from "@/utils/errorMessages.json";
+import { Animal, Specie } from "@/types/types";
 
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:4000";
@@ -61,7 +62,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   }
 };
 
-export const getSpeciesDistribution = async (): Promise<SpeciesData[]> => {
+export const getSpeciesDistribution = async (): Promise<{specieDescription:{specie:Specie, animals:Animal[]}[]}> => {
   console.log(`🔁 Iniciando processo para buscar distribuição de espécies`);
   const token = (await cookies()).get('access_token');
   if (!token) {
@@ -69,7 +70,7 @@ export const getSpeciesDistribution = async (): Promise<SpeciesData[]> => {
   }
 
   try {
-    const response = await fetch(`${urlApi}/dashboard/species-distribution`, {
+    const response = await fetch(`${urlApi}/animal/getAllAnimalsAndSpecies`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -85,8 +86,9 @@ export const getSpeciesDistribution = async (): Promise<SpeciesData[]> => {
       throw new CustomError(errorMessage?.error || "Erro ao buscar distribuição de espécies", response.status);
     }
 
-    const responseBody: SpeciesData[] = await response.json();
+    const responseBody: {specieDescription:{specie:Specie, animals:Animal[]}[]}= await response.json();
     console.log(`✅ Distribuição de espécies obtida com sucesso`);
+    console.log(responseBody)
     return responseBody;
   } catch (error: any) {
     consoler.error(

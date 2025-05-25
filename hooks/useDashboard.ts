@@ -9,6 +9,7 @@ import {
   SpeciesData,
   SpawnsData
 } from '@/actions/dashboard';
+import { Animal, Specie } from '@/types/types';
 
 export const useDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,7 @@ export const useDashboard = () => {
     tankOccupation: 0,
     upcomingSpawns: 0,
   });
-  const [speciesData, setSpeciesData] = useState<SpeciesData[]>([]);
+  const [specieDescription, setSpecieDescription] = useState<{specie:Specie, animals:Animal[]}[]>([]);
   const [spawnsData, setSpawnsData] = useState<SpawnsData[]>([]);
   const { setErrorMessage } = useError();
 
@@ -28,17 +29,13 @@ export const useDashboard = () => {
     try {
       console.log("🔍 Iniciando busca de dados do dashboard...");
       
-      const [statsResponse, speciesResponse, spawnsResponse] = await Promise.all([
+      const [statsResponse, speciesDescription] = await Promise.all([
         getDashboardStats(),
-        getSpeciesDistribution(),
-        getSpawnsByMonth()
+        getSpeciesDistribution()
       ]);
-
-      console.log("📊 Dados de desovas recebidos:", spawnsResponse);
       
       setStats(statsResponse);
-      setSpeciesData(speciesResponse);
-      setSpawnsData(spawnsResponse);
+      setSpecieDescription(speciesDescription.specieDescription);
       
       console.log("✅ Dados do dashboard atualizados com sucesso");
     } catch (error: any) {
@@ -56,7 +53,7 @@ export const useDashboard = () => {
   return {
     loading,
     stats,
-    speciesData,
+    specieDescription,
     spawnsData,
     refreshData: fetchDashboardData
   };
