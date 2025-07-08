@@ -49,7 +49,6 @@ export default function TankDetailsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [paginatedAnimals, setPaginatedAnimals] = useState<Animal[]>([])
   const itemsPerPage = 5
-  const [speciesData, setSpeciesData] = useState<{ name: string; value: number }[]>([])
 
   useEffect(() => {
     fetchTank();
@@ -71,23 +70,16 @@ export default function TankDetailsPage() {
     }
   }
 
-  const fetchAnimals = async ()=>{
-    try {
-      const response = await getAllAnimalsFromTank(tankId) as Animal[]
-      setAnimals(response)
-      setLoadingAnimals(false)
-      const speciesCount: Record<string, number> = {};
-      response.forEach((animal) => {
-        speciesCount[animal.specie] = (speciesCount[animal.specie] || 0) + 1;
-      });
-      const data = Object.entries(speciesCount).map(([name, value]) => ({ name, value }));
-      setSpeciesData(data);
-    } catch (error: any) {
-      const errMsg = error?.message || "Erro desconhecido";
-      setErrorMessage(errMsg);
+    const fetchAnimals = async ()=> {
+      try {
+        const response = await getAllAnimalsFromTank(tankId) as Animal[]
+        setAnimals(response)
+        setLoadingAnimals(false)
+      } catch (error: any) {
+        const errMsg = error?.message || "Erro desconhecido";
+        setErrorMessage(errMsg);
+      }
     }
-  }
-
 
 
 
@@ -105,6 +97,19 @@ export default function TankDetailsPage() {
     ))
   }
 
+  const speciesData =
+  animals?.reduce((acc: { name: string; value: number }[], animal) => {
+    const specieName = species.find((specie) => specie._id === animal.specie)?.name;
+    if (specieName) {
+      const existingSpecie = acc.find((a) => a.name === specieName);
+      if (existingSpecie) {
+        existingSpecie.value += 1;
+      } else {
+        acc.push({ name: specieName, value: 1 });
+      }
+    }
+    return acc;
+  }, []) || [];
   // Função para gerar cores dinamicamente
 const generateColors = (count: number): string[] => {
   const colors: string[] = [];

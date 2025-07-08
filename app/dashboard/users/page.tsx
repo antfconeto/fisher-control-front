@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "../animals/animals.module.css";
-import { FaChevronLeft, FaChevronRight, FaPlus, FaUserEdit, FaTrash } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaPlus, FaUserEdit } from "react-icons/fa";
 import { BsSearch } from "react-icons/bs";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
