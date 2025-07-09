@@ -1,9 +1,10 @@
 import { CustomTable, TableColumn } from '@/components/tables/customTable';
-import { FaBarcode, FaCalendarAlt, FaVenusMars, FaWater } from 'react-icons/fa';
+import { FaBarcode, FaCalendarAlt, FaVenusMars, FaWater, FaEllipsisV } from 'react-icons/fa';
 import { BsPencil, BsTrash } from 'react-icons/bs';
 import { formatDate } from '@/utils/dateFunctions';
 import styles from './animal-table.module.css';
 import { Animal, Specie, Tank } from '@/types/types';
+import { useEffect, useRef, useState } from 'react';
 
 interface AnimalTableProps {
   animals: Animal[];
@@ -14,6 +15,26 @@ interface AnimalTableProps {
 }
 
 export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, species, onEdit, onDelete }) => {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    }
+    if (openMenuId !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
+
   const columns: TableColumn<Animal>[] = [
     {
       header: 'Código',
@@ -63,19 +84,31 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, specie
     {
       header: 'Ações',
       render: (animal) => (
-        <div className={styles.actionsCell}>
+        <div className={styles.actionsCell} style={{ position: 'relative' }}>
           <button
-            className={styles.updateButton}
-            onClick={() => onEdit(animal)}
+            className={styles.ellipsisButton}
+            aria-label="Mais opções"
+            onClick={() => setOpenMenuId(openMenuId === animal.codeAnimal ? null : animal.codeAnimal)}
+            tabIndex={0}
           >
-            <BsPencil /> Atualizar
+            <FaEllipsisV />
           </button>
-          <button
-            className={styles.deleteButton}
-            onClick={() => onDelete(animal.codeAnimal)}
-          >
-            <BsTrash /> Deletar
-          </button>
+          {openMenuId === animal.codeAnimal && (
+            <div className={styles.actionMenu} ref={menuRef}>
+              <button
+                className={styles.menuItem}
+                onClick={() => { setOpenMenuId(null); onEdit(animal); }}
+              >
+                <BsPencil /> Atualizar
+              </button>
+              <button
+                className={styles.menuItem}
+                onClick={() => { setOpenMenuId(null); onDelete(animal.codeAnimal); }}
+              >
+                <BsTrash /> Deletar
+              </button>
+            </div>
+          )}
         </div>
       ),
     },

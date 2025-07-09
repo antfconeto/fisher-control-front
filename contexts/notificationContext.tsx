@@ -21,10 +21,10 @@ interface NotificationContextProps {
   addNotification: (notification: Omit<Notification, 'id'>) => string;
   removeNotification: (id: string) => void;
   clearAll: () => void;
-  success: (title: string, message?: string, options?: Partial<Notification>) => string;
-  error: (title: string, message?: string, options?: Partial<Notification>) => string;
-  warning: (title: string, message?: string, options?: Partial<Notification>) => string;
-  info: (title: string, message?: string, options?: Partial<Notification>) => string;
+  successNotification: (title: string, message?: string, options?: Partial<Notification>) => string;
+  errorNotification: (title: string, message?: string, options?: Partial<Notification>) => string;
+  warningNotification: (title: string, message?: string, options?: Partial<Notification>) => string;
+  infoNotification: (title: string, message?: string, options?: Partial<Notification>) => string;
 }
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
@@ -59,8 +59,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     };
 
     setNotifications(prev => {
-      const updated = [newNotification, ...prev];
-      // Keep only the latest notifications up to maxNotifications
+      // Remove notificações com o mesmo título antes de adicionar a nova
+      const filtered = prev.filter(n => n.title !== newNotification.title);
+      const updated = [newNotification, ...filtered];
+      // Mantém apenas as últimas notificações até maxNotifications
       return updated.slice(0, maxNotifications);
     });
 
@@ -83,7 +85,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   }, []);
 
   // Convenience methods
-  const success = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+  const successNotification = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
     return addNotification({
       type: 'success',
       title,
@@ -92,7 +94,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     });
   }, [addNotification]);
 
-  const error = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+  const errorNotification = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
     return addNotification({
       type: 'error',
       title,
@@ -101,7 +103,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     });
   }, [addNotification]);
 
-  const warning = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+  const warningNotification = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
     return addNotification({
       type: 'warning',
       title,
@@ -110,7 +112,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     });
   }, [addNotification]);
 
-  const info = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+  const infoNotification = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
     return addNotification({
       type: 'info',
       title,
@@ -119,15 +121,25 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     });
   }, [addNotification]);
 
+  // Garante que apenas uma notificação por título seja renderizada
+  const uniqueNotifications = React.useMemo(() => {
+    const seenTitles = new Set<string>();
+    return notifications.filter((notification) => {
+      if (seenTitles.has(notification.title)) return false;
+      seenTitles.add(notification.title);
+      return true;
+    });
+  }, [notifications]);
+
   const value: NotificationContextProps = {
-    notifications,
+    notifications: uniqueNotifications,
     addNotification,
     removeNotification,
     clearAll,
-    success,
-    error,
-    warning,
-    info,
+    successNotification,
+    errorNotification,
+    warningNotification,
+    infoNotification,
   };
 
   return (

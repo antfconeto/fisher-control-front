@@ -50,10 +50,14 @@
 @media (min-width: 992px) {
   .dashboard-content {
     margin-left: var(--sidebar-width);
+    margin-top: 0;
     width: calc(100% - var(--sidebar-width));
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+  .dashboard-container{
+    margin: 0;
   }
 
   .page-header {
@@ -330,7 +334,7 @@
 /* Responsividade para tablets e dispositivos móveis */
 @media (max-width: 991.98px) {
   .dashboard-content {
-    margin-top: 80px; /* Espaço para o botão de menu móvel */
+    margin-top: 0px; /* Espaço para o botão de menu móvel */
   }
 
   .page-header {

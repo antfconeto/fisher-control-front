@@ -3,6 +3,7 @@ import React, { createContext, ReactNode, useState, useEffect, useContext } from
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "@/types/types";
 import { CustomConsole } from "@/utils/customLogger";
+import { useNotification } from "@/contexts/notificationContext";
 
 const logger = new CustomConsole();
 
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<DecodedToken | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { successNotification, errorNotification, infoNotification, warningNotification } = useNotification();
 
   // Check if token is expired
   const isTokenExpired = (token: string): boolean => {
@@ -54,10 +56,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setToken(storedToken);
           setUser(decoded);
           logger.info('User authenticated from stored token');
+          successNotification('Autenticado', 'Usuário autenticado com sucesso!');
         } else if (storedToken) {
           // Token is expired, remove it
           localStorage.removeItem('authToken');
           logger.warn('Expired token removed from storage');
+          warningNotification('Sessão expirada', 'Seu token expirou. Faça login novamente.');
         }
       } catch (error) {
         logger.error(`Error initializing auth state: ${error}`);
@@ -82,8 +86,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(newToken);
       setUser(decoded);
       logger.info('User logged in successfully');
+      successNotification('Login realizado', 'Login efetuado com sucesso!');
     } catch (error) {
       logger.error(`Error during login: ${error}`);
+      const errorMessage = (error instanceof Error) ? error.message : 'Erro desconhecido ao fazer login.';
+      errorNotification('Erro no login', errorMessage);
       throw error;
     }
   };
@@ -93,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     logger.info('User logged out');
+    infoNotification('Logout', 'Você saiu do sistema.');
   };
 
   const refreshToken = () => {
@@ -104,6 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     
     logger.warn('Token needs refresh or is invalid');
+    warningNotification('Sessão expirada', 'Sua sessão expirou. Faça login novamente.');
     logout();
   };
 
