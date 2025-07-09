@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/authContext";
 import { UserProvider } from "@/contexts/userContext";
@@ -19,7 +18,6 @@ export const metadata: Metadata = {
   title: "🐟 Fisher Control",
   description: "A project dedicate a pibic",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body className={`${poppins.className}`}>
+      <body>
         <AuthProvider>
           <ErrorProvider>
             <LoadingProvider>
@@ -38,6 +36,7 @@ export default function RootLayout({
                 </UserProvider>
               </NotificationProvider>
             </LoadingProvider>
+
           </ErrorProvider>
         </AuthProvider>
       </body>

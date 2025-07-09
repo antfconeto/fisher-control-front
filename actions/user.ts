@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import { CustomConsole } from "@/utils/customLogger";
 import { CustomError } from "@/utils/customError";
-import * as errorMessages from "@/utils/errorMessages.json";
+import errorMessages from "@/utils/errorMessages.json";
 import { ResponseError } from "@/types/types";
 import { User } from "@/types/user";
 
@@ -57,11 +57,16 @@ export const listUsersPaginated = async ({
     };
   } catch (error: any) {
     consoler.error(`Erro ao buscar usuários: ${error.message}`);
-    throw new CustomError(getUserErrorMessage("listUsersPaginated", error.statusCode || 500), error.statusCode || 500);
+    throw new CustomError(
+      getUserErrorMessage("listUsersPaginated", error.statusCode || 500),
+      error.statusCode || 500
+    );
   }
 };
 
-export const createUser = async (user: Partial<User>): Promise<User | ResponseError> => {
+export const createUser = async (
+  user: Partial<User>
+): Promise<User | ResponseError> => {
   consoler.process("🔁 Criando usuário");
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -87,11 +92,17 @@ export const createUser = async (user: Partial<User>): Promise<User | ResponseEr
     return await response.json();
   } catch (error: any) {
     consoler.error(`Erro ao criar usuário: ${error.message}`);
-    throw new CustomError(getUserErrorMessage("createUser", error.statusCode || 500), error.statusCode || 500);
+    throw new CustomError(
+      getUserErrorMessage("createUser", error.statusCode || 500),
+      error.statusCode || 500
+    );
   }
 };
 
-export const updateUser = async (id: string, user: Partial<User>): Promise<User | ResponseError> => {
+export const updateUser = async (
+  id: string,
+  user: Partial<User>
+): Promise<User | ResponseError> => {
   consoler.process("🔁 Atualizando usuário");
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -117,11 +128,16 @@ export const updateUser = async (id: string, user: Partial<User>): Promise<User 
     return await response.json();
   } catch (error: any) {
     consoler.error(`Erro ao atualizar usuário: ${error.message}`);
-    throw new CustomError(getUserErrorMessage("updateUser", error.statusCode || 500), error.statusCode || 500);
+    throw new CustomError(
+      getUserErrorMessage("updateUser", error.statusCode || 500),
+      error.statusCode || 500
+    );
   }
 };
 
-export const deleteUser = async (id: string): Promise<boolean | ResponseError> => {
+export const deleteUser = async (
+  id: string
+): Promise<boolean | ResponseError> => {
   consoler.process("🔁 Deletando usuário");
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -146,14 +162,14 @@ export const deleteUser = async (id: string): Promise<boolean | ResponseError> =
     return true;
   } catch (error: any) {
     consoler.error(`Erro ao deletar usuário: ${error.message}`);
-    throw new CustomError(getUserErrorMessage("deleteUser", error.statusCode || 500), error.statusCode || 500);
+    throw new CustomError(
+      getUserErrorMessage("deleteUser", error.statusCode || 500),
+      error.statusCode || 500
+    );
   }
 };
 
 function getUserErrorMessage(context: string, statusCode: number): string {
   const userErrors = errorMessages.userErros as any;
-  return (
-    userErrors[context]?.statusCode?.[statusCode] ||
-    "Erro desconhecido."
-  );
+  return userErrors[context]?.statusCode?.[statusCode] || "Erro desconhecido.";
 }

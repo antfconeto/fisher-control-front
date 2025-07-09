@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import styles from "./animals.module.css";
-import {
-  BsSearch,
-} from "react-icons/bs";
+import { BsSearch } from "react-icons/bs";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -41,33 +39,37 @@ export default function AnimalsPage() {
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
 
   const defaultFilters = {
-    codeAnimal: '',
-    specie: '',
+    codeAnimal: "",
+    specie: "",
     gender: undefined as "M" | "F" | undefined,
-    tankId: '',
-  }
+    tankId: "",
+  };
   //States for filter by code
   const [filters, setFilters] = useState(defaultFilters);
   //default values for animal
-  const defaultAnimal: Animal = {
-    codeAnimal: "",
-    _id: "",
-    specie: "",
-    birthDate: new Date(),
-    gender: "M",
-    matriz_code: "",
-    tankId: "",
-  };
+  const defaultAnimal = useMemo(
+    () => ({
+      codeAnimal: "",
+      _id: "",
+      specie: "",
+      birthDate: new Date(),
+      gender: "M" as "M" | "F",
+      matriz_code: "",
+      tankId: "",
+    }),
+    []
+  );
   const { sendRequest } = useRequest<Animal | ResponseError>();
-  const { errorMessage, setErrorMessage } = useErrorContext()
+  const { errorMessage, setErrorMessage } = useErrorContext();
 
   //States for current animal selected
   const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
 
   //Total items per page
   const itemsPerPage = 5;
-  //Animals filtered 
-  const { animals, setCurrentPage, currentPage, loading, totalPages } = useAnimalsPagination({ filters, itemsPerPage })
+  //Animals filtered
+  const { animals, setCurrentPage, currentPage, loading, totalPages } =
+    useAnimalsPagination({ filters, itemsPerPage });
   //Tanks feched
   const { tanks } = useTanks();
   const { species } = useSpecie();
@@ -100,8 +102,9 @@ export default function AnimalsPage() {
         })),
         {
           label: "Todas",
-          value: ""
-        }],
+          value: "",
+        },
+      ],
       value: filters.specie,
       onChange: (val) => {
         setCurrentPage(1);
@@ -123,7 +126,10 @@ export default function AnimalsPage() {
       value: filters.gender,
       onChange: (val) => {
         setCurrentPage(1);
-        setFilters((prev) => ({ ...prev, gender: val as "M" | "F" | undefined }));
+        setFilters((prev) => ({
+          ...prev,
+          gender: val as "M" | "F" | undefined,
+        }));
       },
     },
     {
@@ -140,8 +146,9 @@ export default function AnimalsPage() {
         })),
         {
           label: "Tanque",
-          value: ""
-        }],
+          value: "",
+        },
+      ],
       value: filters.tankId,
       onChange: (val) => {
         setCurrentPage(1);
@@ -155,7 +162,7 @@ export default function AnimalsPage() {
     setModalMode(ModalMode.CREATE);
     setCurrentAnimal(defaultAnimal);
     setShowModal(true);
-  },[defaultAnimal]);
+  }, [defaultAnimal]);
   //Function who open a updating modal
   const openUpdateModal = (animal: Animal) => {
     setModalMode(ModalMode.UPDATE);
@@ -173,56 +180,62 @@ export default function AnimalsPage() {
       !currentAnimal.birthDate ||
       !currentAnimal.tankId
     ) {
-      setErrorMessage(`Dados Necessário estão faltando!`)
+      setErrorMessage(`Dados Necessário estão faltando!`);
       return;
     }
-    const response = modalMode == ModalMode.CREATE ? await handleCreateAnimal(currentAnimal) : await handleUpdateAnimal(currentAnimal)
+    const response =
+      modalMode == ModalMode.CREATE
+        ? await handleCreateAnimal(currentAnimal)
+        : await handleUpdateAnimal(currentAnimal);
     if (response) {
-      console.log(`✅ Animal ${modalMode == ModalMode.CREATE ? 'created' : 'updated'} with success`, currentAnimal)
-      setShowModal(false)
-      setCurrentAnimal(defaultAnimal)
+      console.log(
+        `✅ Animal ${
+          modalMode == ModalMode.CREATE ? "created" : "updated"
+        } with success`,
+        currentAnimal
+      );
+      setShowModal(false);
+      setCurrentAnimal(defaultAnimal);
       //Reset filters
-      setFilters(defaultFilters)
-
+      setFilters(defaultFilters);
     }
   };
 
   const handleCreateAnimal = async (animal: Animal): Promise<boolean> => {
     try {
       await sendRequest(createAnimal, animal);
-      return true
+      return true;
     } catch (err: any) {
-      console.log(`✍️✍️✍️ Error creating animal`, err)
+      console.log(`✍️✍️✍️ Error creating animal`, err);
       const errMsg = err?.error || "Erro desconhecido";
       setErrorMessage(errMsg);
-      return false
+      return false;
     }
   };
 
   const handleUpdateAnimal = async (animal: Animal): Promise<boolean> => {
     try {
       await sendRequest(updateAnimal, animal);
-      return true
+      return true;
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
       setErrorMessage(errMsg);
-      return false
+      return false;
     }
   };
 
   const handleDeleteAnimal = async (): Promise<boolean> => {
     try {
       const response = await deleteAnimal(currentAnimal.codeAnimal);
-      setFilters(defaultFilters)
-      setShowConfirmModal(false)
-      return response as boolean
+      setFilters(defaultFilters);
+      setShowConfirmModal(false);
+      return response as boolean;
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
       setErrorMessage(errMsg);
-      return false
+      return false;
     }
   };
-
 
   return (
     <>
@@ -249,60 +262,74 @@ export default function AnimalsPage() {
             <section className={styles.filterSection}>
               <DynamicFilters filters={filterFields} name="Filtro de Animais" />
             </section>
-            {loading ?
+            {loading ? (
               <div className="loading-container">
                 <ClockLoader color="#0a58ca" size={60} />
                 <p className="loading-text">Carregando animais...</p>
               </div>
-              :
-              (
-                <>
-                  <div className={styles.tableContainer}>
-                    {animals.length === 0 && !loading ? (
-                      <div className={styles.noDataContainer}>
-                        <h3 className={styles.noDataText}>Nenhum animal encontrado.</h3>
-                      </div>
-                    ) : (
-                      <AnimalTable animals={animals} tanks={tanks} species={species} onDelete={(codeAnimal: string) => {
-                        setCurrentAnimal({ ...currentAnimal, codeAnimal: codeAnimal })
-                        setShowConfirmModal(true)
-                      }} onEdit={openUpdateModal} />
-                    )}
-
-                  </div>
-                  {totalPages > 0 && (
-                    <div className={styles.pagination}>
-                      <button
-                        className={styles.paginationButton}
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
-                      >
-                        <FaChevronLeft /> Anterior
-                      </button>
-                      <div className={styles.paginationInfo}>
-                        Página {currentPage} de {totalPages}
-                      </div>
-                      <button
-                        className={styles.paginationButton}
-                        onClick={() =>
-                          setCurrentPage(Math.min(totalPages, currentPage + 1))
-                        }
-                        disabled={currentPage === totalPages}
-                      >
-                        Próxima <FaChevronRight />
-                      </button>
+            ) : (
+              <>
+                <div className={styles.tableContainer}>
+                  {animals.length === 0 && !loading ? (
+                    <div className={styles.noDataContainer}>
+                      <h3 className={styles.noDataText}>
+                        Nenhum animal encontrado.
+                      </h3>
                     </div>
+                  ) : (
+                    <AnimalTable
+                      animals={animals}
+                      tanks={tanks}
+                      species={species}
+                      onDelete={(codeAnimal: string) => {
+                        setCurrentAnimal({
+                          ...currentAnimal,
+                          codeAnimal: codeAnimal,
+                        });
+                        setShowConfirmModal(true);
+                      }}
+                      onEdit={openUpdateModal}
+                    />
                   )}
-                </>
-              )
-            }
+                </div>
+                {totalPages > 0 && (
+                  <div className={styles.pagination}>
+                    <button
+                      className={styles.paginationButton}
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
+                      disabled={currentPage === 1}
+                    >
+                      <FaChevronLeft /> Anterior
+                    </button>
+                    <div className={styles.paginationInfo}>
+                      Página {currentPage} de {totalPages}
+                    </div>
+                    <button
+                      className={styles.paginationButton}
+                      onClick={() =>
+                        setCurrentPage(Math.min(totalPages, currentPage + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                    >
+                      Próxima <FaChevronRight />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
       {/* Modal de Criação/Atualização */}
-      {showModal ?
+      {showModal ? (
         <CustomModalForm
-          title={modalMode == ModalMode.CREATE ? "Cadastrar Novo Animal" : "Atualizar Animal"}
+          title={
+            modalMode == ModalMode.CREATE
+              ? "Cadastrar Novo Animal"
+              : "Atualizar Animal"
+          }
           onClose={() => setShowModal(false)}
           onSubmit={handleSaveAnimal}
           fields={[
@@ -312,14 +339,15 @@ export default function AnimalsPage() {
               type: "text",
               value: currentAnimal.codeAnimal,
               placeholder: "Digite o código do animal",
-              onChange: (val) => setCurrentAnimal({ ...currentAnimal, codeAnimal: val }),
+              onChange: (val) =>
+                setCurrentAnimal({ ...currentAnimal, codeAnimal: val }),
               disabled: modalMode == ModalMode.UPDATE,
             },
             {
               name: "specie",
               label: "Espécie",
               type: "select",
-              options:[
+              options: [
                 ...species.map((specie) => ({
                   label: specie.name,
                   value: specie._id,
@@ -327,19 +355,25 @@ export default function AnimalsPage() {
                 {
                   label: "Selecione a Espécie",
                   value: "",
-                }
+                },
               ],
               value: currentAnimal.specie,
               placeholder: "Digite a espécie do animal",
-              onChange: (val) => setCurrentAnimal({ ...currentAnimal, specie: val }),
+              onChange: (val) =>
+                setCurrentAnimal({ ...currentAnimal, specie: val }),
             },
             {
               name: "birthDate",
               label: "Data de Nascimento",
               type: "date",
-              value: new Date(currentAnimal.birthDate).toISOString().split("T")[0],
+              value: new Date(currentAnimal.birthDate)
+                .toISOString()
+                .split("T")[0],
               onChange: (val) =>
-                setCurrentAnimal({ ...currentAnimal, birthDate: new Date(val) }),
+                setCurrentAnimal({
+                  ...currentAnimal,
+                  birthDate: new Date(val),
+                }),
             },
             {
               name: "gender",
@@ -351,7 +385,10 @@ export default function AnimalsPage() {
                 { label: "Fêmea", value: "Fêmea" },
               ],
               onChange: (val) =>
-                setCurrentAnimal({ ...currentAnimal, gender: val === "Macho" ? "M" : "F" }),
+                setCurrentAnimal({
+                  ...currentAnimal,
+                  gender: val === "Macho" ? "M" : "F",
+                }),
             },
             {
               name: "matriz_code",
@@ -359,7 +396,8 @@ export default function AnimalsPage() {
               type: "text",
               value: currentAnimal.matriz_code,
               placeholder: "Digite o código da matriz (opcional)",
-              onChange: (val) => setCurrentAnimal({ ...currentAnimal, matriz_code: val }),
+              onChange: (val) =>
+                setCurrentAnimal({ ...currentAnimal, matriz_code: val }),
             },
             {
               name: "tankId",
@@ -370,7 +408,8 @@ export default function AnimalsPage() {
                 label: tank.name,
                 value: tank._id,
               })),
-              onChange: (val) => setCurrentAnimal({ ...currentAnimal, tankId: val }),
+              onChange: (val) =>
+                setCurrentAnimal({ ...currentAnimal, tankId: val }),
             },
           ]}
           infoBox={
@@ -378,16 +417,20 @@ export default function AnimalsPage() {
               <h4 className={styles.infoTitle}>ℹ️ Informações</h4>
               <ul className={styles.infoList}>
                 <li>O código do animal deve ser único no sistema.</li>
-                <li>É necessário especificar o tanque onde o animal está alocado.</li>
                 <li>
-                  O código da matriz é opcional e se refere ao animal progenitor.
+                  É necessário especificar o tanque onde o animal está alocado.
+                </li>
+                <li>
+                  O código da matriz é opcional e se refere ao animal
+                  progenitor.
                 </li>
               </ul>
             </>
-          } />
-        :
+          }
+        />
+      ) : (
         <></>
-      }
+      )}
       {/* Confirm Delete Modal */}
       {showConfirmModal && (
         <ConfirmModal

@@ -1,14 +1,15 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import styles from "./specie.module.css";
-import {
-  FaChevronLeft,
-  FaChevronRight,
-  FaPlus,
-  FaFish,
-} from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaPlus, FaFish } from "react-icons/fa";
 import { Specie, ResponseError } from "@/types/types";
-import { createSpecie, deleteSpecie, getAllQuantityAnimalsFromSpecie, getAllSpecies, updateSpecie } from "@/actions/specie";
+import {
+  createSpecie,
+  deleteSpecie,
+  getAllQuantityAnimalsFromSpecie,
+  getAllSpecies,
+  updateSpecie,
+} from "@/actions/specie";
 import { useRequest } from "@/hooks/useRequest";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
@@ -29,14 +30,18 @@ export default function SpeciesPage() {
   // States for modal mode
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
   // States for filters
-  // Default species object
-  const defaultSpecies: Specie = {
-    _id: "",
-    name: "",
-    description: "",
-    color: "",
-    quantity: 0
-  };
+  const defaultSpecies = useMemo(
+    () => ({
+      _id: "",
+      name: "",
+      description: "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      color: "",
+      quantity: 0,
+    }),
+    []
+  );
   const { sendRequest } = useRequest<Specie | ResponseError>();
   const { errorMessage, setErrorMessage } = useErrorContext();
 
@@ -47,23 +52,13 @@ export default function SpeciesPage() {
   // Species filtered
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5
+  const itemsPerPage = 5;
   const [loading, setLoading] = useState(true);
   const [paginatedSpecies, setPaginatedSpecies] = useState<Specie[]>([]);
 
-  useEffect(() => {
-    fetchSpecies();
-  }, [])
-  useEffect(() => {
-    paginationSpecies();
-  }, [speciesFullInfo, currentPage])
-
-  useEffect(() => {
-    fetchQuantityAnimalsInSpecies();
-  }, [species])
-  const fetchSpecies = async () => {
+  const fetchSpecies = useCallback(async () => {
     try {
-      const response = await getAllSpecies() as Specie[]
+      const response = (await getAllSpecies()) as Specie[];
       if (response) {
         setSpecies(response as Specie[]);
         setTotalPages(Math.ceil(response.length / itemsPerPage));
@@ -72,13 +67,15 @@ export default function SpeciesPage() {
       const errMsg = err?.message || "Erro desconhecido";
       setErrorMessage(errMsg);
     }
-  }
+  }, [setErrorMessage, itemsPerPage]);
 
-  const fetchQuantityAnimalsInSpecies = async () => {
+  const fetchQuantityAnimalsInSpecies = useCallback(async () => {
     try {
       const speciesWithQuantities = await Promise.all(
         species.map(async (specie) => {
-          const response = await getAllQuantityAnimalsFromSpecie(specie._id) as number;
+          const response = (await getAllQuantityAnimalsFromSpecie(
+            specie._id
+          )) as number;
           return {
             ...specie,
             quantity: response,
@@ -87,21 +84,46 @@ export default function SpeciesPage() {
       );
       setSpeciesFullInfo(speciesWithQuantities);
     } catch (error) {
-      console.error("Erro ao buscar quantidades de animais por espécie:", error);
+      console.error(
+        "Erro ao buscar quantidades de animais por espécie:",
+        error
+      );
       setErrorMessage("Erro ao carregar as quantidades de animais.");
     } finally {
       setTimeout(() => {
         setLoading(false);
-      }, 1000)
-
+      }, 1000);
     }
-  };
+  }, [species, setErrorMessage]);
+
+  const paginationSpecies = useCallback(() => {
+    setPaginatedSpecies(
+      speciesFullInfo.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    );
+    setTotalPages(Math.min(Math.ceil(speciesFullInfo.length / itemsPerPage)));
+  }, [speciesFullInfo, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    fetchSpecies();
+  }, [fetchSpecies]);
+
+  useEffect(() => {
+    paginationSpecies();
+  }, [speciesFullInfo, currentPage, paginationSpecies]);
+
+  useEffect(() => {
+    fetchQuantityAnimalsInSpecies();
+  }, [species, fetchQuantityAnimalsInSpecies]);
+
   // Function to open the create modal
   const openCreateModal = useCallback(() => {
     setModalMode(ModalMode.CREATE);
     setCurrentSpecies(defaultSpecies);
     setShowModal(true);
-  }, []);
+  }, [defaultSpecies]);
 
   // Function to open the update modal
   const openUpdateModal = (species: Specie) => {
@@ -123,7 +145,8 @@ export default function SpeciesPage() {
         : await handleUpdateSpecies(currentSpecies);
     if (response) {
       console.log(
-        `✅ Espécie ${modalMode == ModalMode.CREATE ? "criada" : "atualizada"
+        `✅ Espécie ${
+          modalMode == ModalMode.CREATE ? "criada" : "atualizada"
         } com sucesso`,
         currentSpecies
       );
@@ -135,24 +158,7 @@ export default function SpeciesPage() {
   const handleCreateSpecies = async (species: Specie): Promise<boolean> => {
     try {
       await sendRequest(createSpecie, species);
-      setLoading(true)
-      await fetchSpecies();
-      return true;
-    } catch (err: any) {
-      const errMsg = err?.error || "Erro desconhecido";
-      setErrorMessage(errMsg);
-      return false;
-    }finally{
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000)
-    }
-  };
-
-  const handleUpdateSpecies = async (specie: Specie): Promise<boolean> => {
-    try {
-      await sendRequest(updateSpecie, specie);
-      setLoading(true)
+      setLoading(true);
       await fetchSpecies();
       return true;
     } catch (err: any) {
@@ -162,7 +168,24 @@ export default function SpeciesPage() {
     } finally {
       setTimeout(() => {
         setLoading(false);
-      }, 1000)
+      }, 1000);
+    }
+  };
+
+  const handleUpdateSpecies = async (specie: Specie): Promise<boolean> => {
+    try {
+      await sendRequest(updateSpecie, specie);
+      setLoading(true);
+      await fetchSpecies();
+      return true;
+    } catch (err: any) {
+      const errMsg = err?.error || "Erro desconhecido";
+      setErrorMessage(errMsg);
+      return false;
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
   };
 
@@ -170,7 +193,7 @@ export default function SpeciesPage() {
     try {
       const response = await deleteSpecie(currentSpecies._id);
       setShowConfirmModal(false);
-      setLoading(true)
+      setLoading(true);
       await fetchSpecies();
       return response as boolean;
     } catch (err: any) {
@@ -180,19 +203,10 @@ export default function SpeciesPage() {
     } finally {
       setTimeout(() => {
         setLoading(false);
-      }, 1000)
+      }, 1000);
     }
   };
 
-  const paginationSpecies = () => {
-    setPaginatedSpecies(speciesFullInfo.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    ));
-    setTotalPages(Math.min(
-      Math.ceil(speciesFullInfo.length / itemsPerPage)
-    ))
-  }
   return (
     <>
       {errorMessage && (

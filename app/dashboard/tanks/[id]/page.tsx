@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import styles from "../tanks.module.css";
 import { ClockLoader } from "react-spinners";
@@ -22,121 +22,113 @@ import { ErrorBox } from "@/components/ErrorBox";
 import { useSpecie } from "@/hooks/useSpecies";
 import { motion, AnimatePresence } from "framer-motion";
 
-
 export interface TankFullInfo extends Tank {
-  animals: Animal[]
+  animals: Animal[];
 }
 
 export default function TankDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const tankId = params.id as string;
-  const {errorMessage, setErrorMessage } = useErrorContext()
-  const [loadingTank, setLoadingTank] = useState(true)
-  const [tankFullInfo, setTankFullInfo] = useState<TankFullInfo | null>(null)
+  const { errorMessage, setErrorMessage } = useErrorContext();
+  const [loadingTank, setLoadingTank] = useState(true);
+  const [tankFullInfo, setTankFullInfo] = useState<TankFullInfo | null>(null);
   //Default filters
   const defaultFilters = {
-    codeAnimal: '',
-    specie: '',
+    codeAnimal: "",
+    specie: "",
     gender: undefined as "M" | "F" | undefined,
     tankId: tankId,
-  }
+  };
   //States for filter by code
   const [filters, setFilters] = useState(defaultFilters);
-  const [animals, setAnimals] = useState<Animal[]>([])
-  const [loadingAnimals, setLoadingAnimals] = useState(true)
-  const {species} = useSpecie()
-  const [totalPages, setTotalPages] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [paginatedAnimals, setPaginatedAnimals] = useState<Animal[]>([])
-  const itemsPerPage = 5
+  const [animals, setAnimals] = useState<Animal[]>([]);
+  const [loadingAnimals, setLoadingAnimals] = useState(true);
+  const { species } = useSpecie();
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginatedAnimals, setPaginatedAnimals] = useState<Animal[]>([]);
+  const itemsPerPage = 5;
+  const [speciesData, setSpeciesData] = useState<
+    { name: string; value: number }[]
+  >([]);
 
-  useEffect(() => {
-    fetchTank();
-    fetchAnimals();
-  }, [])
-
-  useEffect(()=>{
-    paginationAnimals()
-  }, [animals, currentPage])
-
-  const fetchTank = async () => {
+  const fetchTank = useCallback(async () => {
     try {
-      const response = await getTankById(tankId) as Tank
-      setTankFullInfo({ ...response, animals:animals as any})
-      setLoadingTank(false)
+      const response = (await getTankById(tankId)) as Tank;
+      setTankFullInfo({ ...response, animals: animals as any });
+      setLoadingTank(false);
     } catch (error: any) {
       const errMsg = error?.message || "Erro desconhecido";
       setErrorMessage(errMsg);
     }
-  }
+  }, [tankId, animals, setErrorMessage]);
 
-    const fetchAnimals = async ()=> {
-      try {
-        const response = await getAllAnimalsFromTank(tankId) as Animal[]
-        setAnimals(response)
-        setLoadingAnimals(false)
-      } catch (error: any) {
-        const errMsg = error?.message || "Erro desconhecido";
-        setErrorMessage(errMsg);
-      }
+  const fetchAnimals = useCallback(async () => {
+    try {
+      const response = (await getAllAnimalsFromTank(tankId)) as Animal[];
+      setAnimals(response);
+      setLoadingAnimals(false);
+      const speciesCount: Record<string, number> = {};
+      response.forEach((animal) => {
+        speciesCount[animal.specie] = (speciesCount[animal.specie] || 0) + 1;
+      });
+      const data = Object.entries(speciesCount).map(([name, value]) => ({
+        name,
+        value,
+      }));
+      setSpeciesData(data);
+    } catch (error: any) {
+      const errMsg = error?.message || "Erro desconhecido";
+      setErrorMessage(errMsg);
     }
+  }, [tankId, setErrorMessage]);
 
+  const paginationAnimals = useCallback(() => {
+    setPaginatedAnimals(
+      animals.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    );
+    setTotalPages(Math.min(Math.ceil(animals.length / itemsPerPage)));
+  }, [animals, currentPage, itemsPerPage]);
 
+  useEffect(() => {
+    fetchTank();
+    fetchAnimals();
+  }, [fetchTank, fetchAnimals]);
 
-  const paginationAnimals = ()=>{
-    console.log(animals.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    ))
-    setPaginatedAnimals(animals.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    ));
-    setTotalPages(Math.min(
-      Math.ceil(animals.length / itemsPerPage)
-    ))
-  }
+  useEffect(() => {
+    paginationAnimals();
+  }, [animals, currentPage, paginationAnimals]);
 
-  const speciesData =
-  animals?.reduce((acc: { name: string; value: number }[], animal) => {
-    const specieName = species.find((specie) => specie._id === animal.specie)?.name;
-    if (specieName) {
-      const existingSpecie = acc.find((a) => a.name === specieName);
-      if (existingSpecie) {
-        existingSpecie.value += 1;
-      } else {
-        acc.push({ name: specieName, value: 1 });
-      }
-    }
-    return acc;
-  }, []) || [];
   // Função para gerar cores dinamicamente
-const generateColors = (count: number): string[] => {
-  const colors: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const hue = (i * 360) / count; // Distribui as cores uniformemente no espectro
-    colors.push(`hsl(${hue}, 70%, 50%)`); // Usa o modelo de cor HSL
-  }
-  return colors;
-};
+  const generateColors = (count: number): string[] => {
+    const colors: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const hue = (i * 360) / count; // Distribui as cores uniformemente no espectro
+      colors.push(`hsl(${hue}, 70%, 50%)`); // Usa o modelo de cor HSL
+    }
+    return colors;
+  };
 
   // Dados para gráfico de pizza - espécies de animais
-const dynamicColors = generateColors(speciesData.length);
+  const dynamicColors = generateColors(speciesData.length);
 
   if (loadingTank) {
-    return(
+    return (
       <div className="page-container">
-      <div className="content-container">
-        <div className="content-card">
-          <div className="loading-container">
-            <ClockLoader color="#0a58ca" size={60} />
-            <p className="loading-text">Carregando informações do tank...</p>
+        <div className="content-container">
+          <div className="content-card">
+            <div className="loading-container">
+              <ClockLoader color="#0a58ca" size={60} />
+              <p className="loading-text">Carregando informações do tank...</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    )
+    );
   }
 
   if (!tankFullInfo) {
@@ -161,6 +153,7 @@ const dynamicColors = generateColors(speciesData.length);
       </div>
     );
   }
+
 
   return (<>
   
@@ -196,8 +189,9 @@ const dynamicColors = generateColors(speciesData.length);
                 <FaWater className={styles.pageTitleIcon} />{" "}
                 {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
               </h2>
+
             </div>
-          </div>
+
 
           {/* Informações básicas do tanque */}
           <div className={styles.detailCardsRow + " row g-4"}>
@@ -247,6 +241,7 @@ const dynamicColors = generateColors(speciesData.length);
                 exit={{ opacity: 0, y: 30 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
+
                 <div className={styles.detailCard}>
                   <div className={styles.detailCardIcon}>
                     <FaFish />
@@ -261,6 +256,7 @@ const dynamicColors = generateColors(speciesData.length);
               </motion.div>
             </AnimatePresence>
           </div>
+
         </motion.div>
 
         {/* Conteúdo principal em duas colunas */}
@@ -454,6 +450,7 @@ const dynamicColors = generateColors(speciesData.length);
                       </button>
                     </div>
                   )}
+
                 </div>
               </motion.div>
             )}
@@ -474,6 +471,7 @@ const dynamicColors = generateColors(speciesData.length);
                   </div>
                 </motion.div>
               )}
+
               {/* Mensagem quando não há resultados na busca */}
               {animals.length === 0 && (
                 <motion.div
@@ -483,11 +481,14 @@ const dynamicColors = generateColors(speciesData.length);
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                 >
+
                   <div className={styles.noResults}>
                     <BsInfoCircle size={32} />
                     <h3>Nenhum animal encontrado</h3>
                     <p>
+
                       Não foram encontrados animais com os critérios selecionados.
+
                     </p>
                     <button
                       className={styles.clearFilterButton}
@@ -498,6 +499,7 @@ const dynamicColors = generateColors(speciesData.length);
                       Limpar filtros
                     </button>
                   </div>
+
                 </motion.div>
               )}
             </AnimatePresence>
@@ -506,4 +508,5 @@ const dynamicColors = generateColors(speciesData.length);
       </div>
     </div>
   </>);
+
 }

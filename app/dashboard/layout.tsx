@@ -1,14 +1,8 @@
 import Sidebar from "@/components/sideMenu/sideMenu";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./dashboard.css";
 import { NotificationProvider } from "@/contexts/notificationContext";
 import { NotificationContainer } from "@/components/NotificationToast";
-
-const poppins = Poppins({
-  weight: ["200", "300", "400", "500", "600", "700"],
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "🐟 Fisher Control - Dashboard",
