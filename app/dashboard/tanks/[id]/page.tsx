@@ -20,6 +20,7 @@ import { useErrorContext } from "@/contexts/errorContext";
 import { getAllAnimalsFromTank } from "@/actions/animal";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useSpecie } from "@/hooks/useSpecies";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface TankFullInfo extends Tank {
   animals: Animal[];
@@ -153,40 +154,55 @@ export default function TankDetailsPage() {
     );
   }
 
-  return (
-    <>
-      {errorMessage && (
-        <ErrorBox
-          errorMessage={errorMessage}
-          setErrorMessage={setErrorMessage}
-          otherClassName=""
-        />
-      )}
-      <div className="page-container">
-        <div className="content-container">
-          {/* Cabeçalho */}
-          <div className="content-card mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <div className="d-flex align-items-center flex-wrap gap-3">
-                <button
-                  className={styles.backButton}
-                  onClick={() => {
-                    router.push("/dashboard/tanks");
-                  }}
-                  aria-label="Voltar para a lista de tanques"
-                >
-                  <BsArrowLeft />
-                </button>
-                <h2 className={styles.pageTitle}>
-                  <FaWater className={styles.pageTitleIcon} />{" "}
-                  {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
-                </h2>
-              </div>
+
+  return (<>
+  
+
+          {errorMessage && (
+            <ErrorBox
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              otherClassName=""
+            />
+          )}
+    <div className="page-container">
+      <div className="content-container">
+        {/* Cabeçalho */}
+        <motion.div
+          className="content-card mb-4"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className={styles.header + " mb-3"}>
+            <div className={styles.header + " d-flex align-items-center flex-wrap gap-3"}>
+              <button
+                className={styles.backButton}
+                onClick={() => {
+                  router.push("/dashboard/tanks")
+                }}
+                aria-label="Voltar para a lista de tanques"
+              >
+                <BsArrowLeft />
+              </button>
+              <h2 className={styles.pageTitle}>
+                <FaWater className={styles.pageTitleIcon} />{" "}
+                {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
+              </h2>
+
             </div>
 
-            {/* Informações básicas do tanque */}
-            <div className="row g-4">
-              <div className="col-md-4 col-sm-6">
+
+          {/* Informações básicas do tanque */}
+          <div className={styles.detailCardsRow + " row g-4"}>
+            <AnimatePresence>
+              <motion.div
+                className="col-md-4 col-sm-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
                 <div className={styles.detailCard}>
                   <div className={styles.detailCardIcon}>
                     <BsDropletFill />
@@ -198,8 +214,14 @@ export default function TankDetailsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="col-md-4 col-sm-6">
+              </motion.div>
+              <motion.div
+                className="col-md-4 col-sm-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
                 <div className={styles.detailCard}>
                   <div className={styles.detailCardIcon}>
                     <BsRulers />
@@ -211,8 +233,15 @@ export default function TankDetailsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="col-md-4 col-sm-6">
+              </motion.div>
+              <motion.div
+                className="col-md-4 col-sm-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+
                 <div className={styles.detailCard}>
                   <div className={styles.detailCardIcon}>
                     <FaFish />
@@ -224,232 +253,242 @@ export default function TankDetailsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Conteúdo principal em duas colunas */}
-          {loadingAnimals ? (
-            <div className="loading-container">
-              <ClockLoader color="#0a58ca" size={60} />
-              <p className="loading-text">Carregando informações do tank...</p>
-            </div>
-          ) : (
-            <div className="row g-4">
-              {/* Gráfico de pizza - espécies */}
-              {animals && animals.length > 0 && (
-                <div className="col-lg-6">
-                  <div className="content-card h-100">
-                    <h3 className={styles.sectionTitle}>
-                      <FaFish className={styles.sectionTitleIcon} />{" "}
-                      Distribuição por Espécie
-                    </h3>
-                    <div style={{ height: "350px" }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={speciesData}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={120}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({ name, percent }) =>
-                              `${name}: ${(percent * 100).toFixed(0)}%`
-                            }
-                            labelLine={true}
-                          >
-                            {speciesData.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={
-                                  dynamicColors[index % dynamicColors.length]
-                                }
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            formatter={(value) => [
-                              `${value} animais`,
-                              "Quantidade",
-                            ]}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
+        </motion.div>
+
+        {/* Conteúdo principal em duas colunas */}
+        {loadingAnimals ?
+          <div className="loading-container">
+            <ClockLoader color="#0a58ca" size={60} />
+            <p className="loading-text">Carregando informações do tank...</p>
+          </div>
+          :
+          <div className="row g-4">
+            {/* Gráfico de pizza - espécies */}
+            {animals && animals.length > 0 && (
+              <motion.div
+                className="col-lg-6"
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className={styles.contentCard + " h-100"}>
+                  <h3 className={styles.sectionTitle}>
+                    <FaFish className={styles.sectionTitleIcon} /> Distribuição por Espécie
+                  </h3>
+                  <motion.div
+                    style={{ height: "350px" }}
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={speciesData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) =>
+                            `${name}: ${(percent * 100).toFixed(0)}%`
+                          }
+                          labelLine={true}
+                        >
+                          {speciesData.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={dynamicColors[index % dynamicColors.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value) => [
+                            `${value} animais`,
+                            "Quantidade",
+                          ]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Lista de animais */}
+            {animals && animals.length > 0 && (
+              <motion.div
+                className="col-lg-6"
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className={styles.contentCard + " h-100"}>
+                  <h3 className={styles.sectionTitle}>
+                    <FaFish className={styles.sectionTitleIcon} /> Animais neste Tanque
+                  </h3>
+                  {/* Filtros de pesquisa */}
+                  <div className={styles.animalFilters}>
+                    <div className={styles.searchInput}>
+                      <BsSearch className={styles.filterIcon} />
+                      <input
+                        type="text"
+                        placeholder="Buscar por código"
+                        value={filters.codeAnimal}
+                        onChange={(e) =>
+                          setFilters({ ...filters, codeAnimal: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className={styles.filterInput}>
+                      <BsFilter className={styles.filterIcon} />
+                      <select
+                        value={filters.specie}
+                        onChange={(e) =>
+                          setFilters({ ...filters, specie: e.target.value })
+                        }
+                        className={styles.selectFilter}
+                      >
+                        <option value="">Todas as espécies</option>
+                        {species.map((specie, index) => (
+                          <option key={index} value={specie._id}>
+                            {specie.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Lista de animais */}
-              {animals && animals.length > 0 && (
-                <div className="col-lg-6">
-                  <div className="content-card h-100">
-                    <h3 className={styles.sectionTitle}>
-                      <FaFish className={styles.sectionTitleIcon} /> Animais
-                      neste Tanque
-                    </h3>
-
-                    {/* Filtros de pesquisa */}
-                    <div className={styles.animalFilters}>
-                      <div className={styles.searchInput}>
-                        <BsSearch className={styles.filterIcon} />
-                        <input
-                          type="text"
-                          placeholder="Buscar por código"
-                          value={filters.codeAnimal}
-                          onChange={(e) =>
-                            setFilters({
-                              ...filters,
-                              codeAnimal: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-
-                      <div className={styles.filterInput}>
-                        <BsFilter className={styles.filterIcon} />
-                        <select
-                          value={filters.specie}
-                          onChange={(e) =>
-                            setFilters({ ...filters, specie: e.target.value })
-                          }
-                          className={styles.selectFilter}
-                        >
-                          <option value="">Todas as espécies</option>
-                          {species.map((specie, index) => (
-                            <option key={index} value={specie._id}>
-                              {specie.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Status de filtragem */}
-                    <div className={styles.filterStatus}>
-                      {animals.length === tankFullInfo.animals.length ? (
-                        <span>Mostrando todos os animais</span>
-                      ) : (
-                        <span>
-                          Mostrando {paginatedAnimals.length} de{" "}
-                          {tankFullInfo.animals.length} animais
-                        </span>
-                      )}
-
-                      {(filters.codeAnimal || filters.specie) && (
-                        <button
-                          className={styles.clearFilterButton}
-                          onClick={() => {
-                            setFilters(defaultFilters);
-                          }}
-                        >
-                          Limpar filtros
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="table-responsive">
-                      <table className="table table-hover">
-                        <thead className={styles.tableHeader}>
-                          <tr>
-                            <th scope="col">Código</th>
-                            <th scope="col">Espécie</th>
-                            <th scope="col">Gênero</th>
-                            <th scope="col">Nascimento</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedAnimals.map((animal) => (
-                            <tr
-                              key={animal.codeAnimal}
-                              className={styles.tableRow}
-                            >
-                              <td className={styles.tableCell}>
-                                {animal.codeAnimal}
-                              </td>
-                              <td className={styles.tableCell}>
-                                {
-                                  species.find(
-                                    (specie) => specie._id === animal.specie
-                                  )?.name
-                                }
-                              </td>
-                              <td className={styles.tableCell}>
-                                {animal.gender === "M" ? "Macho" : "Fêmea"}
-                              </td>
-                              <td className={styles.tableCell}>
-                                {new Date(animal.birthDate).toLocaleDateString(
-                                  "pt-BR"
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Paginação */}
-                    {totalPages > 0 && (
-                      <div className={styles.pagination}>
-                        <button
-                          className={styles.paginationButton}
-                          onClick={() =>
-                            setCurrentPage((prev) => Math.max(1, prev - 1))
-                          }
-                          disabled={currentPage === 1}
-                          aria-label="Página anterior"
-                        >
-                          <FaChevronLeft /> Anterior
-                        </button>
-                        <div className={styles.paginationInfo}>
-                          Página {currentPage} de{" "}
-                          {Math.ceil(animals.length / itemsPerPage)}
-                        </div>
-                        <button
-                          className={styles.paginationButton}
-                          onClick={() =>
-                            setCurrentPage((prev) =>
-                              Math.min(
-                                Math.ceil(animals.length / itemsPerPage),
-                                prev + 1
-                              )
-                            )
-                          }
-                          disabled={
-                            currentPage ===
-                            Math.ceil(animals.length / itemsPerPage)
-                          }
-                          aria-label="Próxima página"
-                        >
-                          Próxima <FaChevronRight />
-                        </button>
-                      </div>
+                  {/* Status de filtragem */}
+                  <div className={styles.filterStatus}>
+                    {animals.length === tankFullInfo.animals.length ? (
+                      <span>Mostrando todos os animais</span>
+                    ) : (
+                      <span>
+                        Mostrando {paginatedAnimals.length} de {tankFullInfo.animals.length} animais
+                      </span>
+                    )}
+                    {(filters.codeAnimal || filters.specie) && (
+                      <button
+                        className={styles.clearFilterButton}
+                        onClick={() => {
+                          setFilters(defaultFilters);
+                        }}
+                      >
+                        Limpar filtros
+                      </button>
                     )}
                   </div>
-                </div>
-              )}
+                  <motion.div
+                    className="table-responsive"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <table className="table table-hover">
+                      <thead className={styles.tableHeader}>
+                        <tr>
+                          <th scope="col">Código</th>
+                          <th scope="col">Espécie</th>
+                          <th scope="col">Gênero</th>
+                          <th scope="col">Nascimento</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedAnimals.map((animal) => (
+                          <tr key={animal.codeAnimal} className={styles.tableRow}>
+                            <td className={styles.tableCell}>
+                              {animal.codeAnimal}
+                            </td>
+                            <td className={styles.tableCell}>{species.find((specie)=>specie._id === animal.specie)?.name}</td>
+                            <td className={styles.tableCell}>
+                              {animal.gender === "M" ? "Macho" : "Fêmea"}
+                            </td>
+                            <td className={styles.tableCell}>
+                              {new Date(animal.birthDate).toLocaleDateString(
+                                "pt-BR"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </motion.div>
+                  {/* Paginação */}
+                  {totalPages > 0 && (
+                    <div className={styles.pagination}>
+                      <button
+                        className={styles.paginationButton}
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={currentPage === 1}
+                        aria-label="Página anterior"
+                      >
+                        <FaChevronLeft /> Anterior
+                      </button>
+                      <div className={styles.paginationInfo}>
+                        Página {currentPage} de {Math.ceil(animals.length / itemsPerPage)}
+                      </div>
+                      <button
+                        className={styles.paginationButton}
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(
+                              Math.ceil(animals.length / itemsPerPage),
+                              prev + 1
+                            )
+                          )
+                        }
+                        disabled={currentPage === Math.ceil(animals.length / itemsPerPage)}
+                        aria-label="Próxima página"
+                      >
+                        Próxima <FaChevronRight />
+                      </button>
+                    </div>
+                  )}
 
-              {/* Mensagem quando não há animais */}
+                </div>
+              </motion.div>
+            )}
+            {/* Mensagem quando não há animais */}
+            <AnimatePresence>
               {(!animals || animals.length === 0) && (
-                <div className="col-12">
+                <motion.div
+                  className="col-12"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
                   <div className={styles.noResults}>
                     <BsInfoCircle size={32} />
                     <h3>Nenhum animal cadastrado</h3>
                     <p>Este tanque ainda não possui animais registrados.</p>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Mensagem quando não há resultados na busca */}
               {animals.length === 0 && (
-                <div className="col-12">
+                <motion.div
+                  className="col-12"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+
                   <div className={styles.noResults}>
                     <BsInfoCircle size={32} />
                     <h3>Nenhum animal encontrado</h3>
                     <p>
-                      Não foram encontrados animais com os critérios
-                      selecionados.
+
+                      Não foram encontrados animais com os critérios selecionados.
+
                     </p>
                     <button
                       className={styles.clearFilterButton}
@@ -460,12 +499,14 @@ export default function TankDetailsPage() {
                       Limpar filtros
                     </button>
                   </div>
-                </div>
+
+                </motion.div>
               )}
-            </div>
-          )}
-        </div>
+            </AnimatePresence>
+          </div>
+        }
       </div>
-    </>
-  );
+    </div>
+  </>);
+
 }

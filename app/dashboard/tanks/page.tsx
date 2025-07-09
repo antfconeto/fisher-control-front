@@ -26,6 +26,7 @@ import { useTanks } from "@/hooks/useTanks";
 import { Tank } from "@/types/types";
 import { ClockLoader } from "react-spinners";
 import { getAllAnimalsFromTank } from "@/actions/animal";
+import { Button } from "@/components/ui";
 
 
 enum ModalMode {
@@ -78,6 +79,7 @@ export default function TanksPage() {
         }
       }
       setTankAnimals(animalsCount);
+      
     };
 
     if (tanks.length > 0) {
@@ -173,181 +175,178 @@ export default function TanksPage() {
 
   return (
     <>
-      <div className="page-container">
-        <div className="content-container">
-          <div className="content-card">
-            {/* Cabeçalho com título e botão de criar */}
-            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-              <h2 className={styles.pageTitle}>
-                <FaWater className={styles.pageTitleIcon} /> Gestão de Tanques
-              </h2>
-              <button className={styles.createButton} onClick={openCreateModal}>
-                <FaPlus /> Criar Novo Tanque
-              </button>
-            </div>
-
-            {/* Filtros */}
-            <section className={styles.filterSection}>
-              <div className={styles.filterLabel}>
-                <BsFilter /> Filtro por tanques
-              </div>
-              <div className={styles.filterContainer}>
-                <div className={styles.searchInput}>
-                  <BsSearch className={styles.filterIcon} />
-                  <input
-                    type="text"
-                    placeholder="Nome do tanque"
-                    value={nameFilter}
-                    onChange={(e) => setNameFilter(e.target.value)}
-                  />
-                </div>
-                <div className={styles.filterInput}>
-                  <BsDropletFill className={styles.filterIcon} />
-                  <input
-                    type="text"
-                    placeholder="Capacidade"
-                    value={capacityFilter}
-                    onChange={(e) => setCapacityFilter(e.target.value)}
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Cards de tanques */}
-            {loading ? (
-          <div className="loading-container">
-          <ClockLoader color="#0a58ca" size={60} />
-          <p className="loading-text">Carregando todos os tanks...</p>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>
+            <FaWater className={styles.titleIcon} /> Gestão de Tanques
+          </h2>
+          <Button className={styles.createButton} onClick={openCreateModal} variant="primary">
+            <FaPlus /> Criar Novo Tanque
+          </Button>
         </div>
-            )
-          :
-          <div className={styles.cardsContainer}>
-          {paginatedTanks.map((tank) => (
-            <div
-              key={tank._id}
-              className={styles.tankCard}
-              onClick={() => navigateToTankDetails(tank._id)}
-            >
-              <div className={styles.tankCardHeader}>
-                <h3 className={styles.tankCardTitle}>
-                  <BsDropletFill className={styles.tankCardIcon} /> {tank.name}
-                </h3>
-                <div className={styles.tankCardActions}>
-                  <button
-                    className={styles.updateButton}
-                    onClick={(e) => openUpdateModal(tank, e)}
-                    aria-label="Editar tanque"
-                  >
-                    <BsPencil />
-                  </button>
-                  <button
-                    className={styles.deleteButton}
-                    onClick={(e) => handleDeleteTank(tank._id, e)}
-                    aria-label="Excluir tanque"
-                  >
-                    <BsTrash />
-                  </button>
-                </div>
-              </div>
 
-              <div className={styles.tankCardBody}>
-                <div className={styles.tankCardStat}>
-                  <div className={styles.tankCardStatIcon}>
-                    <BsDropletFill />
-                  </div>
-                  <div className={styles.tankCardStatContent}>
-                    <div className={styles.tankCardStatLabel}>
-                      Capacidade:
-                    </div>
-                    <div className={styles.tankCardStatValue}>
-                      {tank.capacity} L
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.tankCardStat}>
-                  <div className={styles.tankCardStatIcon}>
-                    <BsRulers />
-                  </div>
-                  <div className={styles.tankCardStatContent}>
-                    <div className={styles.tankCardStatLabel}>
-                      Dimensões:
-                    </div>
-                    <div className={styles.tankCardStatValue}>
-                      {tank.size.width}×{tank.size.height} m
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.tankCardStat}>
-                  <div className={styles.tankCardStatIcon}>
-                    <FaFish />
-                  </div>
-                  <div className={styles.tankCardStatContent}>
-                    <div className={styles.tankCardStatLabel}>Animais:</div>
-                    <div className={styles.tankCardStatValue}>
-                      {tankAnimals[tank._id] || 0}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.tankCardFooter}>
-                <div className={styles.viewDetailsButton}>
-                  Ver detalhes <FaChartBar />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-          }
-
-
-            {/* Mensagem quando não há tanques */}
-            {filteredTanks.length === 0 && loading === false && (
-              <div className={styles.noResults}>
-                <BsInfoCircle size={32} />
-                <p>Nenhum tanque encontrado com os filtros aplicados.</p>
-                <button
-                  className={styles.clearFilterButton}
-                  onClick={() => {
-                    setNameFilter("");
-                    setCapacityFilter("");
-                  }}
-                >
-                  Limpar filtros
-                </button>
-              </div>
-            )}
-
-            {/* Paginação */}
-            {totalPages > 0 && (
-              <div className={styles.pagination}>
-                <button
-                  className={styles.paginationButton}
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  aria-label="Página anterior"
-                >
-                  <FaChevronLeft /> Anterior
-                </button>
-                <div className={styles.paginationInfo}>
-                  Página {currentPage} de {totalPages}
-                </div>
-                <button
-                  className={styles.paginationButton}
-                  onClick={() =>
-                    setCurrentPage(Math.min(totalPages, currentPage + 1))
-                  }
-                  disabled={currentPage === totalPages}
-                  aria-label="Próxima página"
-                >
-                  Próxima <FaChevronRight />
-                </button>
-              </div>
-            )}
+        {/* Filtros */}
+        <section className={styles.filterSection}>
+          <div className={styles.filterLabel}>
+            <BsFilter /> Filtro por tanques
           </div>
-        </div>
+          <div className={styles.filterContainer}>
+            <div className={styles.searchInput}>
+              <BsSearch className={styles.filterIcon} />
+              <input
+                type="text"
+                placeholder="Nome do tanque"
+                value={nameFilter}
+                onChange={(e) => setNameFilter(e.target.value)}
+              />
+            </div>
+            <div className={styles.filterInput}>
+              <BsDropletFill className={styles.filterIcon} />
+              <input
+                type="text"
+                placeholder="Capacidade"
+                value={capacityFilter}
+                onChange={(e) => setCapacityFilter(e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Cards de tanques */}
+        {loading ? (
+          <div className="loading-container">
+            <ClockLoader color="#0a58ca" size={60} />
+            <p className="loading-text">Carregando todos os tanks...</p>
+          </div>
+        ) : (
+          <div className={styles.cardsContainer}>
+            {paginatedTanks.map((tank) => (
+              <div
+                key={tank._id}
+                className={styles.tankCard}
+                onClick={() => navigateToTankDetails(tank._id)}
+              >
+                <div className={styles.tankCardHeader}>
+                  <h3 className={styles.tankCardTitle}>
+                    <BsDropletFill className={styles.tankCardIcon} /> {tank.name}
+                  </h3>
+                  <div className={styles.tankCardActions}>
+                    <button
+                      className={styles.updateButton}
+                      onClick={(e) => openUpdateModal(tank, e)}
+                      aria-label="Editar tanque"
+                    >
+                      <BsPencil />
+                    </button>
+                    <button
+                      className={styles.deleteButton}
+                      onClick={(e) => handleDeleteTank(tank._id, e)}
+                      aria-label="Excluir tanque"
+                    >
+                      <BsTrash />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.tankCardBody}>
+                  <div className={styles.tankCardStat}>
+                    <div className={styles.tankCardStatIcon}>
+                      <BsDropletFill />
+                    </div>
+                    <div className={styles.tankCardStatContent}>
+                      <div className={styles.tankCardStatLabel}>
+                        Capacidade:
+                      </div>
+                      <div className={styles.tankCardStatValue}>
+                        {tank.capacity} L
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.tankCardStat}>
+                    <div className={styles.tankCardStatIcon}>
+                      <BsRulers />
+                    </div>
+                    <div className={styles.tankCardStatContent}>
+                      <div className={styles.tankCardStatLabel}>
+                        Dimensões:
+                      </div>
+                      <div className={styles.tankCardStatValue}>
+                        {tank.size.width}×{tank.size.height} m
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.tankCardStat}>
+                    <div className={styles.tankCardStatIcon}>
+                      <FaFish />
+                    </div>
+                    <div className={styles.tankCardStatContent}>
+                      <div className={styles.tankCardStatLabel}>Animais:</div>
+                      <div className={styles.tankCardStatValue}>
+                        {tankAnimals[tank._id] === undefined ? (
+                          <ClockLoader color="#0a58ca" size={20} /> 
+                        ) : (
+                          tankAnimals[tank._id] || 0
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.tankCardFooter}>
+                  <div className={styles.viewDetailsButton}>
+                    Ver detalhes <FaChartBar />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Mensagem quando não há tanques */}
+        {filteredTanks.length === 0 && loading === false && (
+          <div className={styles.noResults}>
+            <BsInfoCircle size={32} />
+            <p>Nenhum tanque encontrado com os filtros aplicados.</p>
+            <button
+              className={styles.clearFilterButton}
+              onClick={() => {
+                setNameFilter("");
+                setCapacityFilter("");
+              }}
+            >
+              Limpar filtros
+            </button>
+          </div>
+        )}
+
+        {/* Paginação */}
+        {totalPages > 0 && (
+          <div className={styles.pagination}>
+            <button
+              className={styles.paginationButton}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              aria-label="Página anterior"
+            >
+              <FaChevronLeft /> Anterior
+            </button>
+            <div className={styles.paginationInfo}>
+              Página {currentPage} de {totalPages}
+            </div>
+            <button
+              className={styles.paginationButton}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
+              disabled={currentPage === totalPages}
+              aria-label="Próxima página"
+            >
+              Próxima <FaChevronRight />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal de Criação/Atualização */}

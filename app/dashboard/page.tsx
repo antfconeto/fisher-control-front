@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { FiUsers, FiDroplet } from "react-icons/fi";
 import { FaFish, FaEgg, FaChartLine } from "react-icons/fa";
@@ -17,16 +17,18 @@ import {
 } from "recharts";
 import { useDashboard } from "@/hooks/useDashboard";
 import {generateColors} from "@/utils/graphUtils"
-
+import { useNotification } from "@/contexts/notificationContext";
 
 
 
 export default function Dashboard() {
   const { loading, stats, specieDescription } = useDashboard();
+
   const speciesData = (specieDescription || []).map((item) => ({
     name: item.specie.name,
     value: item.animals.length,
   }));
+
   // Cores para o gráfico de pizza
   const dynamicColors = generateColors(speciesData.length);
   if (loading) {
@@ -46,6 +48,8 @@ export default function Dashboard() {
     );
   }
 
+
+
   return (
     <>
       <div className="page-container">
@@ -57,6 +61,7 @@ export default function Dashboard() {
                 Control
               </h2>
             </div>
+            
 
             {/* Cards de informações */}
             <Row className="mb-4">

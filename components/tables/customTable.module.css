@@ -1,7 +1,9 @@
 
 .table {
     width: 100%;
+    position: relative;
     min-width: 650px;
+    height: auto;
     border-collapse: separate;
     border-spacing: 0;
   }
