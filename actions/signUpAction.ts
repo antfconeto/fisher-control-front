@@ -4,15 +4,19 @@ import { User, UserCredentials, UserLoginResponse } from "@/types/user";
 import { CookieManager, ICookiesManager } from "@/utils/cookies-manager";
 import { CustomError } from "@/utils/customError";
 import { CustomConsole } from "@/utils/customLogger";
-import * as errorMessages from "@/utils/errorMessages.json"
+import errorMessages from "@/utils/errorMessages.json";
 
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:4000";
-const cookieManager:ICookiesManager = await new CookieManager()
+const cookieManager: ICookiesManager = await new CookieManager();
 
-export const signUpAction = async (data: User): Promise<UserLoginResponse | ResponseError> => {
-  consoler.process(`🔁 Initing process to SignUp for user with email: ${JSON.stringify(data)}`);
-  
+export const signUpAction = async (
+  data: User
+): Promise<UserLoginResponse | ResponseError> => {
+  consoler.process(
+    `🔁 Initing process to SignUp for user with email: ${JSON.stringify(data)}`
+  );
+
   try {
     const response = await fetch(`${urlApi}/user/signUp`, {
       method: "PUT",
@@ -28,32 +32,33 @@ export const signUpAction = async (data: User): Promise<UserLoginResponse | Resp
         `Error to signUp user, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
       return {
-        error: getUserErrorMessage('signup', response.status),
+        error: getUserErrorMessage("signup", response.status),
         statusCode: response.status,
       };
     }
     const responseBody: UserLoginResponse = await response.json();
-    
+
     consoler.success(`User signpup  successfully with email: ${data.email}`);
-    
-    await cookieManager.createCookie('access_token', responseBody.token);
+
+    await cookieManager.createCookie("access_token", responseBody.token);
     return responseBody;
   } catch (error: any) {
     const statusCode = error.statusCode || 500;
     const errorMessage = error.message || "Erro desconhecido";
     consoler.error(
-      `Error to fetch signpup for email: ${data.email}, error: ${error.message}, statusCode: ${error.statusCode || 500}`
+      `Error to fetch signpup for email: ${data.email}, error: ${
+        error.message
+      }, statusCode: ${error.statusCode || 500}`
     );
-    throw new CustomError(getUserErrorMessage('signup', error.statusCode || 500), error.statusCode || 500);
+    throw new CustomError(
+      getUserErrorMessage("signup", error.statusCode || 500),
+      error.statusCode || 500
+    );
   }
 };
 
-
 function getUserErrorMessage(context: string, statusCode: number): string {
-  const userErrors = errorMessages.userErros as any
+  const userErrors = errorMessages.userErros as any;
 
-  return (
-    userErrors[context]?.statusCode?.[statusCode] ||
-    'Erro desconhecido.'
-  );
+  return userErrors[context]?.statusCode?.[statusCode] || "Erro desconhecido.";
 }

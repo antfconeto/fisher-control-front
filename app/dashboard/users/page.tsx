@@ -2,14 +2,24 @@
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "../animals/animals.module.css";
-import { FaChevronLeft, FaChevronRight, FaPlus, FaUserEdit, FaTrash } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaPlus,
+  FaUserEdit,
+} from "react-icons/fa";
 import { BsSearch } from "react-icons/bs";
 import { ErrorBox } from "@/components/ErrorBox";
 import { ClockLoader } from "react-spinners";
 import { useErrorContext } from "@/contexts/errorContext";
 import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
-import { listUsersPaginated, createUser, updateUser, deleteUser } from "@/actions/user";
+import {
+  listUsersPaginated,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "@/actions/user";
 import { Role, User } from "@/types/user";
 import { DynamicFilters } from "@/components/dynamicFilter/dynamicFilters";
 import { FilterFieldConfig } from "@/types/components";
@@ -98,7 +108,7 @@ export default function UsersPage() {
         setCurrentPage(1);
         setFilters((prev) => ({ ...prev, role: val as string }));
       },
-    }
+    },
   ];
 
   // Fetch users paginados
@@ -189,7 +199,8 @@ export default function UsersPage() {
     if (!userToDelete) return;
     try {
       const res = await deleteUser(userToDelete._id);
-      if (typeof res !== "boolean" && "error" in res) throw new Error(res.error);
+      if (typeof res !== "boolean" && "error" in res)
+        throw new Error(res.error);
       setShowConfirmModal(false);
       setUserToDelete(null);
       fetchUsers();
@@ -220,7 +231,10 @@ export default function UsersPage() {
               </button>
             </div>
             <section className={styles.filterSection}>
-              <DynamicFilters filters={filterFields} name="Filtro de Usuários" />
+              <DynamicFilters
+                filters={filterFields}
+                name="Filtro de Usuários"
+              />
             </section>
             {loading ? (
               <div className="loading-container">
@@ -239,7 +253,9 @@ export default function UsersPage() {
                       users={users}
                       onEdit={openUpdateModal}
                       onDelete={(userId: string) => {
-                        setUserToDelete(users.find(u => u._id === userId) || null);
+                        setUserToDelete(
+                          users.find((u) => u._id === userId) || null
+                        );
                         setShowConfirmModal(true);
                       }}
                     />
@@ -249,7 +265,9 @@ export default function UsersPage() {
                   <div className={styles.pagination}>
                     <button
                       className={styles.paginationButton}
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
                       disabled={currentPage === 1}
                     >
                       <FaChevronLeft /> Anterior

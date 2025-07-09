@@ -1,12 +1,6 @@
 import Sidebar from "@/components/sideMenu/sideMenu";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./dashboard.css";
-
-const poppins = Poppins({
-  weight: ["200", "300", "400", "500", "600", "700"],
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "🐟 Fisher Control - Dashboard",
@@ -20,7 +14,7 @@ export default function Layout({
 }>) {
   return (
     <html lang="pt-br">
-      <body className={`${poppins.className}`}>
+      <body>
         <div className="dashboard-container">
           <Sidebar />
           <main className="dashboard-content">{children}</main>
