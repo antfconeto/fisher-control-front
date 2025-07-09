@@ -1,11 +1,11 @@
 "use client";
 import React from 'react';
-import { useNotification } from '@/contexts/notificationContext';
+import { useLoading } from '@/contexts/loadingContext';
 import { Loader2 } from 'lucide-react';
 import styles from './GlobalLoading.module.css';
 
 const GlobalLoading: React.FC = () => {
-  const { loadingState } = useNotification();
+  const { loadingState } = useLoading();
 
   if (!loadingState.isLoading) {
     return null;

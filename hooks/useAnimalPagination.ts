@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { Animal, AnimalPagination, ResponseError } from "@/types/types";
 import { listAnimals } from "@/actions/animal";

@@ -1,105 +1,133 @@
-"use client";
-import React, { createContext, ReactNode, useContext, useState, useCallback } from "react";
+"use client"
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+
+export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: NotificationType;
   title: string;
   message: string;
   duration?: number;
-  timestamp: Date;
+  persistent?: boolean;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
-export interface LoadingState {
-  isLoading: boolean;
-  message?: string;
-  progress?: number;
-}
-
-interface NotificationContextType {
+interface NotificationContextProps {
   notifications: Notification[];
-  loadingState: LoadingState;
-  addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void;
+  addNotification: (notification: Omit<Notification, 'id'>) => string;
   removeNotification: (id: string) => void;
-  clearNotifications: () => void;
-  setLoading: (loading: LoadingState) => void;
-  showSuccess: (title: string, message: string) => void;
-  showError: (title: string, message: string) => void;
-  showWarning: (title: string, message: string) => void;
-  showInfo: (title: string, message: string) => void;
+  clearAll: () => void;
+  success: (title: string, message?: string, options?: Partial<Notification>) => string;
+  error: (title: string, message?: string, options?: Partial<Notification>) => string;
+  warning: (title: string, message?: string, options?: Partial<Notification>) => string;
+  info: (title: string, message?: string, options?: Partial<Notification>) => string;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
+
+export const useNotification = () => {
+  const context = useContext(NotificationContext);
+  if (!context) {
+    throw new Error('useNotification must be used within a NotificationProvider');
+  }
+  return context;
+};
 
 interface NotificationProviderProps {
   children: ReactNode;
+  maxNotifications?: number;
+  defaultDuration?: number;
 }
 
-export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
+export const NotificationProvider: React.FC<NotificationProviderProps> = ({
+  children,
+  maxNotifications = 5,
+  defaultDuration = 5000,
+}) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loadingState, setLoadingState] = useState<LoadingState>({
-    isLoading: false,
-    message: '',
-    progress: undefined
-  });
 
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp'>) => {
+  const addNotification = useCallback((notification: Omit<Notification, 'id'>): string => {
+    const id = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newNotification: Notification = {
       ...notification,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      timestamp: new Date(),
-      duration: notification.duration || 5000
+      id,
+      duration: notification.duration ?? defaultDuration,
     };
 
-    setNotifications(prev => [...prev, newNotification]);
+    setNotifications(prev => {
+      const updated = [newNotification, ...prev];
+      // Keep only the latest notifications up to maxNotifications
+      return updated.slice(0, maxNotifications);
+    });
 
-    // Auto remove notification after duration
-    if (newNotification.duration > 0) {
+    // Auto-remove notification after duration (unless persistent)
+    if (!notification.persistent && newNotification.duration && newNotification.duration > 0) {
       setTimeout(() => {
-        removeNotification(newNotification.id);
+        removeNotification(id);
       }, newNotification.duration);
     }
-  }, []);
+
+    return id;
+  }, [defaultDuration, maxNotifications]);
 
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
   }, []);
 
-  const clearNotifications = useCallback(() => {
+  const clearAll = useCallback(() => {
     setNotifications([]);
   }, []);
 
-  const setLoading = useCallback((loading: LoadingState) => {
-    setLoadingState(loading);
-  }, []);
-
-  const showSuccess = useCallback((title: string, message: string) => {
-    addNotification({ type: 'success', title, message });
+  // Convenience methods
+  const success = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+    return addNotification({
+      type: 'success',
+      title,
+      message: message || '',
+      ...options,
+    });
   }, [addNotification]);
 
-  const showError = useCallback((title: string, message: string) => {
-    addNotification({ type: 'error', title, message, duration: 8000 });
+  const error = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+    return addNotification({
+      type: 'error',
+      title,
+      message: message || '',
+      ...options,
+    });
   }, [addNotification]);
 
-  const showWarning = useCallback((title: string, message: string) => {
-    addNotification({ type: 'warning', title, message });
+  const warning = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+    return addNotification({
+      type: 'warning',
+      title,
+      message: message || '',
+      ...options,
+    });
   }, [addNotification]);
 
-  const showInfo = useCallback((title: string, message: string) => {
-    addNotification({ type: 'info', title, message });
+  const info = useCallback((title: string, message?: string, options?: Partial<Notification>) => {
+    return addNotification({
+      type: 'info',
+      title,
+      message: message || '',
+      ...options,
+    });
   }, [addNotification]);
 
-  const value: NotificationContextType = {
+  const value: NotificationContextProps = {
     notifications,
-    loadingState,
     addNotification,
     removeNotification,
-    clearNotifications,
-    setLoading,
-    showSuccess,
-    showError,
-    showWarning,
-    showInfo
+    clearAll,
+    success,
+    error,
+    warning,
+    info,
   };
 
   return (
@@ -107,12 +135,4 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       {children}
     </NotificationContext.Provider>
   );
-};
-
-export const useNotification = (): NotificationContextType => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error("useNotification must be used within a NotificationProvider");
-  }
-  return context;
 }; 

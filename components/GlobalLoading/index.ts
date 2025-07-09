@@ -1,1 +1,1 @@
-export { default as GlobalLoading } from './GlobalLoading'; 
+export { default } from './GlobalLoading'; 

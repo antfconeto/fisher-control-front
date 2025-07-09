@@ -19,7 +19,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   //global states of token
-  const { setToken } = useAuth();
+  const { login } = useAuth();
   const {setUser } = useUser();
   const { loading, sendRequest } = useRequest<
     UserLoginResponse | ResponseError
@@ -39,7 +39,7 @@ export default function LoginForm() {
       if (response) {
         const userData = response as UserLoginResponse;
         //set token and user
-        setToken(userData.token);
+        login(userData.token);
         setUser(userData.user);
         //redirect for home
         router.push("/dashboard");
