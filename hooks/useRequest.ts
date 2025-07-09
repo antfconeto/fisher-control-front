@@ -1,3 +1,4 @@
+"use client";
 import { ResponseError } from "@/types/types";
 import { useState } from "react";
 
