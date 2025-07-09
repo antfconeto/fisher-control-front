@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRequest } from "@/hooks/useRequest";
 import { Role, UserLoginResponse } from "@/types/user";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/authContext";
 import { ResponseError } from "@/types/types";
 import { Button } from "@/components/buttons/buttons";
 import { DotLoader } from "react-spinners";
@@ -24,7 +24,7 @@ export default function SignUpForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Global states
-  const { setToken } = useAuth();
+  const { login } = useAuth();
   const { setUser } = useUser();
   const {loading, sendRequest } = useRequest<
     UserLoginResponse | ResponseError
@@ -49,7 +49,7 @@ export default function SignUpForm() {
       });
       if (response) {
         const userData = response as UserLoginResponse;
-        setToken(userData.token);
+        login(userData.token);
         setUser(userData.user);
         router.push("/dashboard");
       }
