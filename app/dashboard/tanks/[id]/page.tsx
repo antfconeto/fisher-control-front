@@ -417,6 +417,19 @@ export default function TankDetailsPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   </motion.div>
+                  <div className={detailsStyles.infoBox} style={{ marginTop: '-1rem', marginBottom: '1.2rem' }}>
+                    <h4 className={detailsStyles.infoTitle} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <FaInfoCircle style={{ color: '#2563eb' }} /> Sobre o gráfico
+                    </h4>
+                    <ul className={detailsStyles.infoList}>
+                      <li className={detailsStyles.infoListItem}>
+                        Este gráfico mostra a quantidade de animais de cada espécie presentes neste tanque.
+                      </li>
+                      <li className={detailsStyles.infoListItem}>
+                        Use os filtros acima para refinar a visualização por espécie ou código.
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </motion.div>
             )}

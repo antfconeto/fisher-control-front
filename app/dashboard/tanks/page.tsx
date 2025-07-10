@@ -82,18 +82,17 @@ export default function TanksPage() {
   useEffect(() => {
     const fetchTankAnimals = async () => {
       const animalsCount: { [key: string]: number } = {};
-      for (const tank of tanks) {
-        try {
-          const animals = await getAllAnimalsFromTank(tank._id);
-          if (!('error' in animals)) {
-            animalsCount[tank._id] = animals.length;
-          }
-        } catch (error) {
-          console.error(`Erro ao buscar animais do tanque ${tank._id}:`, error);
+      // Executa todas as requisições em paralelo
+      const responses = await Promise.all(
+        tanks.map((tank) => getAllAnimalsFromTank(tank._id))
+      );
+      responses.forEach((response, idx) => {
+        if (!('error' in response)) {
+          const tankId = tanks[idx]._id;
+          animalsCount[tankId] = response.length;
         }
-      }
+      });
       setTankAnimals(animalsCount);
-
     };
 
     if (tanks.length > 0) {

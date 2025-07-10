@@ -6,10 +6,10 @@
 
 @media (min-width: 768px) {
   .container {
-    margin-left: 250px; /* Espaço para o menu lateral fixo em desktop */
-    max-width: calc(
-      100% - 250px
-    ); /* Limita a largura para não ultrapassar a tela menos o menu */
+    margin-left: 250px;
+    /* Espaço para o menu lateral fixo em desktop */
+    max-width: calc(100% - 250px);
+    /* Limita a largura para não ultrapassar a tela menos o menu */
   }
 }
 
@@ -124,9 +124,12 @@
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
-    margin-top: 4rem; /* Espaço para o botão do menu hambúrguer */
-    margin-left: 0; /* Remove o espaço lateral em dispositivos móveis */
-    max-width: 100%; /* Utiliza toda a largura da tela */
+    margin-top: 4rem;
+    /* Espaço para o botão do menu hambúrguer */
+    margin-left: 0;
+    /* Remove o espaço lateral em dispositivos móveis */
+    max-width: 100%;
+    /* Utiliza toda a largura da tela */
   }
 
   .title {

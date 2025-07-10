@@ -90,9 +90,8 @@ export default function SpeciesPage() {
       );
       setErrorMessage("Erro ao carregar as quantidades de animais.");
     } finally {
-      setTimeout(() => {
         setLoading(false);
-      }, 1000);
+
     }
   }, [species, setErrorMessage]);
 
@@ -229,7 +228,7 @@ export default function SpeciesPage() {
                 <FaPlus /> Cadastrar Nova Espécie
               </button>
             </div>
-            {loading ? (
+            {loading || speciesFullInfo.length === 0 ? (
               <div className="loading-container">
                 <ClockLoader color="#0a58ca" size={60} />
                 <p className="loading-text">Carregando espécies...</p>

@@ -240,7 +240,8 @@
   }
 
   .pageBackground {
-    padding: 3rem 1rem 1rem 1rem; /* Espaço para o botão do menu */
+    padding: 3rem 1rem 1rem 1rem;
+    /* Espaço para o botão do menu */
   }
 
   .profileHeader {
@@ -260,7 +261,7 @@
   }
 
   /* O botão de editar vem depois das informações básicas */
-  .profileHeader > button {
+  .profileHeader>button {
     margin-top: 10px;
   }
 

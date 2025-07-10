@@ -189,8 +189,7 @@ export default function AnimalsPage() {
         : await handleUpdateAnimal(currentAnimal);
     if (response) {
       console.log(
-        `✅ Animal ${
-          modalMode == ModalMode.CREATE ? "created" : "updated"
+        `✅ Animal ${modalMode == ModalMode.CREATE ? "created" : "updated"
         } with success`,
         currentAnimal
       );
