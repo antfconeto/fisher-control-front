@@ -12,12 +12,12 @@ import {
   BsSearch,
   BsFilter,
 } from "react-icons/bs";
-import { FaWater, FaFish, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { FaWater, FaFish, FaChevronLeft, FaChevronRight, FaInfoCircle } from "react-icons/fa";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from "recharts";
 import { Animal, Specie, Tank } from "@/types/types";
 import { getTankById } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
-import { getAllAnimalsFromTank } from "@/actions/animal";
+import { createAnimal, deleteAnimal, getAllAnimalsFromTank, updateAnimal } from "@/actions/animal";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useSpecie } from "@/hooks/useSpecies";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,9 +25,18 @@ import { getSpeciesDistribution } from "@/actions/dashboard";
 import { CustomTable, TableColumn } from '@/components/tables/customTable';
 import { GiFishBucket } from "react-icons/gi";
 import { DynamicFilters } from '@/components/dynamicFilter/dynamicFilters';
+import { CustomModalForm } from '@/components/Forms/CustomModalForm';
+import { useRequest } from "@/hooks/useRequest";
+import { AnimalTable } from "@/components/tables";
+import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 
 export interface TankFullInfo extends Tank {
   animals: Animal[];
+}
+
+enum ModalMode {
+  CREATE = "create",
+  UPDATE = "update",
 }
 
 export default function TankDetailsPage() {
@@ -37,6 +46,22 @@ export default function TankDetailsPage() {
   const { errorMessage, setErrorMessage } = useErrorContext();
   const [loadingTank, setLoadingTank] = useState(true);
   const [tankFullInfo, setTankFullInfo] = useState<TankFullInfo | null>(null);
+  const [currentAnimal, setCurrentAnimal] = useState<Animal>({
+    codeAnimal: "",
+    _id: "",
+    specie: "",
+    birthDate: new Date(),
+    gender: "M" as "M" | "F",
+    matriz_code: "",
+    tankId: "",
+  });
+
+    //States for  change visibility modal
+    const [showModal, setShowModal] = useState(false);
+    const { sendRequest } = useRequest();
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    //States for define status of modal
+    const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.UPDATE);
   //Default filters
   const defaultFilters = {
     codeAnimal: "",
@@ -143,12 +168,12 @@ export default function TankDetailsPage() {
         currentPage * itemsPerPage
       )
     );
-    setTotalPages(Math.min(Math.ceil(animalsFiltered.length / itemsPerPage)));
+    setTotalPages(Math.max(1, Math.ceil(animalsFiltered.length / itemsPerPage)));
   }, [animalsFiltered, currentPage, itemsPerPage]);
 
   useEffect(() => {
     paginationAnimals();
-  }, [animals, currentPage, paginationAnimals]);
+  }, [currentPage, animalsFiltered]);
 
   // Função para gerar cores dinamicamente
   const generateColors = (count: number): string[] => {
@@ -160,6 +185,69 @@ export default function TankDetailsPage() {
     return colors;
   };
 
+
+  
+  const handleSaveAnimal = async () => {
+    if (
+      !currentAnimal.codeAnimal ||
+      !currentAnimal.specie ||
+      !currentAnimal.gender ||
+      !currentAnimal.birthDate ||
+      !currentAnimal.tankId
+    ) {
+      setErrorMessage(`Dados Necessário estão faltando!`);
+      return;
+    }
+    const response = await handleUpdateAnimal(currentAnimal);
+    if (response) {
+      console.log(
+        `✅ Animal ${
+          modalMode == ModalMode.CREATE ? "created" : "updated"
+        } with success`,
+        currentAnimal
+      );
+      setShowModal(false);
+      setCurrentAnimal({
+        codeAnimal: "",
+        _id: "",
+        specie: "",
+        birthDate: new Date(),
+        gender: "M" as "M" | "F",
+        matriz_code: "",
+        tankId: "",
+      });
+      //Reset filters
+      setFilters(defaultFilters);
+    }
+  };
+
+
+  const handleUpdateAnimal = async (animal: Animal): Promise<boolean> => {
+    try {
+      await sendRequest(updateAnimal, animal);
+      await fetchAnimals();
+      setFilters(defaultFilters);
+      return true;
+    } catch (err: any) {
+      const errMsg = err?.message || "Erro desconhecido";
+      setErrorMessage(errMsg);
+      return false;
+    }
+  };
+
+  const handleDeleteAnimal = async (): Promise<boolean> => {
+    try {
+      const response = await deleteAnimal(currentAnimal.codeAnimal);
+      await fetchAnimals();
+      setFilters(defaultFilters);
+      setShowConfirmModal(false);
+      return response as boolean;
+    } catch (err: any) {
+      const errMsg = err?.message || "Erro desconhecido";
+      setErrorMessage(errMsg);
+      return false;
+    }
+  };
   // Dados para gráfico de pizza - espécies de animais
   const dynamicColors = generateColors(speciesData.length);
 
@@ -233,7 +321,7 @@ export default function TankDetailsPage() {
                 <BsArrowLeft />
               </button>
               <h2 className={detailsStyles.pageTitle}>
-                <GiFishBucket />{" "}
+                <GiFishBucket />{" Tanque: "}
                 {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
               </h2>
 
@@ -313,33 +401,20 @@ export default function TankDetailsPage() {
                     transition={{ duration: 0.7, delay: 0.2 }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={speciesData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={120}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) =>
-                            `${name}: ${(percent * 100).toFixed(0)}%`
-                          }
-                          labelLine={true}
-                        >
+                      <BarChart
+                        data={speciesData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" angle={-20} textAnchor="end" interval={0} height={60} />
+                        <YAxis allowDecimals={false} label={{ value: 'Quantidade', angle: -90, position: 'insideLeft', offset: 10 }} />
+                        <Tooltip formatter={(value) => [`${value} animais`, 'Quantidade']} />
+                        <Bar dataKey="value" fill="#2563eb">
                           {speciesData.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={dynamicColors[index % dynamicColors.length]}
-                            />
+                            <Cell key={`cell-bar-${index}`} fill={dynamicColors[index % dynamicColors.length]} />
                           ))}
-                        </Pie>
-                        <Tooltip
-                          formatter={(value) => [
-                            `${value} animais`,
-                            "Quantidade",
-                          ]}
-                        />
-                      </PieChart>
+                        </Bar>
+                      </BarChart>
                     </ResponsiveContainer>
                   </motion.div>
                 </div>
@@ -405,7 +480,7 @@ export default function TankDetailsPage() {
                       <span>Mostrando todos os animais</span>
                     ) : (
                       <span>
-                        Mostrando {paginatedAnimals.length} de {tankFullInfo.animals.length} animais
+                        Mostrando {paginatedAnimals.length} de {animals.length} animais
                       </span>
                     )}
                     {(filters.codeAnimal || filters.specie) && (
@@ -425,26 +500,22 @@ export default function TankDetailsPage() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <CustomTable
-                      columns={[
-                        {
-                          header: 'Código',
-                          render: (animal) => animal.codeAnimal,
-                        },
-                        {
-                          header: 'Espécie',
-                          render: (animal) => species.find((specie) => specie._id === animal.specie)?.name || '-',
-                        },
-                        {
-                          header: 'Gênero',
-                          render: (animal) => animal.gender === 'M' ? 'Macho' : 'Fêmea',
-                        },
-                        {
-                          header: 'Nascimento',
-                          render: (animal) => new Date(animal.birthDate).toLocaleDateString('pt-BR'),
-                        },
-                      ]}
-                      data={paginatedAnimals}
+                    <AnimalTable
+                      animals={paginatedAnimals}
+                      tanks={[tankFullInfo]}
+                      species={species}
+                      onDelete={(codeAnimal: string) => {
+                        setCurrentAnimal({
+                          ...currentAnimal,
+                          codeAnimal: codeAnimal,
+                        });
+                        setShowConfirmModal(true);
+                      }}
+                      onEdit={(animal: Animal) => {
+                        setCurrentAnimal(animal);
+                        setShowModal(true);
+                        setModalMode(ModalMode.UPDATE);
+                      }}
                     />
                   </motion.div>
                   {/* Paginação */}
@@ -461,19 +532,16 @@ export default function TankDetailsPage() {
                         <FaChevronLeft /> Anterior
                       </button>
                       <div className={detailsStyles.paginationInfo}>
-                        Página {currentPage} de {Math.ceil(animals.length / itemsPerPage)}
+                        Página {currentPage} de {totalPages}
                       </div>
                       <button
                         className={detailsStyles.paginationButton}
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(
-                              Math.ceil(animals.length / itemsPerPage),
-                              prev + 1
-                            )
+                            Math.min(totalPages, prev + 1)
                           )
                         }
-                        disabled={currentPage === Math.ceil(animals.length / itemsPerPage)}
+                        disabled={currentPage === totalPages}
                         aria-label="Próxima página"
                       >
                         Próxima <FaChevronRight />
@@ -535,6 +603,78 @@ export default function TankDetailsPage() {
             </AnimatePresence>
           </div>
         }
+        {/* Modal de Atualização */}
+        {showModal && (
+          <CustomModalForm
+            title={"Atualizar Animal"}
+            onClose={() => setShowModal(false)}
+            onSubmit={handleSaveAnimal}
+            fields={[
+              {
+                name: "codeAnimal",
+                label: "Código do Animal",
+                type: "text",
+                value: currentAnimal.codeAnimal,
+                placeholder: "Digite o código do animal",
+                onChange: () => {},
+                disabled: true,
+              },
+              {
+                name: "specie",
+                label: "Espécie",
+                type: "select",
+                options: [
+                  ...species.map((specie) => ({
+                    label: specie.name,
+                    value: specie._id,
+                  })),
+                  {
+                    label: "Selecione a Espécie",
+                    value: "",
+                  },
+                ],
+                value: currentAnimal.specie,
+                placeholder: "Digite a espécie do animal",
+                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, specie: val }),
+              },
+              {
+                name: "birthDate",
+                label: "Data de Nascimento",
+                type: "date",
+                value: new Date(currentAnimal.birthDate).toISOString().split("T")[0],
+                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, birthDate: new Date(val) }),
+              },
+              {
+                name: "gender",
+                label: "Gênero",
+                type: "select",
+                value: currentAnimal.gender === "M" ? "Macho" : "Fêmea",
+                options: [
+                  { label: "Macho", value: "Macho" },
+                  { label: "Fêmea", value: "Fêmea" },
+                ],
+                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, gender: val === "Macho" ? "M" : "F" }),
+              },
+              {
+                name: "matriz_code",
+                label: "Código da Matriz",
+                type: "text",
+                value: currentAnimal.matriz_code,
+                placeholder: "Digite o código da matriz (opcional)",
+                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, matriz_code: val }),
+              },
+            ]}
+          />
+        )}
+              {/* Confirm Delete Modal */}
+      {showConfirmModal && (
+        <ConfirmModal
+          title="Confirmar Exclusão"
+          message="Tem certeza de que deseja excluir este animal?"
+          onConfirm={handleDeleteAnimal}
+          onCancel={() => setShowConfirmModal(false)}
+        />
+      )}
       </div>
     </div>
   </>);
