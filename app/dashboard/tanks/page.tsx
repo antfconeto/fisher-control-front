@@ -27,6 +27,10 @@ import { Tank } from "@/types/types";
 import { ClockLoader } from "react-spinners";
 import { getAllAnimalsFromTank } from "@/actions/animal";
 import { Button } from "@/components/ui";
+import { CustomModalForm } from "@/components/Forms/CustomModalForm";
+import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
+import { useErrorContext } from "@/contexts/errorContext";
+import { ErrorBox } from "@/components/ErrorBox";
 
 
 enum ModalMode {
@@ -34,13 +38,23 @@ enum ModalMode {
   UPDATE = "update",
 }
 
+const defaultTank = {
+
+  capacity: 0,
+  size: {
+    width: 0,
+    height: 0,
+  },
+};
+
 export default function TanksPage() {
   const router = useRouter();
 
-  const {tanks,loading, createTank, updateTank, deleteTank} = useTanks()
-
+  const { tanks, loading, createTank, updateTank, deleteTank } = useTanks()
+  const { setErrorMessage, errorMessage } = useErrorContext()
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [nameFilter, setNameFilter] = useState("");
   const [capacityFilter, setCapacityFilter] = useState("");
@@ -55,9 +69,9 @@ export default function TanksPage() {
       width: 0,
       height: 0,
     },
-    _id:'',
-    fishManagerId:'',
-    name:''
+    _id: '',
+    fishManagerId: '',
+    name: ''
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,7 +93,7 @@ export default function TanksPage() {
         }
       }
       setTankAnimals(animalsCount);
-      
+
     };
 
     if (tanks.length > 0) {
@@ -110,9 +124,9 @@ export default function TanksPage() {
         width: 0,
         height: 0,
       },
-      _id:'',
-      fishManagerId:'',
-      name:''
+      _id: '',
+      fishManagerId: '',
+      name: ''
     });
     setShowModal(true);
   };
@@ -126,9 +140,9 @@ export default function TanksPage() {
         width: 0,
         height: 0,
       },
-      _id:'',
-      fishManagerId:'',
-      name:''
+      _id: '',
+      fishManagerId: '',
+      name: ''
     });
     setEditingTankId(tank._id);
     setShowModal(true);
@@ -146,35 +160,49 @@ export default function TanksPage() {
         } else if (modalMode === ModalMode.UPDATE && editingTankId) {
           await updateTank({ ...currentTank, _id: editingTankId });
         }
-      setShowModal(false);
-      setEditingTankId(null);
+        setShowModal(false);
+        setEditingTankId(null);
       } catch (error: any) {
         console.error("Erro ao salvar tanque:", error);
       }
     }
   };
 
-  const handleDeleteTank = async (id: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (confirm("Tem certeza que deseja excluir este tanque?")) {
-      try {
-        const success = await deleteTank(id);
-        if (success) {
-          console.log("Tanque excluído com sucesso");
+  const handleDeleteTank = async () => {
+    try {
+      setShowConfirmModal(false);
+      setCurrentPage(1)
+      await deleteTank(currentTank._id);
+      setCurrentTank({
+        _id: '',
+        name: '',
+        fishManagerId: '',
+        capacity: 0,
+        size: {
+          width: 0,
+          height: 0,
         }
-      } catch (error: any) {
-        console.error("Erro ao excluir tanque:", error);
-      }
+      });
+    } catch (error: any) {
+      console.error("Erro ao excluir tanque:", error);
+      setErrorMessage(error.message);
     }
+
   };
 
   const navigateToTankDetails = (tankId: string) => {
-
     router.push(`/dashboard/tanks/${tankId}`);
   };
 
   return (
     <>
+      {errorMessage && (
+        <ErrorBox
+          errorMessage={errorMessage}
+          setErrorMessage={setErrorMessage}
+          otherClassName=""
+        />
+      )}
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>
@@ -224,7 +252,6 @@ export default function TanksPage() {
               <div
                 key={tank._id}
                 className={styles.tankCard}
-                onClick={() => navigateToTankDetails(tank._id)}
               >
                 <div className={styles.tankCardHeader}>
                   <h3 className={styles.tankCardTitle}>
@@ -240,7 +267,7 @@ export default function TanksPage() {
                     </button>
                     <button
                       className={styles.deleteButton}
-                      onClick={(e) => handleDeleteTank(tank._id, e)}
+                      onClick={(e) => { setShowConfirmModal(true); setCurrentTank(tank) }}
                       aria-label="Excluir tanque"
                     >
                       <BsTrash />
@@ -285,7 +312,7 @@ export default function TanksPage() {
                       <div className={styles.tankCardStatLabel}>Animais:</div>
                       <div className={styles.tankCardStatValue}>
                         {tankAnimals[tank._id] === undefined ? (
-                          <ClockLoader color="#0a58ca" size={20} /> 
+                          <ClockLoader color="#0a58ca" size={20} />
                         ) : (
                           tankAnimals[tank._id] || 0
                         )}
@@ -295,7 +322,9 @@ export default function TanksPage() {
                 </div>
 
                 <div className={styles.tankCardFooter}>
-                  <div className={styles.viewDetailsButton}>
+                  <div className={styles.viewDetailsButton}
+                    onClick={() => navigateToTankDetails(tank._id)}
+                  >
                     Ver detalhes <FaChartBar />
                   </div>
                 </div>
@@ -351,131 +380,72 @@ export default function TanksPage() {
 
       {/* Modal de Criação/Atualização */}
       {showModal && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>
-                {modalMode === ModalMode.CREATE
-                  ? "Criar Novo Tanque"
-                  : "Atualizar Tanque"}
-              </h2>
-              <button
-                className={styles.modalCloseButton}
-                onClick={() => setShowModal(false)}
-                aria-label="Fechar modal"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="tankName">
-                  Nome do Tanque
-                </label>
-                <input
-                  id="tankName"
-                  type="text"
-                  className={styles.formInput}
-                  value={currentTank.name}
-                  onChange={(e) =>
-                    setCurrentTank({
-                      ...currentTank,
-                      name: e.target.value,
-                    })
-                  }
-                  placeholder="Digite o nome do tanque"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="capacity">
-                  Capacidade (Litros)
-                </label>
-                <input
-                  id="capacity"
-                  type="number"
-                  className={styles.formInput}
-                  value={currentTank.capacity}
-                  onChange={(e) =>
-                    setCurrentTank({
-                      ...currentTank,
-                      capacity: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  placeholder="Digite a capacidade em litros"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="width">
-                  Largura (metros)
-                </label>
-                <input
-                  id="width"
-                  type="number"
-                  className={styles.formInput}
-                  value={currentTank.size.width}
-                  onChange={(e) =>
-                    setCurrentTank({
-                      ...currentTank,
-                      size: {
-                        ...currentTank.size,
-                        width: parseFloat(e.target.value) || 0,
-                      },
-                    })
-                  }
-                  placeholder="Digite a largura em metros"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="height">
-                  Altura (metros)
-                </label>
-                <input
-                  id="height"
-                  type="number"
-                  className={styles.formInput}
-                  value={currentTank.size.height}
-                  onChange={(e) =>
-                    setCurrentTank({
-                      ...currentTank,
-                      size: {
-                        ...currentTank.size,
-                        height: parseFloat(e.target.value) || 0,
-                      },
-                    })
-                  }
-                  placeholder="Digite a altura em metros"
-                />
-              </div>
-              <div className={styles.infoBox}>
-                <h4 className={styles.infoTitle}>
-                  <BsInfoCircle /> Informações
-                </h4>
-                <ul className={styles.infoList}>
-                  <li className={styles.infoListItem}>
-                    Insira todas as informações obrigatórias para o tanque.
-                  </li>
-                  <li className={styles.infoListItem}>
-                    A capacidade deve ser informada em litros.
-                  </li>
-                  <li className={styles.infoListItem}>
-                    As dimensões devem ser informadas em metros.
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className={styles.modalFooter}>
-              <button
-                className={styles.cancelButton}
-                onClick={() => setShowModal(false)}
-              >
-                <FaTimes /> Cancelar
-              </button>
-              <button className={styles.saveButton} onClick={handleSaveTank}>
-                <FaSave /> Salvar
-              </button>
-            </div>
-          </div>
-        </div>
+        <CustomModalForm
+          title={modalMode === ModalMode.CREATE ? "Criar Novo Tanque" : "Atualizar Tanque"}
+          fields={[
+            {
+              name: "name",
+              label: "Nome do Tanque",
+              type: "text",
+              value: currentTank.name,
+              placeholder: "Digite o nome do tanque",
+              onChange: (value: string) => setCurrentTank({ ...currentTank, name: value }),
+            },
+            {
+              name: "capacity",
+              label: "Capacidade (Litros)",
+              type: "number",
+              value: currentTank.capacity,
+              placeholder: "Digite a capacidade em litros",
+              onChange: (value: string) => setCurrentTank({ ...currentTank, capacity: parseFloat(value) || 0 }),
+            },
+            {
+              name: "width",
+              label: "Largura (metros)",
+              type: "number",
+              value: currentTank.size.width,
+              placeholder: "Digite a largura em metros",
+              onChange: (value: string) => setCurrentTank({ ...currentTank, size: { ...currentTank.size, width: parseFloat(value) || 0 } }),
+            },
+            {
+              name: "height",
+              label: "Altura (metros)",
+              type: "number",
+              value: currentTank.size.height,
+              placeholder: "Digite a altura em metros",
+              onChange: (value: string) => setCurrentTank({ ...currentTank, size: { ...currentTank.size, height: parseFloat(value) || 0 } }),
+            },
+          ]}
+          onSubmit={handleSaveTank}
+          onClose={() => setShowModal(false)}
+          infoBox={
+            <>
+              <h4 className={styles.infoTitle}>
+                <BsInfoCircle /> Informações
+              </h4>
+              <ul className={styles.infoList}>
+                <li className={styles.infoListItem}>
+                  Insira todas as informações obrigatórias para o tanque.
+                </li>
+                <li className={styles.infoListItem}>
+                  A capacidade deve ser informada em litros.
+                </li>
+                <li className={styles.infoListItem}>
+                  As dimensões devem ser informadas em metros.
+                </li>
+              </ul>
+            </>
+          }
+        />
+      )}
+      {/* Confirm Delete Modal */}
+      {showConfirmModal && (
+        <ConfirmModal
+          title="Confirmar Exclusão"
+          message="Tem certeza de que deseja excluir este animal? Todos os animais dessa espécie serão excluidos."
+          onConfirm={handleDeleteTank}
+          onCancel={() => setShowConfirmModal(false)}
+        />
       )}
     </>
   );

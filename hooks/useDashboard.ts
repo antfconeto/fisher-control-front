@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from 'react';
 import { useError } from './useError';
 import { 
@@ -10,7 +9,6 @@ import {
   SpawnsData
 } from '@/actions/dashboard';
 import { Animal, Specie } from '@/types/types';
-import { useNotification } from '@/contexts/notificationContext';
 
 export interface TankStatus {
   id: string;
@@ -45,7 +43,6 @@ export interface WaterQualityData {
 }
 
 export const useDashboard = () => {
-  const {successNotification,errorNotification} = useNotification()
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
@@ -205,14 +202,8 @@ export const useDashboard = () => {
       setRecentActivities(mockData.recentActivities);
       setWaterQualityData(mockData.waterQualityData);
       setMonthlyTrends(mockData.monthlyTrends);
-      successNotification("Informações Carregadas", "Dados do dashboard carregados com sucesso", {
-        duration: 10000,
-      });
       console.log("✅ Dados do dashboard atualizados com sucesso");
     } catch (error: any) {
-      errorNotification("Erro ao Carregar Dados", "Erro ao carregar dados do dashboard", {
-        duration: 10000,
-      });
       console.error("❌ Erro ao buscar dados do dashboard:", error);
       setErrorMessage(error.message || 'Erro ao carregar dados do dashboard');
     } finally {

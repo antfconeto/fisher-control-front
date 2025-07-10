@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import styles from "../tanks.module.css";
+import detailsStyles from "../tanksDetails.module.css";
 import { ClockLoader } from "react-spinners";
 import {
   BsDropletFill,
@@ -14,13 +14,17 @@ import {
 } from "react-icons/bs";
 import { FaWater, FaFish, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
-import { Animal, Tank } from "@/types/types";
+import { Animal, Specie, Tank } from "@/types/types";
 import { getTankById } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
 import { getAllAnimalsFromTank } from "@/actions/animal";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useSpecie } from "@/hooks/useSpecies";
 import { motion, AnimatePresence } from "framer-motion";
+import { getSpeciesDistribution } from "@/actions/dashboard";
+import { CustomTable, TableColumn } from '@/components/tables/customTable';
+import { GiFishBucket } from "react-icons/gi";
+import { DynamicFilters } from '@/components/dynamicFilter/dynamicFilters';
 
 export interface TankFullInfo extends Tank {
   animals: Animal[];
@@ -42,62 +46,105 @@ export default function TankDetailsPage() {
   };
   //States for filter by code
   const [filters, setFilters] = useState(defaultFilters);
+  const [animalsFiltered, setAnimalsFiltered] = useState<Animal[]>([]);
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loadingAnimals, setLoadingAnimals] = useState(true);
   const { species } = useSpecie();
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedAnimals, setPaginatedAnimals] = useState<Animal[]>([]);
+  const [specieDescription, setSpecieDescription] = useState<Specie[]>([]);
   const itemsPerPage = 5;
   const [speciesData, setSpeciesData] = useState<
     { name: string; value: number }[]
   >([]);
+  // Adicionar um estado de loading para specieDescription
+  const [loadingSpeciesDesc, setLoadingSpeciesDesc] = useState(true);
 
-  const fetchTank = useCallback(async () => {
+  useEffect(() => {
+    const fetchSpeciesDesc = async () => {
+      setLoadingSpeciesDesc(true);
+      try {
+        const desc = (await getSpeciesDistribution()).specieDescription.map((item) => item.specie);
+        setSpecieDescription(desc);
+      } finally {
+        setLoadingSpeciesDesc(false);
+      }
+    };
+    fetchSpeciesDesc();
+  }, []);
+
+  // fetchAnimals precisa ser declarado antes do useEffect que o utiliza
+  const fetchAnimals = useCallback(async () => {
     try {
-      const response = (await getTankById(tankId)) as Tank;
-      setTankFullInfo({ ...response, animals: animals as any });
+      const response = (await getAllAnimalsFromTank(tankId)) as Animal[];
+      setAnimals(response);
+      setAnimalsFiltered(response);
+      setLoadingAnimals(false);
+      const speciesCount: Record<string, number> = {};
+
+      response.forEach((animal) => {
+        speciesCount[animal.specie] = (speciesCount[animal.specie] || 0) + 1;
+      });
+      // Só monta speciesData se specieDescription estiver carregado
+      if (specieDescription.length > 0) {
+        const data = Object.entries(speciesCount).map(([id, value]) => ({
+          name: specieDescription.find((specie) => specie._id === id)?.name || id,
+          value: value,
+        }));
+        setSpeciesData(data);
+      }
+    } catch (error: any) {
+      const errMsg = error?.message || "Erro desconhecido";
+      setErrorMessage(errMsg);
+    }
+  }, [tankId, setErrorMessage, specieDescription]);
+
+  useEffect(() => {
+    fetchTank();
+
+  }, [tankId]);
+
+  useEffect(() => {
+    if (!loadingSpeciesDesc) {
+      fetchAnimals();
+    }
+  }, [tankId, loadingSpeciesDesc, fetchAnimals]);
+
+  const fetchTank = async () => {
+    try {
+      let response = (await getTankById(tankId)) as Tank;
+      setTankFullInfo({ ...response, animals: [] });
       setLoadingTank(false);
     } catch (error: any) {
       const errMsg = error?.message || "Erro desconhecido";
       setErrorMessage(errMsg);
     }
-  }, [tankId, animals, setErrorMessage]);
+  };
 
-  const fetchAnimals = useCallback(async () => {
-    try {
-      const response = (await getAllAnimalsFromTank(tankId)) as Animal[];
-      setAnimals(response);
-      setLoadingAnimals(false);
-      const speciesCount: Record<string, number> = {};
-      response.forEach((animal) => {
-        speciesCount[animal.specie] = (speciesCount[animal.specie] || 0) + 1;
-      });
-      const data = Object.entries(speciesCount).map(([name, value]) => ({
-        name,
-        value,
-      }));
-      setSpeciesData(data);
-    } catch (error: any) {
-      const errMsg = error?.message || "Erro desconhecido";
-      setErrorMessage(errMsg);
-    }
-  }, [tankId, setErrorMessage]);
+  useEffect(() => {
+    let animalsFiltered = animals.filter((animal) => {
+      if (filters.codeAnimal) {
+        return animal.codeAnimal.includes(filters.codeAnimal);
+      }
+      if (filters.specie) {
+        return animal.specie === filters.specie;
+      };
+      return animals;
+    });
+    setAnimalsFiltered(animalsFiltered);
+  }, [filters]);
 
+  // Paginação dos animais
   const paginationAnimals = useCallback(() => {
     setPaginatedAnimals(
-      animals.slice(
+      animalsFiltered.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
       )
     );
-    setTotalPages(Math.min(Math.ceil(animals.length / itemsPerPage)));
-  }, [animals, currentPage, itemsPerPage]);
-
-  useEffect(() => {
-    fetchTank();
-    fetchAnimals();
-  }, [fetchTank, fetchAnimals]);
+    setTotalPages(Math.min(Math.ceil(animalsFiltered.length / itemsPerPage)));
+  }, [animalsFiltered, currentPage, itemsPerPage]);
 
   useEffect(() => {
     paginationAnimals();
@@ -136,12 +183,12 @@ export default function TankDetailsPage() {
       <div className="page-container">
         <div className="content-container">
           <div className="content-card">
-            <div className={styles.errorMessage}>
+            <div className={detailsStyles.errorMessage}>
               <BsInfoCircle size={48} />
               <h3>Tanque não encontrado</h3>
               <p>O tanque solicitado não existe ou foi removido.</p>
               <button
-                className={styles.backButton}
+                className={detailsStyles.backButton}
                 onClick={() => router.push("/dashboard/tanks")}
                 aria-label="Voltar para a lista de tanques"
               >
@@ -156,15 +203,15 @@ export default function TankDetailsPage() {
 
 
   return (<>
-  
 
-          {errorMessage && (
-            <ErrorBox
-              errorMessage={errorMessage}
-              setErrorMessage={setErrorMessage}
-              otherClassName=""
-            />
-          )}
+
+    {errorMessage && (
+      <ErrorBox
+        errorMessage={errorMessage}
+        setErrorMessage={setErrorMessage}
+        otherClassName=""
+      />
+    )}
     <div className="page-container">
       <div className="content-container">
         {/* Cabeçalho */}
@@ -174,10 +221,10 @@ export default function TankDetailsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className={styles.header + " mb-3"}>
-            <div className={styles.header + " d-flex align-items-center flex-wrap gap-3"}>
+          <div className={detailsStyles.header}>
+            <div className={detailsStyles.header}>
               <button
-                className={styles.backButton}
+                className={detailsStyles.backButton}
                 onClick={() => {
                   router.push("/dashboard/tanks")
                 }}
@@ -185,75 +232,55 @@ export default function TankDetailsPage() {
               >
                 <BsArrowLeft />
               </button>
-              <h2 className={styles.pageTitle}>
-                <FaWater className={styles.pageTitleIcon} />{" "}
+              <h2 className={detailsStyles.pageTitle}>
+                <GiFishBucket />{" "}
                 {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
               </h2>
 
             </div>
-
+          </div>
 
           {/* Informações básicas do tanque */}
-          <div className={styles.detailCardsRow + " row g-4"}>
+          <div className={detailsStyles.detailCardsRow}>
             <AnimatePresence>
-              <motion.div
-                className="col-md-4 col-sm-6"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                <div className={styles.detailCard}>
-                  <div className={styles.detailCardIcon}>
-                    <BsDropletFill />
-                  </div>
-                  <div className={styles.detailCardContent}>
-                    <div className={styles.detailCardLabel}>Capacidade</div>
-                    <div className={styles.detailCardValue}>
-                      {tankFullInfo.capacity} L
-                    </div>
+              <div className={detailsStyles.detailCard}>
+                <div className={detailsStyles.detailCardIcon}>
+                  <BsDropletFill />
+                </div>
+                <div className={detailsStyles.detailCardContent}>
+                  <div className={detailsStyles.detailCardLabel}>Capacidade</div>
+                  <div className={detailsStyles.detailCardValue}>
+                    {tankFullInfo.capacity} L
                   </div>
                 </div>
-              </motion.div>
-              <motion.div
-                className="col-md-4 col-sm-6"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <div className={styles.detailCard}>
-                  <div className={styles.detailCardIcon}>
-                    <BsRulers />
-                  </div>
-                  <div className={styles.detailCardContent}>
-                    <div className={styles.detailCardLabel}>Dimensões</div>
-                    <div className={styles.detailCardValue}>
-                      {tankFullInfo.size.width}×{tankFullInfo.size.height} m
-                    </div>
+              </div>
+              <div className={detailsStyles.detailCard}>
+                <div className={detailsStyles.detailCardIcon}>
+                  <BsRulers />
+                </div>
+                <div className={detailsStyles.detailCardContent}>
+                  <div className={detailsStyles.detailCardLabel}>Dimensões</div>
+                  <div className={detailsStyles.detailCardValue}>
+                    {tankFullInfo.size.width}×{tankFullInfo.size.height} m
                   </div>
                 </div>
-              </motion.div>
-              <motion.div
-                className="col-md-4 col-sm-6"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
+              </div>
 
-                <div className={styles.detailCard}>
-                  <div className={styles.detailCardIcon}>
-                    <FaFish />
-                  </div>
-                  <div className={styles.detailCardContent}>
-                    <div className={styles.detailCardLabel}>Animais</div>
-                    <div className={styles.detailCardValue}>
-                      {animals.length}
-                    </div>
+              <div className={detailsStyles.detailCard}>
+                <div className={detailsStyles.detailCardIcon}>
+                  <FaFish />
+                </div>
+                <div className={detailsStyles.detailCardContent}>
+                  <div className={detailsStyles.detailCardLabel}>Animais</div>
+                  <div className={detailsStyles.detailCardValue}>
+                    {loadingAnimals ? (
+                      <ClockLoader color="#0a58ca" size={20} />
+                    ) : (
+                      animals.length
+                    )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </AnimatePresence>
           </div>
 
@@ -275,9 +302,9 @@ export default function TankDetailsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={styles.contentCard + " h-100"}>
-                  <h3 className={styles.sectionTitle}>
-                    <FaFish className={styles.sectionTitleIcon} /> Distribuição por Espécie
+                <div className={detailsStyles.contentCard + " h-100"}>
+                  <h3 className={detailsStyles.sectionTitle}>
+                    <FaFish /> Distribuição por Espécie
                   </h3>
                   <motion.div
                     style={{ height: "350px" }}
@@ -327,43 +354,53 @@ export default function TankDetailsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={styles.contentCard + " h-100"}>
-                  <h3 className={styles.sectionTitle}>
-                    <FaFish className={styles.sectionTitleIcon} /> Animais neste Tanque
+                <div className={detailsStyles.contentCard + " h-100"}>
+                  <h3 className={detailsStyles.sectionTitle}>
+                    <FaFish /> Animais neste Tanque
                   </h3>
                   {/* Filtros de pesquisa */}
-                  <div className={styles.animalFilters}>
-                    <div className={styles.searchInput}>
-                      <BsSearch className={styles.filterIcon} />
-                      <input
-                        type="text"
-                        placeholder="Buscar por código"
-                        value={filters.codeAnimal}
-                        onChange={(e) =>
-                          setFilters({ ...filters, codeAnimal: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className={styles.filterInput}>
-                      <BsFilter className={styles.filterIcon} />
-                      <select
-                        value={filters.specie}
-                        onChange={(e) =>
-                          setFilters({ ...filters, specie: e.target.value })
-                        }
-                        className={styles.selectFilter}
-                      >
-                        <option value="">Todas as espécies</option>
-                        {species.map((specie, index) => (
-                          <option key={index} value={specie._id}>
-                            {specie.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                  <DynamicFilters
+                    name="Filtros de animais"
+                    filters={[
+                      {
+                        key: 'codeAnimal',
+                        label: 'Código',
+                        icon: BsSearch,
+                        type: 'text',
+                        placeholder: 'Buscar por código',
+                        value: filters.codeAnimal,
+                        onChange: (value: string | number) => {
+                          setCurrentPage(1);
+                          setFilters((prev) => ({
+                            ...prev,
+                            codeAnimal: value as string,
+                          }));
+                        },
+                        size: 'medium',
+                      },
+                      {
+                        key: 'specie',
+                        label: 'Espécie',
+                        icon: BsFilter,
+                        type: 'select',
+                        value: filters.specie,
+                        onChange: (value: string | number) => {
+                          setCurrentPage(1);
+                          setFilters((prev) => ({
+                            ...prev,
+                            specie: value as string,
+                          }));
+                        },
+                        selectOptions: [
+                          { label: 'Todas as espécies', value: '' },
+                          ...species.map((specie) => ({ label: specie.name, value: specie._id }))
+                        ],
+                        size: 'medium',
+                      },
+                    ]}
+                  />
                   {/* Status de filtragem */}
-                  <div className={styles.filterStatus}>
+                  <div className={detailsStyles.filterStatus}>
                     {animals.length === tankFullInfo.animals.length ? (
                       <span>Mostrando todos os animais</span>
                     ) : (
@@ -373,7 +410,7 @@ export default function TankDetailsPage() {
                     )}
                     {(filters.codeAnimal || filters.specie) && (
                       <button
-                        className={styles.clearFilterButton}
+                        className={detailsStyles.clearFilterButton}
                         onClick={() => {
                           setFilters(defaultFilters);
                         }}
@@ -388,40 +425,33 @@ export default function TankDetailsPage() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <table className="table table-hover">
-                      <thead className={styles.tableHeader}>
-                        <tr>
-                          <th scope="col">Código</th>
-                          <th scope="col">Espécie</th>
-                          <th scope="col">Gênero</th>
-                          <th scope="col">Nascimento</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedAnimals.map((animal) => (
-                          <tr key={animal.codeAnimal} className={styles.tableRow}>
-                            <td className={styles.tableCell}>
-                              {animal.codeAnimal}
-                            </td>
-                            <td className={styles.tableCell}>{species.find((specie)=>specie._id === animal.specie)?.name}</td>
-                            <td className={styles.tableCell}>
-                              {animal.gender === "M" ? "Macho" : "Fêmea"}
-                            </td>
-                            <td className={styles.tableCell}>
-                              {new Date(animal.birthDate).toLocaleDateString(
-                                "pt-BR"
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <CustomTable
+                      columns={[
+                        {
+                          header: 'Código',
+                          render: (animal) => animal.codeAnimal,
+                        },
+                        {
+                          header: 'Espécie',
+                          render: (animal) => species.find((specie) => specie._id === animal.specie)?.name || '-',
+                        },
+                        {
+                          header: 'Gênero',
+                          render: (animal) => animal.gender === 'M' ? 'Macho' : 'Fêmea',
+                        },
+                        {
+                          header: 'Nascimento',
+                          render: (animal) => new Date(animal.birthDate).toLocaleDateString('pt-BR'),
+                        },
+                      ]}
+                      data={paginatedAnimals}
+                    />
                   </motion.div>
                   {/* Paginação */}
                   {totalPages > 0 && (
-                    <div className={styles.pagination}>
+                    <div className={detailsStyles.pagination}>
                       <button
-                        className={styles.paginationButton}
+                        className={detailsStyles.paginationButton}
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(1, prev - 1))
                         }
@@ -430,11 +460,11 @@ export default function TankDetailsPage() {
                       >
                         <FaChevronLeft /> Anterior
                       </button>
-                      <div className={styles.paginationInfo}>
+                      <div className={detailsStyles.paginationInfo}>
                         Página {currentPage} de {Math.ceil(animals.length / itemsPerPage)}
                       </div>
                       <button
-                        className={styles.paginationButton}
+                        className={detailsStyles.paginationButton}
                         onClick={() =>
                           setCurrentPage((prev) =>
                             Math.min(
@@ -464,7 +494,7 @@ export default function TankDetailsPage() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className={styles.noResults}>
+                  <div className={detailsStyles.noResults}>
                     <BsInfoCircle size={32} />
                     <h3>Nenhum animal cadastrado</h3>
                     <p>Este tanque ainda não possui animais registrados.</p>
@@ -482,7 +512,7 @@ export default function TankDetailsPage() {
                   transition={{ duration: 0.5 }}
                 >
 
-                  <div className={styles.noResults}>
+                  <div className={detailsStyles.noResults}>
                     <BsInfoCircle size={32} />
                     <h3>Nenhum animal encontrado</h3>
                     <p>
@@ -491,7 +521,7 @@ export default function TankDetailsPage() {
 
                     </p>
                     <button
-                      className={styles.clearFilterButton}
+                      className={detailsStyles.clearFilterButton}
                       onClick={() => {
                         setFilters(defaultFilters);
                       }}

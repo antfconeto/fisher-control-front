@@ -782,6 +782,16 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
+  .detailCard{
+    height: auto;
+    padding: 10px;
+  }
+  .header{
+    display: flex;
+    flex-direction: row;
+    height: auto;
+    padding: 10px;
+  }
 
   .tankCardHeader {
     padding: 20px;
