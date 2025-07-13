@@ -17,7 +17,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { Animal, Specie, Tank } from "@/types/types";
 import { getTankById } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
-import { createAnimal, deleteAnimal, getAllAnimalsFromTank, updateAnimal } from "@/actions/animal";
+import {  deleteAnimal, getAllAnimalsFromTank, updateAnimal } from "@/actions/animal";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useSpecie } from "@/hooks/useSpecies";
 import { motion, AnimatePresence } from "framer-motion";

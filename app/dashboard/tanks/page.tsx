@@ -62,7 +62,7 @@ export default function TanksPage() {
   const [editingTankId, setEditingTankId] = useState<string | null>(null);
 
   const [currentTank, setCurrentTank] = useState<
-    Omit<Tank, "id" | "animalsCount">
+    Omit<Tank, "id" | "animalsCount" >
   >({
     capacity: 0,
     size: {
@@ -70,7 +70,6 @@ export default function TanksPage() {
       height: 0,
     },
     _id: '',
-    fishManagerId: '',
     name: ''
   });
 
@@ -124,7 +123,6 @@ export default function TanksPage() {
         height: 0,
       },
       _id: '',
-      fishManagerId: '',
       name: ''
     });
     setShowModal(true);
@@ -140,7 +138,6 @@ export default function TanksPage() {
         height: 0,
       },
       _id: '',
-      fishManagerId: '',
       name: ''
     });
     setEditingTankId(tank._id);
@@ -175,7 +172,6 @@ export default function TanksPage() {
       setCurrentTank({
         _id: '',
         name: '',
-        fishManagerId: '',
         capacity: 0,
         size: {
           width: 0,

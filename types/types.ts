@@ -50,19 +50,7 @@ export interface Tank {
       width: number;
       height: number;
   }
-  fishManagerId:string;
   animals?: Animal[];
-}
-
-export type FishManager = {
-    _id:string;
-    name:string;
-    description:string;
-    userRequireApprove:string[];
-    users:string[];
-    createdAt:Date;
-    ownerId:string;
-    updatedAt:Date;
 }
 
 export type Specie = {
@@ -71,4 +59,28 @@ export type Specie = {
   quantity:number;
   description:string;
   color:string;
+}
+
+export interface SpawningForm {
+  _id?: string;
+  date: Date;
+  animal_weight: {
+      beforeSpawn: number;
+      afterSpawn: number;
+  };
+  egg_weight: number;
+  hormone: {
+      hour_dosage: string;
+      quantity: number;
+  };
+  monitoring: Monitoring[]
+  animalId: string;
+  userId: string;
+
+}
+
+export type Monitoring = {
+  hour: string;
+  temperature: number;
+  hour_degree: number;
 }
