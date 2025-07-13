@@ -35,15 +35,15 @@ const menuItems = [
       },
       {
         name: "Espécies",
-        icon: <LuFilePenLine size={18}/>,
+        icon: <LuFilePenLine size={18} />,
         link: "/dashboard/species",
       },
       {
         name: "Desovas",
         icon: <Egg size={18} />,
-        link: "/dashboard/spawining",
+        link: "/dashboard/spawning",
       },
-            {
+      {
         name: "Usuários",
         icon: <FaRegUser size={18} />,
         link: "/dashboard/users",
@@ -124,7 +124,12 @@ const Sidebar = () => {
             <Nav className={`flex-column ${styles.navMenu}`}>
               {section.items.map((item, index) => (
                 <Nav.Item key={index} className="w-100">
-                  <Link href={item.link} prefetch={true} passHref legacyBehavior>
+                  <Link
+                    href={item.link}
+                    prefetch={true}
+                    passHref
+                    legacyBehavior
+                  >
                     <Nav.Link
                       className={`text-white ${styles.sideItem} ${
                         isActive(item.link) ? styles.activeItem : ""

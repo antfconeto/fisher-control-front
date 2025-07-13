@@ -7,7 +7,7 @@ import { ResponseError } from "@/types/types";
 import { User } from "@/types/user";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 // ...existing imports...
 
 export const listUsersPaginated = async ({

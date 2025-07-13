@@ -7,7 +7,7 @@ import { CustomConsole } from "@/utils/customLogger";
 import errorMessages from "@/utils/errorMessages.json";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 const cookieManager: ICookiesManager = await new CookieManager();
 
 export const signUpAction = async (
