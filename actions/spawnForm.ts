@@ -2,6 +2,12 @@ import { ResponseError, SpawningForm } from "@/types/types";
 
 const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+function getCookieValue(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? match[2] : null;
+}
+
 export interface SpawnFormsPagination {
   data: SpawningForm[];
   pagination: {
@@ -26,8 +32,7 @@ export interface SpawnFormFilters {
 export const getSpawnFormsWithFilters = async (
   filters: SpawnFormFilters
 ): Promise<SpawnFormsPagination | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -64,8 +69,7 @@ export const getSpawnFormsWithFilters = async (
 export const createSpawnForm = async (
   spawnForm: SpawningForm
 ): Promise<SpawningForm | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -101,8 +105,7 @@ export const createSpawnForm = async (
 export const updateSpawnForm = async (
   spawnForm: SpawningForm
 ): Promise<SpawningForm | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -139,8 +142,7 @@ export const updateSpawnForm = async (
 export const deleteSpawnForm = async (
   spawnFormId: string
 ): Promise<boolean | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -179,8 +181,7 @@ export const deleteSpawnForm = async (
 export const getSpawnFormById = async (
   spawnFormId: string
 ): Promise<SpawningForm | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -219,8 +220,7 @@ export const getSpawnFormById = async (
 export const getUserById = async (
   userId: string
 ): Promise<any | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -258,8 +258,7 @@ export const getUserById = async (
 export const getAnimalById = async (
   animalId: string
 ): Promise<any | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -297,8 +296,7 @@ export const getAnimalById = async (
 export const getAnimalByCode = async (
   codeAnimal: string
 ): Promise<any | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -336,8 +334,7 @@ export const getAnimalByCode = async (
 export const getSpecieById = async (
   specieId: string
 ): Promise<any | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -375,8 +372,7 @@ export const getSpecieById = async (
 export const getTankById = async (
   tankId: string
 ): Promise<any | ResponseError> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const token = getCookieValue("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -420,8 +416,7 @@ export const addMonitoringRecord = async (
   }
 ) => {
   try {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    const token = getCookieValue("access_token");
     if (!token) {
       throw new Error("Token não encontrado");
     }

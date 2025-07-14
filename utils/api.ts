@@ -4,6 +4,12 @@ import { CustomError } from "./customError";
 
 const logger = new CustomConsole();
 
+function getCookieValue(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? match[2] : null;
+}
+
 // API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -20,7 +26,7 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem("authToken");
+    const token = getCookieValue("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -52,7 +58,6 @@ api.interceptors.response.use(
       switch (response.status) {
         case 401:
           // Unauthorized - clear token and redirect to login
-          localStorage.removeItem("authToken");
           window.location.href = "/login";
           break;
         case 403:

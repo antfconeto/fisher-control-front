@@ -5,6 +5,7 @@ import { User } from "@/types/user";
 import { CustomConsole } from "@/utils/customLogger";
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { useErrorContext } from "./errorContext";
+import { useRouter } from "next/navigation";
 
 interface UserContextProps {
   user: User | null;
@@ -26,12 +27,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   //hook request
   const { data, error, loading, sendRequest } = useRequest();
   const { errorMessage, setErrorMessage } = useErrorContext();
+  const router = useRouter();
   //consoler
   const consoler = new CustomConsole();
 
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  const clearTokenAndRedirect = () => {
+    // Limpar token do localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("authToken");
+    }
+    // Limpar token dos cookies
+    document.cookie =
+      "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    consoler.warn("Token inválido removido, redirecionando para login");
+    router.push("/login");
+  };
 
   const fetchUserData = async () => {
     try {
@@ -51,23 +65,22 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           error.message || error.error || "Erro desconhecido"
         }`
       );
-      // Se o erro for relacionado ao token (401, 403), não mostrar erro ao usuário
-      // apenas logar para debug
+      // Se o erro for relacionado ao token (401, 403), limpar token e redirecionar
       if (
         error.statusCode &&
         (error.statusCode === 401 || error.statusCode === 403)
       ) {
         consoler.warn(`Token inválido ou expirado: ${error.message}`);
-        // Não definir mensagem de erro para o usuário neste caso
+        clearTokenAndRedirect();
         return;
       }
 
-      // Se for erro de usuário não encontrado (404), não bloquear a navegação
+      // Se for erro de usuário não encontrado (404), limpar token e redirecionar
       if (error.statusCode === 404) {
         consoler.warn(
           `Usuário não encontrado no banco de dados: ${error.message}`
         );
-        // Não definir mensagem de erro para o usuário neste caso
+        clearTokenAndRedirect();
         return;
       }
 

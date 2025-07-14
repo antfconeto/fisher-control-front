@@ -35,7 +35,14 @@ export function useSpawningPagination(
           setSpawnForms([]);
           setPagination(null);
         } else {
-          setSpawnForms(response.data);
+          // Converter o campo date de string para Date
+          const spawnFormsWithDateConversion = response.data.map(
+            (spawnForm) => ({
+              ...spawnForm,
+              date: new Date(spawnForm.date),
+            })
+          );
+          setSpawnForms(spawnFormsWithDateConversion);
           setPagination(response.pagination);
         }
       } catch (err: any) {

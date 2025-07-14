@@ -1,5 +1,11 @@
-"use client"
-import React, { createContext, ReactNode, useState, useEffect, useContext } from "react";
+"use client";
+import React, {
+  createContext,
+  ReactNode,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "@/types/types";
 import { CustomConsole } from "@/utils/customLogger";
@@ -17,12 +23,14 @@ export interface AuthContextProps {
   refreshToken: () => void;
 }
 
-export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+export const AuthContext = createContext<AuthContextProps | undefined>(
+  undefined
+);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -31,7 +39,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<DecodedToken | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { successNotification, errorNotification, infoNotification, warningNotification } = useNotification();
+  const {
+    successNotification,
+    errorNotification,
+    infoNotification,
+    warningNotification,
+  } = useNotification();
 
   // Check if token is expired
   const isTokenExpired = (token: string): boolean => {
@@ -49,23 +62,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedToken = localStorage.getItem('authToken');
-        
-        if (storedToken && !isTokenExpired(storedToken)) {
-          const decoded = jwtDecode<DecodedToken>(storedToken);
-          setToken(storedToken);
-          setUser(decoded);
-          logger.info('User authenticated from stored token');
-          successNotification('Autenticado', 'Usuário autenticado com sucesso!');
-        } else if (storedToken) {
-          // Token is expired, remove it
-          localStorage.removeItem('authToken');
-          logger.warn('Expired token removed from storage');
-          warningNotification('Sessão expirada', 'Seu token expirou. Faça login novamente.');
-        }
+        // Remover todas as referências a localStorage relacionadas ao token (get, set, remove). Se necessário, use cookies-manager.ts para manipular cookies.
+        // const storedToken = localStorage.getItem("authToken");
+        // if (storedToken && !isTokenExpired(storedToken)) {
+        //   const decoded = jwtDecode<DecodedToken>(storedToken);
+        //   setToken(storedToken);
+        //   setUser(decoded);
+        //   logger.info("User authenticated from stored token");
+        //   successNotification(
+        //     "Autenticado",
+        //     "Usuário autenticado com sucesso!"
+        //   );
+        // } else if (storedToken) {
+        //   // Token is expired, remove it
+        //   localStorage.removeItem("authToken");
+        //   logger.warn("Expired token removed from storage");
+        //   warningNotification(
+        //     "Sessão expirada",
+        //     "Seu token expirou. Faça login novamente."
+        //   );
+        // }
       } catch (error) {
         logger.error(`Error initializing auth state: ${error}`);
-        localStorage.removeItem('authToken');
+        // localStorage.removeItem("authToken");
       } finally {
         setIsLoading(false);
       }
@@ -77,42 +96,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (newToken: string) => {
     try {
       const decoded = jwtDecode<DecodedToken>(newToken);
-      
+
       if (isTokenExpired(newToken)) {
-        throw new Error('Token is expired');
+        throw new Error("Token is expired");
       }
 
-      localStorage.setItem('authToken', newToken);
+      // localStorage.setItem("authToken", newToken); // Remover
       setToken(newToken);
       setUser(decoded);
-      logger.info('User logged in successfully');
-      successNotification('Login realizado', 'Login efetuado com sucesso!');
+      logger.info("User logged in successfully");
+      successNotification("Login realizado", "Login efetuado com sucesso!");
     } catch (error) {
       logger.error(`Error during login: ${error}`);
-      const errorMessage = (error instanceof Error) ? error.message : 'Erro desconhecido ao fazer login.';
-      errorNotification('Erro no login', errorMessage);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro desconhecido ao fazer login.";
+      errorNotification("Erro no login", errorMessage);
       throw error;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    // localStorage.removeItem("authToken"); // Remover
     setToken(null);
     setUser(null);
-    logger.info('User logged out');
-    infoNotification('Logout', 'Você saiu do sistema.');
+    logger.info("User logged out");
+    infoNotification("Logout", "Você saiu do sistema.");
   };
 
   const refreshToken = () => {
     // This would typically make an API call to refresh the token
     // For now, we'll just check if the current token is still valid
     if (token && !isTokenExpired(token)) {
-      logger.info('Token is still valid');
+      logger.info("Token is still valid");
       return;
     }
-    
-    logger.warn('Token needs refresh or is invalid');
-    warningNotification('Sessão expirada', 'Sua sessão expirou. Faça login novamente.');
+
+    logger.warn("Token needs refresh or is invalid");
+    warningNotification(
+      "Sessão expirada",
+      "Sua sessão expirou. Faça login novamente."
+    );
     logout();
   };
 
@@ -126,11 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     refreshToken,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
 export default useAuth;
