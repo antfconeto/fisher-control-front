@@ -11,6 +11,7 @@ import {
   BsClock,
   BsGraphUp,
   BsInfoCircle,
+  BsPlus,
 } from "react-icons/bs";
 import {
   FaFish,
@@ -22,82 +23,245 @@ import {
   FaClock,
   FaEgg,
   FaUserTie,
+  FaTimes,
+  FaSave,
 } from "react-icons/fa";
 import { ClockLoader } from "react-spinners";
 import { Button } from "@/components/ui";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
-import { SpawningForm, Monitoring } from "@/types/types";
-import { useSpawning } from "@/hooks/useSpawning";
+import { SpawningForm } from "@/types/types";
+import {
+  getSpawnFormById,
+  getUserById,
+  getAnimalByCode,
+  getSpecieById,
+  getTankById,
+  addMonitoringRecord,
+} from "@/actions/spawnForm";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { InputDefault } from "@/components/Inputs/InputDefault/inputDefault";
 
-// Dados mockados para demonstração
-const mockUser = {
-  id: "USER001",
-  name: "João Silva",
-  email: "joao.silva@fisher.com",
-  role: "Técnico",
-  phone: "(11) 99999-9999",
-};
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  fishManager: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-const mockAnimal = {
-  id: "ANM001",
-  codeAnimal: "ANM001",
-  specie: "Tilápia do Nilo",
-  birthDate: new Date("2023-01-15"),
-  gender: "F" as "M" | "F",
-  matriz_code: "MAT001",
-  tankId: "TANK001",
-  weight: 2.5,
-  length: 25,
-  healthStatus: "Saudável",
-};
+interface Animal {
+  _id: string;
+  codeAnimal: string;
+  specie: string;
+  birthDate: string;
+  gender: "M" | "F";
+  matriz_code: string;
+  tankId: string;
+}
+
+interface Specie {
+  _id: string;
+  name: string;
+  description?: string;
+}
+
+interface Tank {
+  _id: string;
+  name: string;
+  capacity: number;
+  size: {
+    width: number;
+    height: number;
+  };
+  fishManagerId: string;
+}
 
 export default function SpawningDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { setErrorMessage, errorMessage } = useErrorContext();
-  const { getSpawningFormById } = useSpawning();
 
   const [spawningForm, setSpawningForm] = useState<SpawningForm | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [animal, setAnimal] = useState<Animal | null>(null);
+  const [specie, setSpecie] = useState<Specie | null>(null);
+  const [tank, setTank] = useState<Tank | null>(null);
+  const [showAddMonitoringModal, setShowAddMonitoringModal] = useState(false);
+  const [newMonitoringRecord, setNewMonitoringRecord] = useState({
+    hour: "",
+    temperature: 0,
+    hour_degree: 0,
+  });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadSpawningForm = async () => {
-      try {
-        setLoading(true);
-        // Simular delay de API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const form = getSpawningFormById(params.id as string);
-        if (form) {
-          setSpawningForm(form);
-        } else {
-          setErrorMessage("Spawning form não encontrado");
-        }
-      } catch (error: any) {
-        setErrorMessage(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Função para carregar o spawning form e dados relacionados
+  const loadSpawningForm = async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
 
+      if (!params.id) {
+        setErrorMessage("ID do spawning form não fornecido");
+        return;
+      }
+
+      const response = await getSpawnFormById(params.id as string);
+
+      if ("error" in response) {
+        setErrorMessage(response.error);
+        return;
+      }
+
+      // Converter o campo date de string para Date
+      const spawnFormWithDateConversion = {
+        ...response,
+        date: new Date(response.date),
+      };
+
+      setSpawningForm(spawnFormWithDateConversion);
+
+      // Buscar dados do usuário
+      if (response.userId) {
+        const userResponse = await getUserById(response.userId);
+        if (!("error" in userResponse)) {
+          setUser(userResponse);
+        }
+      }
+
+      // Buscar dados do animal
+      if (response.animalId) {
+        const animalResponse = await getAnimalByCode(response.animalId);
+        if (!("error" in animalResponse)) {
+          setAnimal(animalResponse);
+
+          // Buscar dados da espécie usando o ID da espécie do animal
+          if (animalResponse.specie) {
+            const specieResponse = await getSpecieById(animalResponse.specie);
+            if (!("error" in specieResponse)) {
+              setSpecie(specieResponse);
+            }
+          }
+
+          // Buscar dados do tanque usando o tankId do animal
+          if (animalResponse.tankId) {
+            const tankResponse = await getTankById(animalResponse.tankId);
+            if (!("error" in tankResponse)) {
+              setTank(tankResponse);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      setErrorMessage(
+        error.message || "Erro ao carregar detalhes do spawning form"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (params.id) {
       loadSpawningForm();
     }
-  }, [params.id, getSpawningFormById, setErrorMessage]);
+  }, [params.id, setErrorMessage]);
 
   const formatTime = (time: string) => {
     return time;
   };
 
+  const formatNumber = (value: string, maxDecimals: number = 2): string => {
+    // Remove caracteres não numéricos exceto vírgula e ponto
+    let cleaned = value.replace(/[^\d,.-]/g, "");
+
+    // Substitui vírgula por ponto para cálculos
+    cleaned = cleaned.replace(",", ".");
+
+    // Converte para número
+    let num = parseFloat(cleaned);
+    if (isNaN(num)) return "";
+
+    // Formata com o número máximo de decimais
+    return num.toFixed(maxDecimals).replace(".", ",");
+  };
+
+  const handleMonitoringInputChange = (
+    field: string,
+    value: string | number
+  ) => {
+    let formattedValue = value;
+
+    // Aplicar formatação específica para cada campo
+    if (field === "temperature" || field === "hour_degree") {
+      if (typeof value === "string") {
+        formattedValue =
+          parseFloat(formatNumber(value, 1).replace(",", ".")) || 0;
+      }
+    }
+
+    setNewMonitoringRecord((prev) => ({
+      ...prev,
+      [field]: formattedValue,
+    }));
+  };
+
+  const handleAddMonitoringRecord = async () => {
+    try {
+      if (!newMonitoringRecord.hour || newMonitoringRecord.temperature === 0) {
+        setErrorMessage("Por favor, preencha todos os campos obrigatórios");
+        return;
+      }
+
+      if (!spawningForm || !spawningForm._id) {
+        setErrorMessage("Spawning form não encontrado.");
+        return;
+      }
+      await addMonitoringRecord(spawningForm._id, newMonitoringRecord);
+
+      // Recarregar os dados do spawning form
+      await loadSpawningForm();
+
+      // Limpar o formulário e fechar o modal
+      setNewMonitoringRecord({
+        hour: "",
+        temperature: 0,
+        hour_degree: 0,
+      });
+      setShowAddMonitoringModal(false);
+
+      // Mostrar notificação de sucesso
+      if (typeof window !== "undefined") {
+        alert("Registro de monitoramento adicionado com sucesso!");
+      }
+    } catch (error: any) {
+      setErrorMessage(
+        error.message || "Erro ao adicionar registro de monitoramento"
+      );
+    }
+  };
+
   const calculateWeightLoss = () => {
     if (!spawningForm) return 0;
-    return spawningForm.animal_weight.beforeSpawn - spawningForm.animal_weight.afterSpawn;
+    return (
+      spawningForm.animal_weight.beforeSpawn -
+      spawningForm.animal_weight.afterSpawn
+    );
   };
 
   const getMonitoringChartData = () => {
     if (!spawningForm) return [];
-    
+
     return spawningForm.monitoring.map((monitoring, index) => ({
       hour: monitoring.hour,
       temperature: monitoring.temperature,
@@ -110,7 +274,9 @@ export default function SpawningDetailsPage() {
     return (
       <div className={styles.loadingContainer}>
         <ClockLoader color="#0a58ca" size={60} />
-        <p className={styles.loadingText}>Carregando detalhes do spawning form...</p>
+        <p className={styles.loadingText}>
+          Carregando detalhes do spawning form...
+        </p>
       </div>
     );
   }
@@ -137,12 +303,12 @@ export default function SpawningDetailsPage() {
           otherClassName=""
         />
       )}
-      
+
       <div className={styles.container}>
         {/* Header */}
         <div className={styles.header}>
-          <Button 
-            onClick={() => router.back()} 
+          <Button
+            onClick={() => router.back()}
             variant="secondary"
             className={styles.backButton}
           >
@@ -160,42 +326,86 @@ export default function SpawningDetailsPage() {
               <BsCalendar3 className={styles.infoCardIcon} />
               <h3>Informações do Spawning</h3>
             </div>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Data:</span>
-                <span className={styles.infoValue}>
-                  {spawningForm.date.toLocaleDateString("pt-BR")}
-                </span>
+            <div className={styles.spawningInfoGrid}>
+              <div className={`${styles.spawningInfoItem} ${styles.dateCard}`}>
+                <div>
+                  <div className={styles.spawningInfoLabel}>
+                    <BsCalendar3 className={styles.spawningInfoIcon} />
+                    Data do Spawning
+                  </div>
+                  <div className={styles.spawningInfoValue}>
+                    {spawningForm.date instanceof Date
+                      ? spawningForm.date.toLocaleDateString("pt-BR")
+                      : new Date(spawningForm.date).toLocaleDateString("pt-BR")}
+                  </div>
+                </div>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Peso Antes:</span>
-                <span className={styles.infoValue}>
-                  {spawningForm.animal_weight.beforeSpawn}kg
-                </span>
+
+              <div
+                className={`${styles.spawningInfoItem} ${styles.weightCard}`}
+              >
+                <div>
+                  <div className={styles.spawningInfoLabel}>
+                    <FaWeight className={styles.spawningInfoIcon} />
+                    Peso Antes
+                  </div>
+                  <div className={styles.spawningInfoValue}>
+                    {spawningForm.animal_weight.beforeSpawn}kg
+                  </div>
+                </div>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Peso Depois:</span>
-                <span className={styles.infoValue}>
-                  {spawningForm.animal_weight.afterSpawn}kg
-                </span>
+
+              <div
+                className={`${styles.spawningInfoItem} ${styles.weightCard}`}
+              >
+                <div>
+                  <div className={styles.spawningInfoLabel}>
+                    <FaWeight className={styles.spawningInfoIcon} />
+                    Peso Depois
+                  </div>
+                  <div className={styles.spawningInfoValue}>
+                    {spawningForm.animal_weight.afterSpawn}kg
+                  </div>
+                </div>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Perda de Peso:</span>
-                <span className={styles.infoValue}>
-                  {calculateWeightLoss().toFixed(2)}kg
-                </span>
+
+              <div className={styles.spawningInfoItem}>
+                <div>
+                  <div className={styles.spawningInfoLabel}>
+                    <BsThermometer className={styles.spawningInfoIcon} />
+                    Perda de Peso
+                  </div>
+                  <div className={styles.spawningInfoValue}>
+                    {calculateWeightLoss().toFixed(2)}kg
+                  </div>
+                </div>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Peso dos Ovos:</span>
-                <span className={styles.infoValue}>
-                  {spawningForm.egg_weight}kg
-                </span>
+
+              <div className={styles.spawningInfoItem}>
+                <div>
+                  <div className={styles.spawningInfoLabel}>
+                    <BsEgg className={styles.spawningInfoIcon} />
+                    Peso dos Ovos
+                  </div>
+                  <div className={styles.spawningInfoValue}>
+                    {spawningForm.egg_weight}kg
+                  </div>
+                </div>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Hormônio:</span>
-                <span className={styles.infoValue}>
-                  {spawningForm.hormone.quantity}ml às {spawningForm.hormone.hour_dosage}
-                </span>
+
+              <div
+                className={`${styles.spawningInfoItem} ${styles.hormoneCard}`}
+              >
+                <div>
+                  <div className={styles.spawningInfoLabel}>
+                    <FaClock className={styles.spawningInfoIcon} />
+                    Hormônio
+                  </div>
+                  <div className={styles.spawningInfoValue}>
+                    {spawningForm.hormone.quantity}ml às{" "}
+                    {spawningForm.hormone.hour_dosage}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -212,19 +422,23 @@ export default function SpawningDetailsPage() {
             <div className={styles.infoList}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Nome:</span>
-                <span className={styles.infoValue}>{mockUser.name}</span>
+                <span className={styles.infoValue}>{user?.username}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Email:</span>
-                <span className={styles.infoValue}>{mockUser.email}</span>
+                <span className={styles.infoValue}>{user?.email}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Cargo:</span>
-                <span className={styles.infoValue}>{mockUser.role}</span>
+                <span className={styles.infoValue}>{user?.role}</span>
               </div>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Telefone:</span>
-                <span className={styles.infoValue}>{mockUser.phone}</span>
+                <span className={styles.infoLabel}>Data de Cadastro:</span>
+                <span className={styles.infoValue}>
+                  {user?.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString("pt-BR")
+                    : "Não informado"}
+                </span>
               </div>
             </div>
           </div>
@@ -238,35 +452,37 @@ export default function SpawningDetailsPage() {
             <div className={styles.infoList}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Código:</span>
-                <span className={styles.infoValue}>{mockAnimal.codeAnimal}</span>
+                <span className={styles.infoValue}>{animal?.codeAnimal}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Espécie:</span>
-                <span className={styles.infoValue}>{mockAnimal.specie}</span>
+                <span className={styles.infoValue}>{specie?.name}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Gênero:</span>
                 <span className={styles.infoValue}>
-                  {mockAnimal.gender === "F" ? "Fêmea" : "Macho"}
+                  {animal?.gender === "F" ? "Fêmea" : "Macho"}
                 </span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Data de Nascimento:</span>
                 <span className={styles.infoValue}>
-                  {mockAnimal.birthDate.toLocaleDateString("pt-BR")}
+                  {animal?.birthDate && animal.birthDate !== ""
+                    ? new Date(animal.birthDate).toLocaleDateString("pt-BR")
+                    : "Não informado"}
                 </span>
               </div>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Peso Atual:</span>
-                <span className={styles.infoValue}>{mockAnimal.weight}kg</span>
+                <span className={styles.infoLabel}>Código da Matriz:</span>
+                <span className={styles.infoValue}>
+                  {animal?.matriz_code || "Não informado"}
+                </span>
               </div>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Comprimento:</span>
-                <span className={styles.infoValue}>{mockAnimal.length}cm</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Status de Saúde:</span>
-                <span className={styles.infoValue}>{mockAnimal.healthStatus}</span>
+                <span className={styles.infoLabel}>Tanque:</span>
+                <span className={styles.infoValue}>
+                  {tank?.name || "Não informado"}
+                </span>
               </div>
             </div>
           </div>
@@ -277,32 +493,73 @@ export default function SpawningDetailsPage() {
           <div className={styles.chartHeader}>
             <BsGraphUp className={styles.chartIcon} />
             <h3>Monitoramento de Temperatura</h3>
+            <Button
+              onClick={() => setShowAddMonitoringModal(true)}
+              variant="primary"
+              className={styles.addMonitoringButton}
+            >
+              <BsPlus /> Adicionar Registro
+            </Button>
           </div>
-          
+
           <div className={styles.chartContainer}>
-            <div className={styles.chartPlaceholder}>
-              <FaChartBar style={{ fontSize: '4rem', marginBottom: '1rem', color: '#0a58ca' }} />
-              <h4>Gráfico de Monitoramento</h4>
-              <p>Implementar com biblioteca de gráficos (Chart.js, Recharts, etc.)</p>
-              <div className={styles.monitoringData}>
-                <h5>Dados de Monitoramento:</h5>
-                <div className={styles.monitoringList}>
-                  {getMonitoringChartData().map((data, index) => (
-                    <div key={index} className={styles.monitoringItem}>
-                      <div className={styles.monitoringTime}>
-                        <BsClock /> {data.hour}
-                      </div>
-                      <div className={styles.monitoringTemp}>
-                        <BsThermometer /> {data.temperature}°C
-                      </div>
-                      <div className={styles.monitoringDegree}>
-                        <BsGraphUp /> {data.hourDegree} graus-hora
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {spawningForm.monitoring.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={getMonitoringChartData()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="hour"
+                    label={{
+                      value: "Hora",
+                      position: "insideBottom",
+                      offset: -10,
+                    }}
+                  />
+                  <YAxis
+                    label={{
+                      value: "Temperatura (°C)",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      `${value}°C`,
+                      name === "temperature" ? "Temperatura" : "Graus-Hora",
+                    ]}
+                    labelFormatter={(label) => `Hora: ${label}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="temperature"
+                    stroke="#0a58ca"
+                    strokeWidth={2}
+                    dot={{ fill: "#0a58ca", strokeWidth: 2, r: 4 }}
+                    activeDot={{
+                      r: 6,
+                      stroke: "#0a58ca",
+                      strokeWidth: 2,
+                      fill: "#fff",
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className={styles.chartPlaceholder}>
+                <FaChartBar
+                  style={{
+                    fontSize: "4rem",
+                    marginBottom: "1rem",
+                    color: "#0a58ca",
+                  }}
+                />
+                <h4>Nenhum dado de monitoramento</h4>
+                <p>
+                  Este spawning form não possui registros de monitoramento de
+                  temperatura.
+                </p>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -312,7 +569,7 @@ export default function SpawningDetailsPage() {
             <BsClock className={styles.tableIcon} />
             <h3>Registros de Monitoramento</h3>
           </div>
-          
+
           <div className={styles.tableContainer}>
             <table className={styles.table}>
               <thead>
@@ -335,6 +592,87 @@ export default function SpawningDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal para Adicionar Registro de Monitoramento */}
+      {showAddMonitoringModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>Adicionar Registro de Monitoramento</h3>
+              <button
+                onClick={() => setShowAddMonitoringModal(false)}
+                className={styles.closeButton}
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label>Hora:</label>
+                <InputDefault
+                  type="time"
+                  value={newMonitoringRecord.hour}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleMonitoringInputChange("hour", e.target.value)
+                  }
+                  required
+                  icon={<FaClock />}
+                  placeholder="HH:MM"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Temperatura (°C):</label>
+                <InputDefault
+                  type="text"
+                  value={
+                    newMonitoringRecord.temperature === 0
+                      ? ""
+                      : newMonitoringRecord.temperature.toString()
+                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleMonitoringInputChange("temperature", e.target.value)
+                  }
+                  required
+                  icon={<FaThermometerHalf />}
+                  placeholder="0,0"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Graus-Hora:</label>
+                <InputDefault
+                  type="text"
+                  value={
+                    newMonitoringRecord.hour_degree === 0
+                      ? ""
+                      : newMonitoringRecord.hour_degree.toString()
+                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleMonitoringInputChange("hour_degree", e.target.value)
+                  }
+                  required
+                  icon={<BsGraphUp />}
+                  placeholder="0,0"
+                />
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <Button
+                onClick={() => setShowAddMonitoringModal(false)}
+                variant="secondary"
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleAddMonitoringRecord} variant="primary">
+                <FaSave /> Salvar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
-} 
+}

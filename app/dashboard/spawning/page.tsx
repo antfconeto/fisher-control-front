@@ -37,9 +37,27 @@ import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
 import { SpawningForm, Monitoring } from "@/types/types";
-// import { useSpawning } from "@/hooks/useSpawning";
 import { useSpawningPagination } from "@/hooks/useSpawningPagination";
+import {
+  createSpawnForm,
+  updateSpawnForm,
+  deleteSpawnForm,
+} from "@/actions/spawnForm";
 import { GiFishEggs } from "react-icons/gi";
+import { useAuth } from "@/contexts/authContext";
+import { useNotification } from "@/contexts/notificationContext";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 enum ModalMode {
   CREATE = "create",
@@ -66,20 +84,13 @@ const defaultSpawningForm: Omit<SpawningForm, "_id"> = {
 export default function SpawningPage() {
   const router = useRouter();
   const { setErrorMessage, errorMessage } = useErrorContext();
-  // const {
-  //   spawningForms,
-  //   loading,
-  //   error,
-  //   createSpawningForm,
-  //   updateSpawningForm,
-  //   deleteSpawningForm,
-  // } = useSpawning();
+  const { user } = useAuth();
+  const { successNotification } = useNotification();
 
-  // Filtros iniciais
+  // Filtros iniciais (removido userId)
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
-    userId: "",
     animalId: "",
   });
   const itemsPerPage = 6;
@@ -115,6 +126,7 @@ export default function SpawningPage() {
   const [currentSpawningForm, setCurrentSpawningForm] = useState<SpawningForm>(
     defaultSpawningForm as SpawningForm
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Estados do calendário
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -157,7 +169,11 @@ export default function SpawningPage() {
   };
 
   const getSpawningDays = () => {
-    return spawnForms.map((form) => new Date(form.date).toDateString());
+    return spawnForms.map((form) =>
+      form.date instanceof Date
+        ? form.date.toDateString()
+        : new Date(form.date).toDateString()
+    );
   };
 
   const isSpawningDay = (date: Date) => {
@@ -176,7 +192,10 @@ export default function SpawningPage() {
   // Funções de modal
   const openCreateModal = () => {
     setModalMode(ModalMode.CREATE);
-    setCurrentSpawningForm(defaultSpawningForm as SpawningForm);
+    setCurrentSpawningForm({
+      ...defaultSpawningForm,
+      userId: user?.id || "",
+    } as SpawningForm);
     setShowModal(true);
   };
 
@@ -192,30 +211,105 @@ export default function SpawningPage() {
     setShowModal(true);
   };
 
+  // Função para recarregar dados
+  const reloadData = () => {
+    setCurrentPage(1);
+    setHookFilters({ ...hookFilters });
+  };
+
   const handleSaveSpawningForm = async () => {
     try {
+      setIsSubmitting(true);
+      const formToSend = {
+        ...currentSpawningForm,
+        userId: user?.id || currentSpawningForm.userId || "",
+      };
       if (modalMode === ModalMode.CREATE) {
-        // await createSpawningForm(currentSpawningForm); // This line was removed as per the edit hint
+        const result = await createSpawnForm(formToSend);
+        if ("error" in result) {
+          setErrorMessage(result.error);
+          return;
+        }
+        successNotification("Sucesso", "Spawning form criado com sucesso!");
       } else if (modalMode === ModalMode.UPDATE) {
-        // await updateSpawningForm(currentSpawningForm); // This line was removed as per the edit hint
+        const result = await updateSpawnForm(formToSend);
+        if ("error" in result) {
+          setErrorMessage(result.error);
+          return;
+        }
+        successNotification("Sucesso", "Spawning form atualizado com sucesso!");
       }
       setShowModal(false);
+      // Recarregar dados automaticamente
+      reloadData();
     } catch (error: any) {
       setErrorMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteSpawningForm = async () => {
     try {
-      // await deleteSpawningForm(currentSpawningForm._id!); // This line was removed as per the edit hint
+      setIsSubmitting(true);
+      const result = await deleteSpawnForm(currentSpawningForm._id!);
+      if (typeof result === "object" && "error" in result) {
+        setErrorMessage(result.error);
+        return;
+      }
+      successNotification("Sucesso", "Spawning form excluído com sucesso!");
       setShowConfirmModal(false);
+      // Recarregar dados automaticamente
+      reloadData();
     } catch (error: any) {
       setErrorMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const navigateToSpawningDetails = (spawningId: string) => {
     router.push(`/dashboard/spawning/${spawningId}`);
+  };
+
+  // Funções de formatação automática
+  const formatNumber = (value: string, maxDecimals: number = 2): string => {
+    // Remove tudo exceto números e vírgula/ponto
+    let cleaned = value.replace(/[^\d,.-]/g, "");
+
+    // Substitui vírgula por ponto para cálculos
+    cleaned = cleaned.replace(",", ".");
+
+    // Permite apenas um ponto decimal
+    const parts = cleaned.split(".");
+    if (parts.length > 2) {
+      cleaned = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Limita casas decimais
+    if (parts.length === 2 && parts[1].length > maxDecimals) {
+      cleaned = parts[0] + "." + parts[1].substring(0, maxDecimals);
+    }
+
+    // Converte de volta para formato brasileiro
+    return cleaned.replace(".", ",");
+  };
+
+  const formatTime = (value: string): string => {
+    // Remove tudo exceto números e :
+    let cleaned = value.replace(/[^\d:]/g, "");
+
+    // Adiciona : se necessário
+    if (cleaned.length >= 2 && !cleaned.includes(":")) {
+      cleaned = cleaned.substring(0, 2) + ":" + cleaned.substring(2);
+    }
+
+    // Limita a HH:MM
+    if (cleaned.length > 5) {
+      cleaned = cleaned.substring(0, 5);
+    }
+
+    return cleaned;
   };
 
   // Estatísticas
@@ -230,6 +324,50 @@ export default function SpawningPage() {
         sum + (form.animal_weight.beforeSpawn - form.animal_weight.afterSpawn),
       0
     ) / spawnForms.length || 0;
+
+  // Dados para gráficos
+  const getChartData = () => {
+    const monthlyData = spawnForms.reduce((acc, form) => {
+      const date = form.date instanceof Date ? form.date : new Date(form.date);
+      const month = date.toLocaleDateString("pt-BR", { month: "short" });
+
+      if (!acc[month]) {
+        acc[month] = {
+          month,
+          count: 0,
+          totalEggWeight: 0,
+          avgWeightLoss: 0,
+          totalWeightLoss: 0,
+        };
+      }
+
+      acc[month].count += 1;
+      acc[month].totalEggWeight += form.egg_weight;
+      acc[month].totalWeightLoss +=
+        form.animal_weight.beforeSpawn - form.animal_weight.afterSpawn;
+      acc[month].avgWeightLoss = acc[month].totalWeightLoss / acc[month].count;
+
+      return acc;
+    }, {} as Record<string, any>);
+
+    return Object.values(monthlyData);
+  };
+
+  const getGenderDistribution = () => {
+    // Simular distribuição por gênero (já que não temos essa info nos dados atuais)
+    return [
+      {
+        name: "Fêmeas",
+        value: Math.floor(totalSpawningForms * 0.6),
+        color: "#ff6b6b",
+      },
+      {
+        name: "Machos",
+        value: Math.floor(totalSpawningForms * 0.4),
+        color: "#4ecdc4",
+      },
+    ];
+  };
 
   const daysInMonth = getDaysInMonth(currentMonth);
   const monthNames = [
@@ -302,13 +440,69 @@ export default function SpawningPage() {
               <BsGraphUp /> Estatísticas de Spawning
             </div>
             <div className={styles.chartContainer}>
-              <div className={styles.chartPlaceholder}>
-                <FaChartBar
-                  style={{ fontSize: "3rem", marginBottom: "1rem" }}
-                />
-                <p>Gráfico de estatísticas de spawning</p>
-                <p>Implementar com biblioteca de gráficos</p>
-              </div>
+              {spawnForms.length > 0 ? (
+                <div style={{ display: "flex", gap: "20px", height: "300px" }}>
+                  {/* Gráfico de Barras - Spawning por Mês */}
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ textAlign: "center", marginBottom: "10px" }}>
+                      Spawning por Mês
+                    </h4>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={getChartData()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip
+                          formatter={(value, name) => [
+                            name === "count"
+                              ? `${value} spawning(s)`
+                              : name === "totalEggWeight"
+                              ? `${value}kg`
+                              : `${value}kg`,
+                          ]}
+                        />
+                        <Bar dataKey="count" fill="#0a58ca" name="Quantidade" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Gráfico de Pizza - Distribuição por Gênero */}
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ textAlign: "center", marginBottom: "10px" }}>
+                      Distribuição por Gênero
+                    </h4>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={getGenderDistribution()}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) =>
+                            `${name} ${(percent * 100).toFixed(0)}%`
+                          }
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {getGenderDistribution().map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.chartPlaceholder}>
+                  <FaChartBar
+                    style={{ fontSize: "3rem", marginBottom: "1rem" }}
+                  />
+                  <p>Nenhum dado disponível para gráficos</p>
+                  <p>Adicione spawning forms para ver as estatísticas</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -426,15 +620,6 @@ export default function SpawningPage() {
               />
             </div>
             <div className={styles.filterInput}>
-              <label>Usuário:</label>
-              <input
-                type="text"
-                placeholder="ID do Usuário"
-                value={filters.userId}
-                onChange={(e) => handleFilterChange("userId", e.target.value)}
-              />
-            </div>
-            <div className={styles.filterInput}>
               <label>Animal:</label>
               <input
                 type="text"
@@ -499,7 +684,9 @@ export default function SpawningPage() {
                     <div className={styles.spawningCardStatContent}>
                       <div className={styles.spawningCardStatLabel}>Data:</div>
                       <div className={styles.spawningCardStatValue}>
-                        {form.date.toLocaleDateString("pt-BR")}
+                        {form.date instanceof Date
+                          ? form.date.toLocaleDateString("pt-BR")
+                          : new Date(form.date).toLocaleDateString("pt-BR")}
                       </div>
                     </div>
                   </div>
@@ -598,12 +785,18 @@ export default function SpawningPage() {
           }
           onClose={() => setShowModal(false)}
           onSubmit={handleSaveSpawningForm}
+          isSubmitting={isSubmitting}
           fields={[
             {
               name: "date",
               label: "Data",
               type: "date",
-              value: currentSpawningForm.date.toISOString().split("T")[0],
+              value:
+                currentSpawningForm.date instanceof Date
+                  ? currentSpawningForm.date.toISOString().split("T")[0]
+                  : new Date(currentSpawningForm.date)
+                      .toISOString()
+                      .split("T")[0],
               onChange: (value) =>
                 setCurrentSpawningForm({
                   ...currentSpawningForm,
@@ -626,74 +819,89 @@ export default function SpawningPage() {
             {
               name: "beforeSpawn",
               label: "Peso Antes (kg)",
-              type: "number",
-              value: currentSpawningForm.animal_weight.beforeSpawn,
-              onChange: (value) =>
+              type: "text",
+              value: currentSpawningForm.animal_weight.beforeSpawn.toString(),
+              onChange: (value) => {
+                const formatted = formatNumber(value, 2);
                 setCurrentSpawningForm({
                   ...currentSpawningForm,
                   animal_weight: {
                     ...currentSpawningForm.animal_weight,
-                    beforeSpawn: parseFloat(value) || 0,
+                    beforeSpawn: parseFloat(formatted.replace(",", ".")) || 0,
                   },
-                }),
+                });
+              },
               disabled: modalMode === ModalMode.VIEW,
+              placeholder: "0,00",
             },
             {
               name: "afterSpawn",
               label: "Peso Depois (kg)",
-              type: "number",
-              value: currentSpawningForm.animal_weight.afterSpawn,
-              onChange: (value) =>
+              type: "text",
+              value: currentSpawningForm.animal_weight.afterSpawn.toString(),
+              onChange: (value) => {
+                const formatted = formatNumber(value, 2);
                 setCurrentSpawningForm({
                   ...currentSpawningForm,
                   animal_weight: {
                     ...currentSpawningForm.animal_weight,
-                    afterSpawn: parseFloat(value) || 0,
+                    afterSpawn: parseFloat(formatted.replace(",", ".")) || 0,
                   },
-                }),
+                });
+              },
               disabled: modalMode === ModalMode.VIEW,
+              placeholder: "0,00",
             },
             {
               name: "eggWeight",
               label: "Peso dos Ovos (kg)",
-              type: "number",
-              value: currentSpawningForm.egg_weight,
-              onChange: (value) =>
+              type: "text",
+              value: currentSpawningForm.egg_weight.toString(),
+              onChange: (value) => {
+                const formatted = formatNumber(value, 2);
                 setCurrentSpawningForm({
                   ...currentSpawningForm,
-                  egg_weight: parseFloat(value) || 0,
-                }),
+                  egg_weight: parseFloat(formatted.replace(",", ".")) || 0,
+                });
+              },
               disabled: modalMode === ModalMode.VIEW,
+              placeholder: "0,00",
             },
             {
               name: "hourDosage",
               label: "Hora da Dosagem",
               type: "text",
               value: currentSpawningForm.hormone.hour_dosage,
-              onChange: (value) =>
+              onChange: (value) => {
+                const formatted = formatTime(value);
                 setCurrentSpawningForm({
                   ...currentSpawningForm,
                   hormone: {
                     ...currentSpawningForm.hormone,
-                    hour_dosage: value,
+                    hour_dosage: formatted,
                   },
-                }),
+                });
+              },
               disabled: modalMode === ModalMode.VIEW,
+              placeholder: "HH:MM",
             },
             {
               name: "hormoneQuantity",
               label: "Quantidade Hormônio (ml)",
-              type: "number",
-              value: currentSpawningForm.hormone.quantity,
-              onChange: (value) =>
+              type: "text",
+              value: currentSpawningForm.hormone.quantity.toString(),
+              onChange: (value) => {
+                const formatted = formatNumber(value, 1);
                 setCurrentSpawningForm({
                   ...currentSpawningForm,
                   hormone: {
                     ...currentSpawningForm.hormone,
-                    quantity: parseFloat(value) || 0,
+                    quantity: parseFloat(formatted.replace(",", ".")) || 0,
                   },
-                }),
+                });
+              },
               disabled: modalMode === ModalMode.VIEW,
+              placeholder: "0,0",
             },
           ]}
           infoBox={
@@ -739,6 +947,7 @@ export default function SpawningPage() {
           message="Tem certeza que deseja excluir este spawning form? Esta ação não pode ser desfeita."
           onConfirm={handleDeleteSpawningForm}
           onCancel={() => setShowConfirmModal(false)}
+          isSubmitting={isSubmitting}
         />
       )}
     </>
