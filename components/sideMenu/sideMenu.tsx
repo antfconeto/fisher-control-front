@@ -41,7 +41,7 @@ const menuItems = [
       {
         name: "Desovas",
         icon: <Egg size={18} />,
-        link: "/dashboard/spawining",
+        link: "/dashboard/spawning",
       },
             {
         name: "Usuários",
