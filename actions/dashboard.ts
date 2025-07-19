@@ -6,7 +6,7 @@ import * as errorMessages from "@/utils/errorMessages.json";
 import { Animal, Specie } from "@/types/types";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export interface DashboardStats {
   totalUsers: number;
@@ -29,7 +29,7 @@ export interface SpawnsData {
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   console.log(`🔁 Iniciando processo para buscar estatísticas do dashboard`);
-  const token = (await cookies()).get('access_token');
+  const token = (await cookies()).get("access_token");
   if (!token) {
     throw new CustomError("Token não recebido", 401);
   }
@@ -39,7 +39,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token.value}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 
@@ -48,7 +48,10 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       consoler.error(
         `Erro ao buscar estatísticas do dashboard, erro: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      throw new CustomError(errorMessage?.error || "Erro ao buscar estatísticas do dashboard", response.status);
+      throw new CustomError(
+        errorMessage?.error || "Erro ao buscar estatísticas do dashboard",
+        response.status
+      );
     }
 
     const responseBody: DashboardStats = await response.json();
@@ -56,15 +59,22 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     return responseBody;
   } catch (error: any) {
     consoler.error(
-      `Erro ao buscar estatísticas do dashboard, erro: ${error.message}, statusCode: ${error.statusCode || 500}`
+      `Erro ao buscar estatísticas do dashboard, erro: ${
+        error.message
+      }, statusCode: ${error.statusCode || 500}`
     );
-    throw new CustomError(error.message || "Erro ao buscar estatísticas do dashboard", error.statusCode || 500);
+    throw new CustomError(
+      error.message || "Erro ao buscar estatísticas do dashboard",
+      error.statusCode || 500
+    );
   }
 };
 
-export const getSpeciesDistribution = async (): Promise<{specieDescription:{specie:Specie, animals:Animal[]}[]}> => {
+export const getSpeciesDistribution = async (): Promise<{
+  specieDescription: { specie: Specie; animals: Animal[] }[];
+}> => {
   console.log(`🔁 Iniciando processo para buscar distribuição de espécies`);
-  const token = (await cookies()).get('access_token');
+  const token = (await cookies()).get("access_token");
   if (!token) {
     throw new CustomError("Token não recebido", 401);
   }
@@ -74,7 +84,7 @@ export const getSpeciesDistribution = async (): Promise<{specieDescription:{spec
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token.value}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 
@@ -83,24 +93,34 @@ export const getSpeciesDistribution = async (): Promise<{specieDescription:{spec
       consoler.error(
         `Erro ao buscar distribuição de espécies, erro: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      throw new CustomError(errorMessage?.error || "Erro ao buscar distribuição de espécies", response.status);
+      throw new CustomError(
+        errorMessage?.error || "Erro ao buscar distribuição de espécies",
+        response.status
+      );
     }
 
-    const responseBody: {specieDescription:{specie:Specie, animals:Animal[]}[]}= await response.json();
+    const responseBody: {
+      specieDescription: { specie: Specie; animals: Animal[] }[];
+    } = await response.json();
     console.log(`✅ Distribuição de espécies obtida com sucesso`);
-    console.log(responseBody)
+    console.log(responseBody);
     return responseBody;
   } catch (error: any) {
     consoler.error(
-      `Erro ao buscar distribuição de espécies, erro: ${error.message}, statusCode: ${error.statusCode || 500}`
+      `Erro ao buscar distribuição de espécies, erro: ${
+        error.message
+      }, statusCode: ${error.statusCode || 500}`
     );
-    throw new CustomError(error.message || "Erro ao buscar distribuição de espécies", error.statusCode || 500);
+    throw new CustomError(
+      error.message || "Erro ao buscar distribuição de espécies",
+      error.statusCode || 500
+    );
   }
 };
 
 export const getSpawnsByMonth = async (): Promise<SpawnsData[]> => {
   console.log(`🔁 Iniciando processo para buscar desovas por mês`);
-  const token = (await cookies()).get('access_token');
+  const token = (await cookies()).get("access_token");
   if (!token) {
     throw new CustomError("Token não recebido", 401);
   }
@@ -110,7 +130,7 @@ export const getSpawnsByMonth = async (): Promise<SpawnsData[]> => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token.value}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 
@@ -119,7 +139,10 @@ export const getSpawnsByMonth = async (): Promise<SpawnsData[]> => {
       consoler.error(
         `Erro ao buscar desovas por mês, erro: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      throw new CustomError(errorMessage?.error || "Erro ao buscar desovas por mês", response.status);
+      throw new CustomError(
+        errorMessage?.error || "Erro ao buscar desovas por mês",
+        response.status
+      );
     }
 
     const responseBody: SpawnsData[] = await response.json();
@@ -127,8 +150,13 @@ export const getSpawnsByMonth = async (): Promise<SpawnsData[]> => {
     return responseBody;
   } catch (error: any) {
     consoler.error(
-      `Erro ao buscar desovas por mês, erro: ${error.message}, statusCode: ${error.statusCode || 500}`
+      `Erro ao buscar desovas por mês, erro: ${error.message}, statusCode: ${
+        error.statusCode || 500
+      }`
     );
-    throw new CustomError(error.message || "Erro ao buscar desovas por mês", error.statusCode || 500);
+    throw new CustomError(
+      error.message || "Erro ao buscar desovas por mês",
+      error.statusCode || 500
+    );
   }
-}; 
+};

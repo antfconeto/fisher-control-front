@@ -1,8 +1,15 @@
-"use client"
-import React, { createContext, ReactNode, useState, useEffect, useContext } from "react";
+"use client";
+import React, {
+  createContext,
+  ReactNode,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "@/types/types";
 import { CustomConsole } from "@/utils/customLogger";
+import { useRouter } from "next/navigation";
 
 const logger = new CustomConsole();
 
@@ -16,12 +23,14 @@ export interface AuthContextProps {
   refreshToken: () => void;
 }
 
-export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+export const AuthContext = createContext<AuthContextProps | undefined>(
+  undefined
+);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -30,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<DecodedToken | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   // Check if token is expired
   const isTokenExpired = (token: string): boolean => {
@@ -43,25 +53,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Clear token and redirect to login
+  const clearTokenAndRedirect = () => {
+    document.cookie =
+      "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setToken(null);
+    setUser(null);
+    logger.warn("Token inválido removido, redirecionando para login");
+    router.push("/login");
+  };
+
   // Initialize auth state from localStorage
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedToken = localStorage.getItem('authToken');
-        
+        const storedToken = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("access_token="))
+          ?.split("=")[1];
+
         if (storedToken && !isTokenExpired(storedToken)) {
           const decoded = jwtDecode<DecodedToken>(storedToken);
           setToken(storedToken);
           setUser(decoded);
-          logger.info('User authenticated from stored token');
+          logger.info("User authenticated from stored token");
         } else if (storedToken) {
           // Token is expired, remove it
-          localStorage.removeItem('authToken');
-          logger.warn('Expired token removed from storage');
+          clearTokenAndRedirect();
         }
       } catch (error) {
         logger.error(`Error initializing auth state: ${error}`);
-        localStorage.removeItem('authToken');
+        clearTokenAndRedirect();
       } finally {
         setIsLoading(false);
       }
@@ -73,15 +95,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (newToken: string) => {
     try {
       const decoded = jwtDecode<DecodedToken>(newToken);
-      
+
       if (isTokenExpired(newToken)) {
-        throw new Error('Token is expired');
+        throw new Error("Token is expired");
       }
 
-      localStorage.setItem('authToken', newToken);
+      document.cookie = `access_token=${newToken}; path=/;`;
       setToken(newToken);
       setUser(decoded);
-      logger.info('User logged in successfully');
+      logger.info("User logged in successfully");
     } catch (error) {
       logger.error(`Error during login: ${error}`);
       throw error;
@@ -89,22 +111,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    document.cookie =
+      "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setToken(null);
     setUser(null);
-    logger.info('User logged out');
+    logger.info("User logged out");
   };
 
   const refreshToken = () => {
     // This would typically make an API call to refresh the token
     // For now, we'll just check if the current token is still valid
     if (token && !isTokenExpired(token)) {
-      logger.info('Token is still valid');
+      logger.info("Token is still valid");
       return;
     }
-    
-    logger.warn('Token needs refresh or is invalid');
-    logout();
+
+    logger.warn("Token needs refresh or is invalid");
+    clearTokenAndRedirect();
   };
 
   const value: AuthContextProps = {
@@ -117,9 +140,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     refreshToken,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

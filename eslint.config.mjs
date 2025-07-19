@@ -21,14 +21,17 @@ const eslintConfig = [
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "prefer-const": "error",
       "no-var": "error",
-      
+
       // TypeScript specific rules
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/prefer-interface": "off",
-      
+
       // React specific rules
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
@@ -51,7 +54,7 @@ const eslintConfig = [
       "react/self-closing-comp": "error",
       "react/sort-comp": "off",
       "react/sort-prop-types": "off",
-      
+
       // Import rules
       "import/order": [
         "error",
@@ -62,21 +65,21 @@ const eslintConfig = [
             "internal",
             "parent",
             "sibling",
-            "index"
+            "index",
           ],
           "newlines-between": "always",
           alphabetize: {
             order: "asc",
-            caseInsensitive: true
-          }
-        }
+            caseInsensitive: true,
+          },
+        },
       ],
       "import/no-unresolved": "off",
       "import/named": "off",
       "import/default": "off",
       "import/namespace": "off",
       "import/no-duplicates": "error",
-      
+
       // Accessibility rules
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-has-content": "error",
@@ -93,15 +96,15 @@ const eslintConfig = [
       "jsx-a11y/role-has-required-aria-props": "error",
       "jsx-a11y/role-supports-aria-props": "error",
       "jsx-a11y/scope": "error",
-      
+
       // Performance rules
       "react/jsx-no-bind": "warn",
       "react/jsx-no-leaked-render": "error",
-      
+
       // Code style rules
-      "indent": ["error", 2],
-      "quotes": ["error", "single"],
-      "semi": ["error", "always"],
+      indent: ["error", 2],
+      quotes: ["error", "single"],
+      semi: ["error", "always"],
       "comma-dangle": ["error", "always-multiline"],
       "object-curly-spacing": ["error", "always"],
       "array-bracket-spacing": ["error", "never"],

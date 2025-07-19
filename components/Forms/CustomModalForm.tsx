@@ -19,6 +19,7 @@ interface CustomModalFormProps {
   onSubmit: () => void;
   onClose: () => void;
   infoBox?: React.ReactNode; // permite passar JSX para a caixinha de informações
+  isSubmitting?: boolean;
 }
 
 export const CustomModalForm: React.FC<CustomModalFormProps> = ({
@@ -27,13 +28,18 @@ export const CustomModalForm: React.FC<CustomModalFormProps> = ({
   onSubmit,
   onClose,
   infoBox,
+  isSubmitting = false,
 }) => {
   return (
     <div className={styles.modal}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>{title}</h2>
-          <button className={styles.modalCloseButton} onClick={onClose}>
+          <button
+            className={styles.modalCloseButton}
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             <FaTimes />
           </button>
         </div>
@@ -47,7 +53,7 @@ export const CustomModalForm: React.FC<CustomModalFormProps> = ({
                   className={styles.formInput}
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={field.disabled}
+                  disabled={field.disabled || isSubmitting}
                 >
                   <option value="">Selecione</option>
                   {field.options?.map((opt) => (
@@ -63,7 +69,7 @@ export const CustomModalForm: React.FC<CustomModalFormProps> = ({
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
                   placeholder={field.placeholder}
-                  disabled={field.disabled}
+                  disabled={field.disabled || isSubmitting}
                 />
               )}
             </div>
@@ -73,11 +79,19 @@ export const CustomModalForm: React.FC<CustomModalFormProps> = ({
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.cancelButton} onClick={onClose}>
+          <button
+            className={styles.cancelButton}
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             <FaTimes /> Cancelar
           </button>
-          <button className={styles.saveButton} onClick={onSubmit}>
-            Salvar
+          <button
+            className={styles.saveButton}
+            onClick={onSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Salvando..." : "Salvar"}
           </button>
         </div>
       </div>
