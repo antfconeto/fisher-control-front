@@ -75,6 +75,7 @@
 .filterInput {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 0.5rem;
 }
 
@@ -236,6 +237,7 @@
   padding: 1.5rem;
   transition: all 0.2s;
   border: 1px solid transparent;
+  height: fit-content;
 }
 
 .spawningCard:hover {
@@ -478,6 +480,7 @@
 .loadingContainer {
   display: flex;
   flex-direction: column;
+  width: 100%;
   align-items: center;
   justify-content: center;
   padding: 3rem;
@@ -505,10 +508,14 @@
     font-size: 1.5rem;
   }
 
+  
+
   .filterContainer {
+    width: 100%;
     flex-direction: column;
     align-items: stretch;
   }
+
 
   .filterInput {
     flex-direction: column;
@@ -516,7 +523,7 @@
   }
 
   .filterInput label {
-    min-width: auto;
+   width: 100%;
   }
 
   .dashboardGrid {
@@ -569,6 +576,7 @@
 }
 
 @media (max-width: 480px) {
+  
   .spawningCardHeader {
     flex-direction: column;
     align-items: stretch;
@@ -679,4 +687,27 @@
     color: #0a58ca;
     margin-bottom: 1rem;
   }
+
+}
+
+.customInput {
+  width: 100%;
+  padding: 8px 36px 8px 12px;
+  border: 1px solid #0a58ca;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  color: #222;
+  transition: width 0.2s, border 0.2s;
+  box-sizing: border-box; /* Garante que o padding não ultrapasse o container */
+}
+
+.customInput:hover {
+  width: 100%;
+}
+
+.customInput:focus {
+  border: 2px solid #0a58ca;
+  width: 100%;
+  outline: none;
 }

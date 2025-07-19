@@ -1,4 +1,6 @@
+"use server";
 import { ResponseError, SpawningForm } from "@/types/types";
+import { cookies } from "next/headers";
 
 const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -32,7 +34,7 @@ export interface SpawnFormFilters {
 export const getSpawnFormsWithFilters = async (
   filters: SpawnFormFilters
 ): Promise<SpawnFormsPagination | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -43,7 +45,7 @@ export const getSpawnFormsWithFilters = async (
     const response = await fetch(`${urlApi}/spawn/getSpawnFormsWithFilters`, {
       method: "POST", // Corrigido para POST
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(filters),
@@ -69,7 +71,7 @@ export const getSpawnFormsWithFilters = async (
 export const createSpawnForm = async (
   spawnForm: SpawningForm
 ): Promise<SpawningForm | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -80,7 +82,7 @@ export const createSpawnForm = async (
     const response = await fetch(`${urlApi}/spawn/createSpawnForm`, {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ spawnForm }),
@@ -105,7 +107,7 @@ export const createSpawnForm = async (
 export const updateSpawnForm = async (
   spawnForm: SpawningForm
 ): Promise<SpawningForm | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -116,7 +118,7 @@ export const updateSpawnForm = async (
     const response = await fetch(`${urlApi}/spawn/updateSpawnForm`, {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ spawnForm }),
@@ -142,7 +144,7 @@ export const updateSpawnForm = async (
 export const deleteSpawnForm = async (
   spawnFormId: string
 ): Promise<boolean | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -155,7 +157,7 @@ export const deleteSpawnForm = async (
       {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -181,7 +183,7 @@ export const deleteSpawnForm = async (
 export const getSpawnFormById = async (
   spawnFormId: string
 ): Promise<SpawningForm | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -194,7 +196,7 @@ export const getSpawnFormById = async (
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -220,7 +222,7 @@ export const getSpawnFormById = async (
 export const getUserById = async (
   userId: string
 ): Promise<any | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -233,7 +235,7 @@ export const getUserById = async (
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -258,7 +260,7 @@ export const getUserById = async (
 export const getAnimalById = async (
   animalId: string
 ): Promise<any | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -271,7 +273,7 @@ export const getAnimalById = async (
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -296,7 +298,7 @@ export const getAnimalById = async (
 export const getAnimalByCode = async (
   codeAnimal: string
 ): Promise<any | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -309,7 +311,7 @@ export const getAnimalByCode = async (
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -334,7 +336,7 @@ export const getAnimalByCode = async (
 export const getSpecieById = async (
   specieId: string
 ): Promise<any | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -347,7 +349,7 @@ export const getSpecieById = async (
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -372,7 +374,7 @@ export const getSpecieById = async (
 export const getTankById = async (
   tankId: string
 ): Promise<any | ResponseError> => {
-  const token = getCookieValue("access_token");
+  const token = (await cookies()).get("access_token");
   if (!token) {
     return {
       error: "Token not received",
@@ -385,7 +387,7 @@ export const getTankById = async (
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
       }
@@ -416,7 +418,7 @@ export const addMonitoringRecord = async (
   }
 ) => {
   try {
-    const token = getCookieValue("access_token");
+    const token = (await cookies()).get("access_token");
     if (!token) {
       throw new Error("Token não encontrado");
     }
@@ -425,7 +427,7 @@ export const addMonitoringRecord = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.value}`,
       },
       body: JSON.stringify({
         spawnFormId,
