@@ -20,6 +20,7 @@ import {
   FaPlus,
   FaChevronLeft,
   FaChevronRight,
+  FaRegUser,
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { ClockLoader } from "react-spinners";
@@ -54,6 +55,7 @@ import {
 import dayjs from 'dayjs';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useUser } from "@/hooks/userHook";
 
 enum ModalMode {
   CREATE = "create",
@@ -74,19 +76,23 @@ const defaultSpawningForm: Omit<SpawningForm, "_id"> = {
   },
   monitoring: [],
   animalId: "",
-  userId: "",
+  user: {
+    id: "",
+    name: "",
+  },
 };
 
 export default function SpawningPage() {
   const router = useRouter();
   const { setErrorMessage, errorMessage } = useErrorContext();
-  const { user } = useAuth();
+  const { user } = useUser();
   const { successNotification } = useNotification();
 
   // Filtros iniciais (removido userId)
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
+    userName:"",
     animalId: "",
   });
   const itemsPerPage = 6;
@@ -99,6 +105,7 @@ export default function SpawningPage() {
     setFilters: setHookFilters,
     currentPage,
     setCurrentPage,
+    totalSpawn
   } = useSpawningPagination(filters, itemsPerPage);
 
   // Adicionar estados para datas do filtro
@@ -138,10 +145,6 @@ export default function SpawningPage() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Estados do calendário
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
   // Funções de filtro
   const filteredSpawningForms = spawnForms.filter((form) => {
     const matchesAnimal =
@@ -158,53 +161,15 @@ export default function SpawningPage() {
     currentPage * itemsPerPage
   );
 
-  // Funções do calendário
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
 
-    const days = [];
-    const currentDate = new Date(startDate);
 
-    while (currentDate <= lastDay || days.length < 42) {
-      days.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return days;
-  };
-
-  const getSpawningDays = () => {
-    return spawnForms.map((form) =>
-      form.date instanceof Date
-        ? form.date.toDateString()
-        : new Date(form.date).toDateString()
-    );
-  };
-
-  const isSpawningDay = (date: Date) => {
-    return getSpawningDays().includes(date.toDateString());
-  };
-
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
-  };
-
-  const isCurrentMonth = (date: Date) => {
-    return date.getMonth() === currentMonth.getMonth();
-  };
 
   // Funções de modal
   const openCreateModal = () => {
     setModalMode(ModalMode.CREATE);
     setCurrentSpawningForm({
       ...defaultSpawningForm,
-      userId: user?.id || "",
+      userId: user?._id || "",
     } as SpawningForm);
     setShowModal(true);
   };
@@ -232,7 +197,9 @@ export default function SpawningPage() {
       setIsSubmitting(true);
       const formToSend = {
         ...currentSpawningForm,
-        userId: user?.id || currentSpawningForm.userId || "",
+        user: {
+          id:user?._id || "",
+        name:user?.username || ""},
       };
       if (modalMode === ModalMode.CREATE) {
         const result = await createSpawnForm(formToSend);
@@ -323,7 +290,6 @@ export default function SpawningPage() {
   };
 
   // Estatísticas
-  const totalSpawningForms = spawnForms.length;
   const totalEggWeight = spawnForms.reduce(
     (sum, form) => sum + form.egg_weight,
     0
@@ -368,35 +334,16 @@ export default function SpawningPage() {
     return [
       {
         name: "Fêmeas",
-        value: Math.floor(totalSpawningForms * 0.6),
+        value: Math.floor(totalSpawn * 0.6),
         color: "#ff6b6b",
       },
       {
         name: "Machos",
-        value: Math.floor(totalSpawningForms * 0.4),
+        value: Math.floor(totalSpawn * 0.4),
         color: "#4ecdc4",
       },
     ];
   };
-
-  const daysInMonth = getDaysInMonth(currentMonth);
-  const monthNames = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-  ];
-
-
-
 
   return (
     <>
@@ -426,7 +373,7 @@ export default function SpawningPage() {
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <BsEgg className={styles.statIcon} />
-            <div className={styles.statValue}>{totalSpawningForms}</div>
+            <div className={styles.statValue}>{totalSpawn}</div>
             <div className={styles.statLabel}>Total de Spawning</div>
           </div>
           <div className={styles.statCard}>
@@ -446,172 +393,7 @@ export default function SpawningPage() {
         </div>
 
         {/* Dashboard Grid */}
-        <div className={styles.dashboardGrid}>
-          {/* Gráfico */}
-          <div className={styles.chartSection}>
-            <div className={styles.chartTitle}>
-              <BsGraphUp /> Estatísticas de Spawning
-            </div>
-            <div className={styles.chartContainer}>
-              {spawnForms.length > 0 ? (
-                <div style={{ display: "flex", gap: "20px", height: "300px" }}>
-                  {/* Gráfico de Barras - Spawning por Mês */}
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ textAlign: "center", marginBottom: "10px" }}>
-                      Spawning por Mês
-                    </h4>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={getChartData()}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip
-                          formatter={(value, name) => [
-                            name === "count"
-                              ? `${value} spawning(s)`
-                              : name === "totalEggWeight"
-                                ? `${value}kg`
-                                : `${value}kg`,
-                          ]}
-                        />
-                        <Bar dataKey="count" fill="#0a58ca" name="Quantidade" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
 
-                  {/* Gráfico de Pizza - Distribuição por Gênero */}
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ textAlign: "center", marginBottom: "10px" }}>
-                      Distribuição por Gênero
-                    </h4>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={getGenderDistribution()}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) =>
-                            `${name} ${(percent * 100).toFixed(0)}%`
-                          }
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {getGenderDistribution().map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              ) : (
-                <div className={styles.chartPlaceholder}>
-                  <FaChartBar
-                    style={{ fontSize: "3rem", marginBottom: "1rem" }}
-                  />
-                  <p>Nenhum dado disponível para gráficos</p>
-                  <p>Adicione spawning forms para ver as estatísticas</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Calendário */}
-          <div className={styles.calendarSection}>
-            <div className={styles.chartTitle}>
-              <BsCalendar3 /> Calendário de Spawning
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1rem",
-              }}
-            >
-              <button
-                onClick={() =>
-                  setCurrentMonth(
-                    new Date(
-                      currentMonth.getFullYear(),
-                      currentMonth.getMonth() - 1
-                    )
-                  )
-                }
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "1.2rem",
-                }}
-              >
-                ←
-              </button>
-              <h3 style={{ margin: 0 }}>
-                {monthNames[currentMonth.getMonth()]}{" "}
-                {currentMonth.getFullYear()}
-              </h3>
-              <button
-                onClick={() =>
-                  setCurrentMonth(
-                    new Date(
-                      currentMonth.getFullYear(),
-                      currentMonth.getMonth() + 1
-                    )
-                  )
-                }
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "1.2rem",
-                }}
-              >
-                →
-              </button>
-            </div>
-
-            <div className={styles.calendarHeader}>
-              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
-                <div key={day} className={styles.calendarDayHeader}>
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.calendarContainer}>
-              {daysInMonth.map((day, index) => {
-                const dayClasses = [
-                  styles.calendarDay,
-                  isToday(day) ? styles.today : "",
-                  isSpawningDay(day) ? styles.spawning : "",
-                  !isCurrentMonth(day) ? styles.otherMonth : "",
-                  selectedDate &&
-                    day.toDateString() === selectedDate.toDateString()
-                    ? styles.selected
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-
-                return (
-                  <div
-                    key={index}
-                    className={dayClasses}
-                    onClick={() => setSelectedDate(day)}
-                    title={isSpawningDay(day) ? "Dia com spawning" : ""}
-                  >
-                    {day.getDate()}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
         {/* Filtros */}
         <section className={styles.filterSection}>
           <div className={styles.filterLabel}>
@@ -642,334 +424,366 @@ export default function SpawningPage() {
                 onChange={(e) => handleFilterChange("animalId", e.target.value)}
               />
             </div>
+            <div className={styles.filterInput}>
+              <label>Autor:</label>
+              <input
+                type="text"
+                placeholder="Nome do Autor"
+                value={filters.userName}
+                onChange={(e) => handleFilterChange("userName", e.target.value)}
+              />
+            </div>
           </div>
         </section>
-      {/* Cards de Spawning Forms */ }
-  {loading ? (
+        {/* Cards de Spawning Forms */}
+        {loading ? (
           <div className={styles.loadingContainer}>
-          <ClockLoader color="#0a58ca" size={60} />
-          <p className={styles.loadingText}>Carregando spawning forms...</p>
-        </div>
-  ) :
-  (  <div className={styles.cardsContainer}>
-      {
-      spawnForms.map((form) => (
-        <div key={form._id} className={styles.spawningCard}>
-            <div className={styles.spawningCardHeader}>
-              <h3 className={styles.spawningCardTitle}>
-                <GiFishEggs size={30} color="#0a58ca" /> Spawning
-              </h3>
-              <div className={styles.spawningCardActions}>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => openViewModal(form)}
-                  title="Visualizar"
-                >
-                  <BsEye />
-                </button>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => openUpdateModal(form)}
-                  title="Editar"
-                >
-                  <BsPencil />
-                </button>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => {
-                    setCurrentSpawningForm(form);
-                    setShowConfirmModal(true);
-                  }}
-                  title="Excluir"
-                >
-                  <BsTrash />
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.spawningCardBody}>
-              <div className={styles.spawningCardStat}>
-                <div className={styles.spawningCardStatIcon}>
-                  <BsCalendar3 />
-                </div>
-                <div className={styles.spawningCardStatContent}>
-                  <div className={styles.spawningCardStatLabel}>Data:</div>
-                  <div className={styles.spawningCardStatValue}>
-                    {form.date instanceof Date
-                      ? form.date.toLocaleDateString("pt-BR")
-                      : new Date(form.date).toLocaleDateString("pt-BR")}
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.spawningCardStat}>
-                <div className={styles.spawningCardStatIcon}>
-                  <FaFish />
-                </div>
-                <div className={styles.spawningCardStatContent}>
-                  <div className={styles.spawningCardStatLabel}>
-                    Animal ID:
-                  </div>
-                  <div className={styles.spawningCardStatValue}>
-                    {form.animalId}
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.spawningCardStat}>
-                <div className={styles.spawningCardStatIcon}>
-                  <BsEgg />
-                </div>
-                <div className={styles.spawningCardStatContent}>
-                  <div className={styles.spawningCardStatLabel}>
-                    Peso dos Ovos:
-                  </div>
-                  <div className={styles.spawningCardStatValue}>
-                    {form.egg_weight}kg
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.spawningCardFooter}>
-              <div
-                className={styles.viewDetailsButton}
-                onClick={() => navigateToSpawningDetails(form._id!)}
-              >
-                Mais detalhes <FaChartBar />
-              </div>
-            </div>
+            <ClockLoader color="#0a58ca" size={60} />
+            <p className={styles.loadingText}>Carregando spawning forms...</p>
           </div>
-      ))}
-    </div>)
-  }
+        ) :
+          (<div className={styles.cardsContainer}>
+            {
+              spawnForms.map((form) => (
+                <div key={form._id} className={styles.spawningCard}>
+                  <div className={styles.spawningCardHeader}>
+                    <h3 className={styles.spawningCardTitle}>
+                      <GiFishEggs size={30} color="#0a58ca" /> Spawning
+                    </h3>
+                    <div className={styles.spawningCardActions}>
+                      <button
+                        className={styles.actionButton}
+                        onClick={() => openViewModal(form)}
+                        title="Visualizar"
+                      >
+                        <BsEye />
+                      </button>
+                      <button
+                        className={styles.actionButton}
+                        onClick={() => openUpdateModal(form)}
+                        title="Editar"
+                      >
+                        <BsPencil />
+                      </button>
+                      <button
+                        className={styles.actionButton}
+                        onClick={() => {
+                          setCurrentSpawningForm(form);
+                          setShowConfirmModal(true);
+                        }}
+                        title="Excluir"
+                      >
+                        <BsTrash />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.spawningCardBody}>
+                    <div className={styles.spawningCardStat}>
+                      <div className={styles.spawningCardStatIcon}>
+                        <BsCalendar3 />
+                      </div>
+                      <div className={styles.spawningCardStatContent}>
+                        <div className={styles.spawningCardStatLabel}>Data:</div>
+                        <div className={styles.spawningCardStatValue}>
+                          {form.date instanceof Date
+                            ? form.date.toLocaleDateString("pt-BR")
+                            : new Date(form.date).toLocaleDateString("pt-BR")}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.spawningCardStat}>
+                      <div className={styles.spawningCardStatIcon}>
+                        <FaFish />
+                      </div>
+                      <div className={styles.spawningCardStatContent}>
+                        <div className={styles.spawningCardStatLabel}>
+                          Animal ID:
+                        </div>
+                        <div className={styles.spawningCardStatValue}>
+                          {form.animalId}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.spawningCardStat}>
+                      <div className={styles.spawningCardStatIcon}>
+                        <BsEgg />
+                      </div>
+                      <div className={styles.spawningCardStatContent}>
+                        <div className={styles.spawningCardStatLabel}>
+                          Peso dos Ovos:
+                        </div>
+                        <div className={styles.spawningCardStatValue}>
+                          {form.egg_weight}kg
+                        </div>
+                      </div>
+                    </div>
+
+                    
+                    <div className={styles.spawningCardStat}>
+                      <div className={styles.spawningCardStatIcon}>
+                      <FaRegUser />
+                      </div>
+                      <div className={styles.spawningCardStatContent}>
+                        <div className={styles.spawningCardStatLabel}>
+                          Autor:
+                        </div>
+                        <div className={styles.spawningCardStatValue}>
+                          {form.user.name}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.spawningCardFooter}>
+                    <div
+                      className={styles.viewDetailsButton}
+                      onClick={() => navigateToSpawningDetails(form._id!)}
+                    >
+                      Mais detalhes <FaChartBar />
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>)
+        }
 
 
-  {/* Mensagem quando não há spawning forms */ }
-  {
-    filteredSpawningForms.length === 0 && loading === false && (
-      <div className={styles.noResults}>
-        <BsInfoCircle size={32} />
-        <p>Nenhum spawning form encontrado com os filtros aplicados.</p>
-        <button
-          className={styles.clearFilterButton}
-          onClick={() => setFilters({ ...filters, animalId: "" })}
-        >
-          Limpar filtros
-        </button>
-      </div>
-    )
-  }
+        {/* Mensagem quando não há spawning forms */}
+        {
+          filteredSpawningForms.length === 0 && loading === false && (
+            <div className={styles.noResults}>
+              <BsInfoCircle size={32} />
+              <p>Nenhum spawning form encontrado com os filtros aplicados.</p>
+              <button
+                className={styles.clearFilterButton}
+                onClick={() => {
+                  setFilters({
+                  animalId: "",
+                  startDate: "",
+                  userName:"",
+                  endDate: "",
+                })
+              setHookFilters(filters)
+              }}
+              >
+                Limpar filtros
+              </button>
+            </div>
+          )
+        }
 
-  {/* Paginação */ }
-  {
-    pagination && (
-      <div className={styles.paginationContainer}>
-        <button
-          className={styles.paginationButton}
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={!pagination.hasPreviousPage || currentPage === 1}
-        >
-          <FaChevronLeft /> Página anterior
-        </button>
-        <span className={styles.paginationInfo}>
-          Página {pagination.page} de {pagination.totalPages}
-        </span>
-        <button
-          className={styles.paginationButton}
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={
-            !pagination.hasNextPage || currentPage === pagination.totalPages
-          }
-        >
-          Próxima página <FaChevronRight />
-        </button>
-      </div>
-    )
-  }
+        {/* Paginação */}
+        {
+          pagination && (
+            <div className={styles.paginationContainer}>
+              <button
+                className={styles.paginationButton}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={!pagination.hasPreviousPage || currentPage === 1}
+              >
+                <FaChevronLeft /> Página anterior
+              </button>
+              <span className={styles.paginationInfo}>
+                Página {pagination.page} de {pagination.totalPages}
+              </span>
+              <button
+                className={styles.paginationButton}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={
+                  !pagination.hasNextPage || currentPage === pagination.totalPages
+                }
+              >
+                Próxima página <FaChevronRight />
+              </button>
+            </div>
+          )
+        }
       </div >
 
-    {/* Modal de Formulário */ }
-  {
-    showModal && (
-      <CustomModalForm
-        title={
-          modalMode === ModalMode.CREATE
-            ? "Novo Spawning Form"
-            : modalMode === ModalMode.UPDATE
-              ? "Editar Spawning Form"
-              : "Visualizar Spawning Form"
-        }
-        onClose={() => setShowModal(false)}
-        onSubmit={handleSaveSpawningForm}
-        isSubmitting={isSubmitting}
-        fields={[
-          {
-            name: "date",
-            label: "Data",
-            type: "date",
-            value:
-              currentSpawningForm.date instanceof Date
-                ? currentSpawningForm.date.toISOString().split("T")[0]
-                : new Date(currentSpawningForm.date)
-                  .toISOString()
-                  .split("T")[0],
-            onChange: (value) =>
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                date: new Date(value),
-              }),
-            disabled: modalMode === ModalMode.VIEW,
-          },
-          {
-            name: "animalId",
-            label: "ID do Animal",
-            type: "text",
-            value: currentSpawningForm.animalId,
-            onChange: (value) =>
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                animalId: value,
-              }),
-            disabled: modalMode === ModalMode.VIEW,
-          },
-          {
-            name: "beforeSpawn",
-            label: "Peso Antes (kg)",
-            type: "text",
-            value: currentSpawningForm.animal_weight.beforeSpawn.toString(),
-            onChange: (value) => {
-              const formatted = formatNumber(value, 2);
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                animal_weight: {
-                  ...currentSpawningForm.animal_weight,
-                  beforeSpawn: parseFloat(formatted.replace(",", ".")) || 0,
+      {/* Modal de Formulário */}
+      {
+        showModal && (
+          <CustomModalForm
+            title={
+              modalMode === ModalMode.CREATE
+                ? "Novo Spawning Form"
+                : modalMode === ModalMode.UPDATE
+                  ? "Editar Spawning Form"
+                  : "Visualizar Spawning Form"
+            }
+            onClose={() => setShowModal(false)}
+            onSubmit={handleSaveSpawningForm}
+            isSubmitting={isSubmitting}
+            fields={[
+              {
+                name: "date",
+                label: "Data",
+                type: "date",
+                value:
+                  currentSpawningForm.date instanceof Date
+                    ? currentSpawningForm.date.toISOString().split("T")[0]
+                    : new Date(currentSpawningForm.date)
+                      .toISOString()
+                      .split("T")[0],
+                onChange: (value) =>
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    date: new Date(value),
+                  }),
+                disabled: modalMode === ModalMode.VIEW,
+              },
+              {
+                name: "animalId",
+                label: "ID do Animal",
+                type: "text",
+                value: currentSpawningForm.animalId,
+                onChange: (value) =>
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    animalId: value,
+                  }),
+                disabled: modalMode === ModalMode.VIEW,
+              },
+              {
+                name: "beforeSpawn",
+                label: "Peso Antes (kg)",
+                type: "text",
+                value: currentSpawningForm.animal_weight.beforeSpawn.toString(),
+                onChange: (value) => {
+                  const formatted = formatNumber(value, 2);
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    animal_weight: {
+                      ...currentSpawningForm.animal_weight,
+                      beforeSpawn: parseFloat(formatted.replace(",", ".")) || 0,
+                    },
+                  });
                 },
-              });
-            },
-            disabled: modalMode === ModalMode.VIEW,
-            placeholder: "0,00",
-          },
-          {
-            name: "afterSpawn",
-            label: "Peso Depois (kg)",
-            type: "text",
-            value: currentSpawningForm.animal_weight.afterSpawn.toString(),
-            onChange: (value) => {
-              const formatted = formatNumber(value, 2);
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                animal_weight: {
-                  ...currentSpawningForm.animal_weight,
-                  afterSpawn: parseFloat(formatted.replace(",", ".")) || 0,
+                disabled: modalMode === ModalMode.VIEW,
+                placeholder: "0,00",
+              },
+              {
+                name: "afterSpawn",
+                label: "Peso Depois (kg)",
+                type: "text",
+                value: currentSpawningForm.animal_weight.afterSpawn.toString(),
+                onChange: (value) => {
+                  const formatted = formatNumber(value, 2);
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    animal_weight: {
+                      ...currentSpawningForm.animal_weight,
+                      afterSpawn: parseFloat(formatted.replace(",", ".")) || 0,
+                    },
+                  });
                 },
-              });
-            },
-            disabled: modalMode === ModalMode.VIEW,
-            placeholder: "0,00",
-          },
-          {
-            name: "eggWeight",
-            label: "Peso dos Ovos (kg)",
-            type: "text",
-            value: currentSpawningForm.egg_weight.toString(),
-            onChange: (value) => {
-              const formatted = formatNumber(value, 2);
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                egg_weight: parseFloat(formatted.replace(",", ".")) || 0,
-              });
-            },
-            disabled: modalMode === ModalMode.VIEW,
-            placeholder: "0,00",
-          },
-          {
-            name: "hourDosage",
-            label: "Hora da Dosagem",
-            type: "text",
-            value: currentSpawningForm.hormone.hour_dosage,
-            onChange: (value) => {
-              const formatted = formatTime(value);
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                hormone: {
-                  ...currentSpawningForm.hormone,
-                  hour_dosage: formatted,
+                disabled: modalMode === ModalMode.VIEW,
+                placeholder: "0,00",
+              },
+              {
+                name: "eggWeight",
+                label: "Peso dos Ovos (kg)",
+                type: "text",
+                value: currentSpawningForm.egg_weight.toString(),
+                onChange: (value) => {
+                  const formatted = formatNumber(value, 2);
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    egg_weight: parseFloat(formatted.replace(",", ".")) || 0,
+                  });
                 },
-              });
-            },
-            disabled: modalMode === ModalMode.VIEW,
-            placeholder: "HH:MM",
-          },
-          {
-            name: "hormoneQuantity",
-            label: "Quantidade Hormônio (ml)",
-            type: "text",
-            value: currentSpawningForm.hormone.quantity.toString(),
-            onChange: (value) => {
-              const formatted = formatNumber(value, 1);
-              setCurrentSpawningForm({
-                ...currentSpawningForm,
-                hormone: {
-                  ...currentSpawningForm.hormone,
-                  quantity: parseFloat(formatted.replace(",", ".")) || 0,
+                disabled: modalMode === ModalMode.VIEW,
+                placeholder: "0,00",
+              },
+              {
+                name: "hourDosage",
+                label: "Hora da Dosagem",
+                type: "text",
+                value: currentSpawningForm.hormone.hour_dosage,
+                onChange: (value) => {
+                  const formatted = formatTime(value);
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    hormone: {
+                      ...currentSpawningForm.hormone,
+                      hour_dosage: formatted,
+                    },
+                  });
                 },
-              });
-            },
-            disabled: modalMode === ModalMode.VIEW,
-            placeholder: "0,0",
-          },
-        ]}
-        infoBox={
-          modalMode === ModalMode.VIEW &&
-            currentSpawningForm.monitoring.length > 0 ? (
-            <div>
-              <h4>Monitoramentos:</h4>
-              <div
-                style={{
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  border: "1px solid #ddd",
-                  padding: "1rem",
-                  borderRadius: "4px",
-                }}
-              >
-                {currentSpawningForm.monitoring.map((monitoring, index) => (
+                disabled: modalMode === ModalMode.VIEW,
+                placeholder: "HH:MM",
+              },
+              {
+                name: "hormoneQuantity",
+                label: "Quantidade Hormônio (ml)",
+                type: "text",
+                value: currentSpawningForm.hormone.quantity.toString(),
+                onChange: (value) => {
+                  const formatted = formatNumber(value, 1);
+                  setCurrentSpawningForm({
+                    ...currentSpawningForm,
+                    hormone: {
+                      ...currentSpawningForm.hormone,
+                      quantity: parseFloat(formatted.replace(",", ".")) || 0,
+                    },
+                  });
+                },
+                disabled: modalMode === ModalMode.VIEW,
+                placeholder: "0,0",
+              },
+            ]}
+            infoBox={
+              modalMode === ModalMode.VIEW &&
+                currentSpawningForm.monitoring.length > 0 ? (
+                <div>
+                  <h4>Monitoramentos:</h4>
                   <div
-                    key={index}
                     style={{
-                      marginBottom: "0.5rem",
-                      padding: "0.5rem",
-                      background: "#f8f9fa",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      border: "1px solid #ddd",
+                      padding: "1rem",
                       borderRadius: "4px",
                     }}
                   >
-                    <strong>Hora:</strong> {monitoring.hour} |
-                    <strong> Temperatura:</strong> {monitoring.temperature}°C
-                    |<strong> Graus-hora:</strong> {monitoring.hour_degree}
+                    {currentSpawningForm.monitoring.map((monitoring, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          marginBottom: "0.5rem",
+                          padding: "0.5rem",
+                          background: "#f8f9fa",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        <strong>Hora:</strong> {monitoring.hour} |
+                        <strong> Temperatura:</strong> {monitoring.temperature}°C
+                        |<strong> Graus-hora:</strong> {monitoring.hour_degree}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : undefined
-        }
-      />
-    )
-  }
+                </div>
+              ) : undefined
+            }
+          />
+        )
+      }
 
-  {/* Modal de Confirmação */ }
-  {
-    showConfirmModal && (
-      <ConfirmModal
-        title="Confirmar Exclusão"
-        message="Tem certeza que deseja excluir este spawning form? Esta ação não pode ser desfeita."
-        onConfirm={handleDeleteSpawningForm}
-        onCancel={() => setShowConfirmModal(false)}
-        isSubmitting={isSubmitting}
-      />
-    )
-  }
+      {/* Modal de Confirmação */}
+      {
+        showConfirmModal && (
+          <ConfirmModal
+            title="Confirmar Exclusão"
+            message="Tem certeza que deseja excluir este spawning form? Esta ação não pode ser desfeita."
+            onConfirm={handleDeleteSpawningForm}
+            onCancel={() => setShowConfirmModal(false)}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
     </>
   );
 }

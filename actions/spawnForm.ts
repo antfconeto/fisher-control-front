@@ -25,7 +25,7 @@ export interface SpawnFormsPagination {
 export interface SpawnFormFilters {
   startDate?: string;
   endDate?: string;
-  userId?: string;
+  userName?: string;
   animalId?: string;
   page?: number;
   pageSize?: number;
@@ -219,9 +219,8 @@ export const getSpawnFormById = async (
   }
 };
 
-export const getUserById = async (
-  userId: string
-): Promise<any | ResponseError> => {
+export const getCountSpawn = async (
+): Promise<number |  ResponseError> => {
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -230,221 +229,27 @@ export const getUserById = async (
     };
   }
   try {
-    const response = await fetch(
-      `${urlApi}/user/getUserById?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!response.ok) {
-      const errorMessage: ResponseError = await response.json();
-      return {
-        error: errorMessage?.error || "Erro ao buscar usuário",
-        statusCode: response.status,
-      };
-    }
-    const responseBody = await response.json();
-    return responseBody;
-  } catch (error: any) {
-    return {
-      error: error.message || "Erro desconhecido ao buscar usuário",
-      statusCode: 500,
-    };
-  }
-};
-
-export const getAnimalById = async (
-  animalId: string
-): Promise<any | ResponseError> => {
-  const token = (await cookies()).get("access_token");
-  if (!token) {
-    return {
-      error: "Token not received",
-      statusCode: 401,
-    };
-  }
-  try {
-    const response = await fetch(
-      `${urlApi}/animal/getAnimalById?animalId=${animalId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!response.ok) {
-      const errorMessage: ResponseError = await response.json();
-      return {
-        error: errorMessage?.error || "Erro ao buscar animal",
-        statusCode: response.status,
-      };
-    }
-    const responseBody = await response.json();
-    return responseBody;
-  } catch (error: any) {
-    return {
-      error: error.message || "Erro desconhecido ao buscar animal",
-      statusCode: 500,
-    };
-  }
-};
-
-export const getAnimalByCode = async (
-  codeAnimal: string
-): Promise<any | ResponseError> => {
-  const token = (await cookies()).get("access_token");
-  if (!token) {
-    return {
-      error: "Token not received",
-      statusCode: 401,
-    };
-  }
-  try {
-    const response = await fetch(
-      `${urlApi}/animal/getAnimalByCode?animalCode=${codeAnimal}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!response.ok) {
-      const errorMessage: ResponseError = await response.json();
-      return {
-        error: errorMessage?.error || "Erro ao buscar animal por código",
-        statusCode: response.status,
-      };
-    }
-    const responseBody = await response.json();
-    return responseBody;
-  } catch (error: any) {
-    return {
-      error: error.message || "Erro desconhecido ao buscar animal por código",
-      statusCode: 500,
-    };
-  }
-};
-
-export const getSpecieById = async (
-  specieId: string
-): Promise<any | ResponseError> => {
-  const token = (await cookies()).get("access_token");
-  if (!token) {
-    return {
-      error: "Token not received",
-      statusCode: 401,
-    };
-  }
-  try {
-    const response = await fetch(
-      `${urlApi}/specie/getSpecieById?specieId=${specieId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!response.ok) {
-      const errorMessage: ResponseError = await response.json();
-      return {
-        error: errorMessage?.error || "Erro ao buscar espécie",
-        statusCode: response.status,
-      };
-    }
-    const responseBody = await response.json();
-    return responseBody;
-  } catch (error: any) {
-    return {
-      error: error.message || "Erro desconhecido ao buscar espécie",
-      statusCode: 500,
-    };
-  }
-};
-
-export const getTankById = async (
-  tankId: string
-): Promise<any | ResponseError> => {
-  const token = (await cookies()).get("access_token");
-  if (!token) {
-    return {
-      error: "Token not received",
-      statusCode: 401,
-    };
-  }
-  try {
-    const response = await fetch(
-      `${urlApi}/tank/getTankById?tankId=${tankId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!response.ok) {
-      const errorMessage: ResponseError = await response.json();
-      return {
-        error: errorMessage?.error || "Erro ao buscar tanque",
-        statusCode: response.status,
-      };
-    }
-    const responseBody = await response.json();
-    return responseBody;
-  } catch (error: any) {
-    return {
-      error: error.message || "Erro desconhecido ao buscar tanque",
-      statusCode: 500,
-    };
-  }
-};
-
-export const addMonitoringRecord = async (
-  spawnFormId: string,
-  monitoringRecord: {
-    hour: string;
-    temperature: number;
-    hour_degree: number;
-  }
-) => {
-  try {
-    const token = (await cookies()).get("access_token");
-    if (!token) {
-      throw new Error("Token não encontrado");
-    }
-
-    const response = await fetch(`${urlApi}/spawn/addMonitoringRecord`, {
-      method: "POST",
+    const response = await fetch(`${urlApi}/spawn/countSpawnForms`, {
+      method: "GET", // Corrigido para POST
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token.value}`,
-      },
-      body: JSON.stringify({
-        spawnFormId,
-        monitoringRecord,
-      }),
+        "Content-Type": "application/json",
+      }
     });
-
     if (!response.ok) {
-      const errorData: ResponseError = await response.json();
-      throw new Error(
-        errorData.error || "Erro ao adicionar registro de monitoramento"
-      );
+      const errorMessage: ResponseError = await response.json();
+      return {
+        error: errorMessage?.error || "Erro ao buscar o total de desovas",
+        statusCode: response.status,
+      };
     }
-
-    return await response.json();
+    const responseBody: {count:number} = await response.json();
+    return responseBody.count;
   } catch (error: any) {
-    console.error("Erro ao adicionar registro de monitoramento:", error);
-    throw error;
+    return {
+      error:
+        error.message || "Erro desconhecido ao buscar o total de desovas",
+      statusCode: 500,
+    };
   }
 };

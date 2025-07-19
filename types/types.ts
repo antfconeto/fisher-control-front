@@ -75,7 +75,10 @@ export interface SpawningForm {
   };
   monitoring: Monitoring[]
   animalId: string;
-  userId: string;
+  user: {
+    id:string;
+    name:string;
+  };
 
 }
 

@@ -1,9 +1,16 @@
 .container {
   padding: 2rem 1rem;
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
-
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    margin-top: 4rem; /* Espaço para o botão do menu hambúrguer */
+    margin-left: 0; /* Remove o espaço lateral em dispositivos móveis */
+    max-width: 100%; /* Utiliza toda a largura da tela */
+  }
+}
 .header {
   display: flex;
   justify-content: space-between;
@@ -67,7 +74,6 @@
 
 .filterContainer {
   display: flex;
-  flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
 }
@@ -87,6 +93,7 @@
 
 .filterInput input {
   padding: 0.5rem;
+  width: 100%;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -148,80 +155,6 @@
   color: #b0b8c1;
   padding: 2rem;
 }
-
-/* Calendário */
-.calendarSection {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(10, 88, 202, 0.08);
-  padding: 2rem;
-  transition: box-shadow 0.2s;
-}
-
-.calendarSection:hover {
-  box-shadow: 0 8px 30px rgba(10, 88, 202, 0.12);
-}
-
-.calendarHeader {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.calendarDayHeader {
-  text-align: center;
-  font-weight: 600;
-  color: #0a58ca;
-  padding: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.calendarContainer {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-}
-
-.calendarDay {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
-  border: 1px solid transparent;
-}
-
-.calendarDay:hover {
-  background: #e9f1fb;
-  border-color: #0a58ca;
-}
-
-.calendarDay.today {
-  background: #0a58ca;
-  color: white;
-  font-weight: 700;
-}
-
-.calendarDay.spawning {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-  font-weight: 700;
-}
-
-.calendarDay.selected {
-  background: #084298;
-  color: white;
-  font-weight: 700;
-}
-
-.calendarDay.otherMonth {
-  color: #b0b8c1;
-}
-
 /* Cards de Spawning */
 .cardsContainer {
   display: grid;
@@ -232,7 +165,6 @@
 
 .spawningCard {
   background: #fff;
-  border-radius: 16px;
   box-shadow: 0 4px 20px rgba(10, 88, 202, 0.08);
   padding: 1.5rem;
   transition: all 0.2s;
@@ -494,7 +426,7 @@
 }
 
 /* Responsividade */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .container {
     padding: 1rem;
   }
@@ -691,15 +623,13 @@
 }
 
 .customInput {
-  width: 100%;
-  padding: 8px 36px 8px 12px;
+  padding: 8px 6px 8px 12px;
   border: 1px solid #0a58ca;
   border-radius: 6px;
   font-size: 1rem;
   background: #fff;
   color: #222;
   transition: width 0.2s, border 0.2s;
-  box-sizing: border-box; /* Garante que o padding não ultrapasse o container */
 }
 
 .customInput:hover {

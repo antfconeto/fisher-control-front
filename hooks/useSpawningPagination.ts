@@ -19,6 +19,7 @@ export function useSpawningPagination(
   >(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [totalSpawn, setTotalSpawn] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +44,7 @@ export function useSpawningPagination(
             })
           );
           setSpawnForms(spawnFormsWithDateConversion);
+          setTotalSpawn(response.pagination.totalItems)
           setPagination(response.pagination);
         }
       } catch (err: any) {
@@ -60,6 +62,7 @@ export function useSpawningPagination(
     spawnForms,
     pagination,
     loading,
+    totalSpawn,
     error,
     filters,
     setFilters,
