@@ -30,15 +30,7 @@ import { ClockLoader } from "react-spinners";
 import { Button } from "@/components/ui";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
-import { SpawningForm } from "@/types/types";
-import {
-  getSpawnFormById,
-  getUserById,
-  getAnimalByCode,
-  getSpecieById,
-  getTankById,
-  addMonitoringRecord,
-} from "@/actions/spawnForm";
+import { Animal, SpawningForm, Specie, Tank } from "@/types/types";
 import {
   LineChart,
   Line,
@@ -49,43 +41,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { InputDefault } from "@/components/Inputs/InputDefault/inputDefault";
-
-interface User {
-  _id: string;
-  username: string;
-  email: string;
-  role: string;
-  fishManager: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Animal {
-  _id: string;
-  codeAnimal: string;
-  specie: string;
-  birthDate: string;
-  gender: "M" | "F";
-  matriz_code: string;
-  tankId: string;
-}
-
-interface Specie {
-  _id: string;
-  name: string;
-  description?: string;
-}
-
-interface Tank {
-  _id: string;
-  name: string;
-  capacity: number;
-  size: {
-    width: number;
-    height: number;
-  };
-  fishManagerId: string;
-}
+import { getSpawnFormById } from "@/actions/spawnForm";
+import { User } from "@/types/user";
 
 export default function SpawningDetailsPage() {
   const params = useParams();
@@ -117,7 +74,7 @@ export default function SpawningDetailsPage() {
       }
 
       const response = await getSpawnFormById(params.id as string);
-
+      console.log(response)
       if ("error" in response) {
         setErrorMessage(response.error);
         return;
@@ -131,37 +88,37 @@ export default function SpawningDetailsPage() {
 
       setSpawningForm(spawnFormWithDateConversion);
 
-      // Buscar dados do usuário
-      if (response.userId) {
-        const userResponse = await getUserById(response.userId);
-        if (!("error" in userResponse)) {
-          setUser(userResponse);
-        }
-      }
+      // // Buscar dados do usuário
+      // if (response.user) {
+      //   const userResponse = await getUserById(response.user.id);
+      //   if (!("error" in userResponse)) {
+      //     setUser(userResponse);
+      //   }
+      // }
 
-      // Buscar dados do animal
-      if (response.animalId) {
-        const animalResponse = await getAnimalByCode(response.animalId);
-        if (!("error" in animalResponse)) {
-          setAnimal(animalResponse);
+      // // Buscar dados do animal
+      // if (response.animalId) {
+      //   const animalResponse = await getAnimalByCode(response.animalId);
+      //   if (!("error" in animalResponse)) {
+      //     setAnimal(animalResponse);
 
-          // Buscar dados da espécie usando o ID da espécie do animal
-          if (animalResponse.specie) {
-            const specieResponse = await getSpecieById(animalResponse.specie);
-            if (!("error" in specieResponse)) {
-              setSpecie(specieResponse);
-            }
-          }
+      //     // Buscar dados da espécie usando o ID da espécie do animal
+      //     if (animalResponse.specie) {
+      //       const specieResponse = await getSpecieById(animalResponse.specie);
+      //       if (!("error" in specieResponse)) {
+      //         setSpecie(specieResponse);
+      //       }
+      //     }
 
-          // Buscar dados do tanque usando o tankId do animal
-          if (animalResponse.tankId) {
-            const tankResponse = await getTankById(animalResponse.tankId);
-            if (!("error" in tankResponse)) {
-              setTank(tankResponse);
-            }
-          }
-        }
-      }
+      //     // Buscar dados do tanque usando o tankId do animal
+      //     if (animalResponse.tankId) {
+      //       const tankResponse = await getTankById(animalResponse.tankId);
+      //       if (!("error" in tankResponse)) {
+      //         setTank(tankResponse);
+      //       }
+      //     }
+      //   }
+      // }
     } catch (error: any) {
       setErrorMessage(
         error.message || "Erro ao carregar detalhes do spawning form"
@@ -227,7 +184,7 @@ export default function SpawningDetailsPage() {
         setErrorMessage("Spawning form não encontrado.");
         return;
       }
-      await addMonitoringRecord(spawningForm._id, newMonitoringRecord);
+      // await addMonitoringRecord(spawningForm._id, newMonitoringRecord);
 
       // Recarregar os dados do spawning form
       await loadSpawningForm();
@@ -467,7 +424,7 @@ export default function SpawningDetailsPage() {
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Data de Nascimento:</span>
                 <span className={styles.infoValue}>
-                  {animal?.birthDate && animal.birthDate !== ""
+                  {animal?.birthDate && animal.birthDate.toISOString() !== ""
                     ? new Date(animal.birthDate).toLocaleDateString("pt-BR")
                     : "Não informado"}
                 </span>

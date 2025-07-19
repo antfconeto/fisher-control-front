@@ -358,14 +358,14 @@ export default function SpawningPage() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>
-            <FaFish className={styles.titleIcon} /> Gestão de Spawning Forms
+            <FaFish className={styles.titleIcon} /> Gestão de Desovas
           </h2>
           <Button
             className={styles.createButton}
             onClick={openCreateModal}
             variant="primary"
           >
-            <FaPlus /> Novo Spawning Form
+            <FaPlus /> Registrar nova desova
           </Button>
         </div>
 
@@ -374,7 +374,7 @@ export default function SpawningPage() {
           <div className={styles.statCard}>
             <BsEgg className={styles.statIcon} />
             <div className={styles.statValue}>{totalSpawn}</div>
-            <div className={styles.statLabel}>Total de Spawning</div>
+            <div className={styles.statLabel}>Total de Desovas</div>
           </div>
           <div className={styles.statCard}>
             <BsDroplet className={styles.statIcon} />
@@ -393,7 +393,7 @@ export default function SpawningPage() {
         </div>
 
         {/* Dashboard Grid */}
-
+      
         {/* Filtros */}
         <section className={styles.filterSection}>
           <div className={styles.filterLabel}>
@@ -448,7 +448,7 @@ export default function SpawningPage() {
                 <div key={form._id} className={styles.spawningCard}>
                   <div className={styles.spawningCardHeader}>
                     <h3 className={styles.spawningCardTitle}>
-                      <GiFishEggs size={30} color="#0a58ca" /> Spawning
+                      <GiFishEggs size={30} color="#0a58ca" /> Desova
                     </h3>
                     <div className={styles.spawningCardActions}>
                       <button

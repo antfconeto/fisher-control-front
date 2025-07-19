@@ -192,13 +192,14 @@ export const getSpawnFormById = async (
   }
   try {
     const response = await fetch(
-      `${urlApi}/spawn/getSpawnFormById?spawnFormId=${spawnFormId}`,
+      `${urlApi}/spawn/getSpawnFormById`,
       {
-        method: "GET",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ spawnFormId }),
       }
     );
     if (!response.ok) {
