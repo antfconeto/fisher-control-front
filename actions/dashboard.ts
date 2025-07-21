@@ -15,6 +15,8 @@ export interface DashboardStats {
   totalSpawns: number;
   tankOccupation: number;
   upcomingSpawns: number;
+  totalEggWeight: number;
+  averageWeightLoss: number;
 }
 
 export interface SpeciesData {

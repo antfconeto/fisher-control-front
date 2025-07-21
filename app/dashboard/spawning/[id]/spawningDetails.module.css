@@ -220,13 +220,21 @@
 }
 
 .modalContent {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem 2.5rem;
-  width: 95%;
-  max-width: 420px;
-  box-shadow: 0 8px 32px rgba(10, 88, 202, 0.18);
-  animation: fadeIn 0.2s;
+  background: #fff;
+  border-radius: 18px;
+  padding: 2.2rem 2.2rem 1.5rem 2.2rem;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 0 12px 36px rgba(10, 88, 202, 0.18),
+    0 1.5px 8px rgba(10, 88, 202, 0.08);
+  animation: fadeIn 0.22s cubic-bezier(0.4, 0.2, 0.2, 1);
+  border: 1.5px solid #e3eaff;
+}
+
+.modalContent .input {
+  background-color: #fff !important;
+  color: #222 !important;
+  border: 1.5px solid #b6c1d6 !important;
 }
 
 @keyframes fadeIn {
@@ -244,68 +252,84 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1.7rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 2px solid #e3eaff;
+  background: linear-gradient(90deg, #f8faff 60%, #e3eaff 100%);
+  border-radius: 12px 12px 0 0;
 }
 
 .modalHeader h3 {
   margin: 0;
   color: #0a58ca;
-  font-size: 1.3rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .closeButton {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   cursor: pointer;
-  color: #666;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  color: #888;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  transition: background 0.18s, color 0.18s;
 }
-
 .closeButton:hover {
-  background-color: #f0f0f0;
-}
-
-.modalBody {
-  margin-bottom: 1.5rem;
-}
-
-.formGroup {
-  margin-bottom: 1.2rem;
-}
-
-.formGroup label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  background-color: #e3eaff;
   color: #0a58ca;
 }
 
-.formGroup input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+.modalBody {
+  margin-bottom: 1.7rem;
 }
 
+.formGroup {
+  margin-bottom: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.formGroup label {
+  font-weight: 600;
+  color: #0a58ca;
+  margin-bottom: 0.2rem;
+  font-size: 1.05rem;
+}
+.formGroup input {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  border: 1.5px solid #b6c1d6;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  background: #f8faff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
 .formGroup input:focus {
   outline: none;
   border-color: #0a58ca;
-  box-shadow: 0 0 0 2px rgba(10, 88, 202, 0.1);
+  box-shadow: 0 0 0 2px #e3eaff;
+  background: #fff;
 }
 
 .modalFooter {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  gap: 1.2rem;
+  padding-top: 1.1rem;
+  border-top: 2px solid #e3eaff;
+}
+
+.modalFooter button {
+  min-width: 120px;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  padding: 0.7rem 1.2rem;
+  box-shadow: 0 1px 4px rgba(10, 88, 202, 0.08);
+  transition: background 0.18s, color 0.18s;
 }
 
 .chartContainer {
@@ -499,7 +523,11 @@
     padding: 1rem 0.5rem;
   }
   .modalContent {
-    padding: 1.2rem 0.5rem;
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+    max-width: 98vw;
+  }
+  .modalHeader {
+    padding-bottom: 0.7rem;
   }
 }
 

@@ -26,7 +26,10 @@ export const useSpawning = () => {
         { hour: "16:00", temperature: 28.5, hour_degree: 456 },
       ],
       animalId: "ANM001",
-      userId: "USER001",
+      user: {
+        id: "USER001",
+        name: "Usuário 1",
+      },
     },
     {
       _id: "2",
@@ -46,7 +49,10 @@ export const useSpawning = () => {
         { hour: "17:00", temperature: 28.5, hour_degree: 484 },
       ],
       animalId: "ANM002",
-      userId: "USER001",
+      user: {
+        id: "USER001",
+        name: "Usuário 1",
+      },
     },
     {
       _id: "3",
@@ -66,7 +72,10 @@ export const useSpawning = () => {
         { hour: "15:30", temperature: 28.5, hour_degree: 427 },
       ],
       animalId: "ANM003",
-      userId: "USER001",
+      user: {
+        id: "USER001",
+        name: "Usuário 1",
+      },
     },
   ];
 
@@ -76,7 +85,7 @@ export const useSpawning = () => {
       try {
         setLoading(true);
         // Simular delay de API
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setSpawningForms(mockSpawningForms);
         setError(null);
       } catch (err) {
@@ -90,13 +99,15 @@ export const useSpawning = () => {
     loadSpawningForms();
   }, []);
 
-  const createSpawningForm = async (spawningForm: Omit<SpawningForm, "_id">) => {
+  const createSpawningForm = async (
+    spawningForm: Omit<SpawningForm, "_id">
+  ) => {
     try {
       const newForm: SpawningForm = {
         ...spawningForm,
         _id: Date.now().toString(),
       };
-      setSpawningForms(prev => [...prev, newForm]);
+      setSpawningForms((prev) => [...prev, newForm]);
       return newForm;
     } catch (err) {
       setError("Erro ao criar spawning form");
@@ -106,8 +117,10 @@ export const useSpawning = () => {
 
   const updateSpawningForm = async (spawningForm: SpawningForm) => {
     try {
-      setSpawningForms(prev => 
-        prev.map(form => form._id === spawningForm._id ? spawningForm : form)
+      setSpawningForms((prev) =>
+        prev.map((form) =>
+          form._id === spawningForm._id ? spawningForm : form
+        )
       );
       return spawningForm;
     } catch (err) {
@@ -118,7 +131,7 @@ export const useSpawning = () => {
 
   const deleteSpawningForm = async (id: string) => {
     try {
-      setSpawningForms(prev => prev.filter(form => form._id !== id));
+      setSpawningForms((prev) => prev.filter((form) => form._id !== id));
     } catch (err) {
       setError("Erro ao excluir spawning form");
       throw err;
@@ -126,17 +139,17 @@ export const useSpawning = () => {
   };
 
   const getSpawningFormById = (id: string) => {
-    return spawningForms.find(form => form._id === id);
+    return spawningForms.find((form) => form._id === id);
   };
 
   const getSpawningFormsByDateRange = (startDate: Date, endDate: Date) => {
-    return spawningForms.filter(form => 
-      form.date >= startDate && form.date <= endDate
+    return spawningForms.filter(
+      (form) => form.date >= startDate && form.date <= endDate
     );
   };
 
   const getSpawningFormsByAnimal = (animalId: string) => {
-    return spawningForms.filter(form => form.animalId === animalId);
+    return spawningForms.filter((form) => form.animalId === animalId);
   };
 
   return {
@@ -150,4 +163,4 @@ export const useSpawning = () => {
     getSpawningFormsByDateRange,
     getSpawningFormsByAnimal,
   };
-}; 
+};

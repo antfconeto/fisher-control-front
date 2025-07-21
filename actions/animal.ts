@@ -271,6 +271,42 @@ export const getAllAnimalsFromTank = async (
   }
 };
 
+export const getAnimalByCode = async (
+  animalCode: string
+): Promise<Animal | ResponseError> => {
+  const token = (await cookies()).get("access_token");
+  if (!token) {
+    return {
+      error: "Token not received",
+      statusCode: 401,
+    };
+  }
+  try {
+    const response = await fetch(`${urlApi}/animal/getAnimalByCode`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ animalCode }),
+    });
+    if (!response.ok) {
+      const errorMessage: ResponseError = await response.json();
+      return {
+        error: errorMessage?.error || "Erro ao buscar animal por código",
+        statusCode: response.status,
+      };
+    }
+    const responseBody: Animal = await response.json();
+    return responseBody;
+  } catch (error: any) {
+    return {
+      error: error.message || "Erro desconhecido ao buscar animal por código",
+      statusCode: 500,
+    };
+  }
+};
+
 function getAnimalErrorMessage(context: string, statusCode: number): string {
   const animalErros = errorMessages.animalErros as any;
 

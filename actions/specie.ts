@@ -281,14 +281,16 @@ export const getSpecieById = async (
     };
   }
   try {
-    const response = await fetch(`${urlApi}/specie/getSpecieById`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token!.value}`,
-      },
-      body: JSON.stringify({ specieId: specieId }),
-    });
+    const response = await fetch(
+      `${urlApi}/specie/getSpecieById?specieId=${specieId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token!.value}`,
+        },
+      }
+    );
     //verify if response was ok
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();

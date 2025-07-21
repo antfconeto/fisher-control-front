@@ -16,74 +16,72 @@ export type ResponseError = {
 export type DecodedToken = {
   email: string;
   password: string;
-  role:Role;
+  role: Role;
   id: string;
   iat: number;
   exp: number;
 };
 
-
-export type AnimalPagination = { 
-  currentPage: number; 
-  totalPages: number; 
-  totalItems: number; 
-  totalAnimals:number;
-  animals: Animal[]; 
-}
-
+export type AnimalPagination = {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  totalAnimals: number;
+  animals: Animal[];
+};
 
 export interface Animal {
   codeAnimal: string;
-  _id:string;
-  specie:string;
+  _id: string;
+  specie: string;
   birthDate: Date;
   gender: "M" | "F";
   matriz_code: string;
-  tankId:string;
+  tankId: string;
 }
 
 export interface Tank {
   _id: string;
-  name:string;
+  name: string;
   capacity: number;
-  size:{
-      width: number;
-      height: number;
-  }
+  size: {
+    width: number;
+    height: number;
+  };
   animals?: Animal[];
 }
 
 export type Specie = {
-  _id:string;
-  name:string;
-  quantity:number;
-  description:string;
-  color:string;
-}
+  _id: string;
+  name: string;
+  quantity: number;
+  description: string;
+  color: string;
+};
 
 export interface SpawningForm {
   _id?: string;
   date: Date;
   animal_weight: {
-      beforeSpawn: number;
-      afterSpawn: number;
+    beforeSpawn: number;
+    afterSpawn: number;
   };
   egg_weight: number;
   hormone: {
-      hour_dosage: string;
-      quantity: number;
+    hour_dosage: string;
+    quantity: number;
   };
-  monitoring: Monitoring[]
+  monitoring: Monitoring[];
   animalId: string;
-  user: {
-    id:string;
-    name:string;
+  user?: {
+    id: string;
+    name: string;
   };
-
+  userId?: string;
 }
 
 export type Monitoring = {
   hour: string;
   temperature: number;
   hour_degree: number;
-}
+};

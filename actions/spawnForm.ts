@@ -43,7 +43,7 @@ export const getSpawnFormsWithFilters = async (
   }
   try {
     const response = await fetch(`${urlApi}/spawn/getSpawnFormsWithFilters`, {
-      method: "POST", // Corrigido para POST
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
@@ -191,17 +191,14 @@ export const getSpawnFormById = async (
     };
   }
   try {
-    const response = await fetch(
-      `${urlApi}/spawn/getSpawnFormById`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ spawnFormId }),
-      }
-    );
+    const response = await fetch(`${urlApi}/spawn/getSpawnFormById`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ spawnFormId }),
+    });
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();
       return {
@@ -220,8 +217,7 @@ export const getSpawnFormById = async (
   }
 };
 
-export const getCountSpawn = async (
-): Promise<number |  ResponseError> => {
+export const getCountSpawn = async (): Promise<number | ResponseError> => {
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -235,7 +231,7 @@ export const getCountSpawn = async (
       headers: {
         Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
-      }
+      },
     });
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();
@@ -244,12 +240,47 @@ export const getCountSpawn = async (
         statusCode: response.status,
       };
     }
-    const responseBody: {count:number} = await response.json();
+    const responseBody: { count: number } = await response.json();
     return responseBody.count;
   } catch (error: any) {
     return {
-      error:
-        error.message || "Erro desconhecido ao buscar o total de desovas",
+      error: error.message || "Erro desconhecido ao buscar o total de desovas",
+      statusCode: 500,
+    };
+  }
+};
+
+export const addMonitoringRecord = async (
+  spawnFormId: string,
+  monitoring: any[]
+): Promise<any> => {
+  const token = (await cookies()).get("access_token");
+  if (!token) {
+    return {
+      error: "Token not received",
+      statusCode: 401,
+    };
+  }
+  try {
+    const response = await fetch(`${urlApi}/spawn/addMonitoring`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ spawnFormId, monitoring }),
+    });
+    if (!response.ok) {
+      const errorMessage: ResponseError = await response.json();
+      return {
+        error: errorMessage?.error || "Erro ao adicionar monitoramento",
+        statusCode: response.status,
+      };
+    }
+    return await response.json();
+  } catch (error: any) {
+    return {
+      error: error.message || "Erro desconhecido ao adicionar monitoramento",
       statusCode: 500,
     };
   }

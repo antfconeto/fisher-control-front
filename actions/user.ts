@@ -169,6 +169,41 @@ export const deleteUser = async (
   }
 };
 
+export const getUserById = async (
+  userId: string
+): Promise<User | ResponseError> => {
+  const token = (await cookies()).get("access_token");
+  if (!token) {
+    return { error: "Token não recebido", statusCode: 401 };
+  }
+  try {
+    const response = await fetch(
+      `${urlApi}/user/getUserById?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errorMessage: ResponseError = await response.json();
+      return {
+        error: errorMessage?.error || "Erro ao buscar usuário por ID",
+        statusCode: response.status,
+      };
+    }
+    const responseBody: User = await response.json();
+    return responseBody;
+  } catch (error: any) {
+    return {
+      error: error.message || "Erro desconhecido ao buscar usuário por ID",
+      statusCode: 500,
+    };
+  }
+};
+
 function getUserErrorMessage(context: string, statusCode: number): string {
   const userErrors = errorMessages.userErros as any;
   return userErrors[context]?.statusCode?.[statusCode] || "Erro desconhecido.";

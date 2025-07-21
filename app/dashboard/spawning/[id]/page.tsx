@@ -43,6 +43,11 @@ import {
 import { InputDefault } from "@/components/Inputs/InputDefault/inputDefault";
 import { getSpawnFormById } from "@/actions/spawnForm";
 import { User } from "@/types/user";
+import { getUserById } from "@/actions/user";
+import { getAnimalByCode } from "@/actions/animal";
+import { getSpecieById } from "@/actions/specie";
+import { getTankById } from "@/actions/tank";
+import { addMonitoringRecord } from "@/actions/spawnForm";
 
 export default function SpawningDetailsPage() {
   const params = useParams();
@@ -74,7 +79,6 @@ export default function SpawningDetailsPage() {
       }
 
       const response = await getSpawnFormById(params.id as string);
-      console.log(response)
       if ("error" in response) {
         setErrorMessage(response.error);
         return;
@@ -85,40 +89,44 @@ export default function SpawningDetailsPage() {
         ...response,
         date: new Date(response.date),
       };
-
       setSpawningForm(spawnFormWithDateConversion);
 
-      // // Buscar dados do usuário
-      // if (response.user) {
-      //   const userResponse = await getUserById(response.user.id);
-      //   if (!("error" in userResponse)) {
-      //     setUser(userResponse);
-      //   }
-      // }
+      // Buscar dados do usuário
+      if (response.userId) {
+        const userResponse = await getUserById(response.userId);
+        if (!("error" in userResponse)) {
+          setUser(userResponse);
+        }
+      } else if (response.user && response.user.id) {
+        const userResponse = await getUserById(response.user.id);
+        if (!("error" in userResponse)) {
+          setUser(userResponse);
+        }
+      }
 
-      // // Buscar dados do animal
-      // if (response.animalId) {
-      //   const animalResponse = await getAnimalByCode(response.animalId);
-      //   if (!("error" in animalResponse)) {
-      //     setAnimal(animalResponse);
+      // Buscar dados do animal
+      if (response.animalId) {
+        const animalResponse = await getAnimalByCode(response.animalId);
+        if (!("error" in animalResponse)) {
+          setAnimal(animalResponse);
 
-      //     // Buscar dados da espécie usando o ID da espécie do animal
-      //     if (animalResponse.specie) {
-      //       const specieResponse = await getSpecieById(animalResponse.specie);
-      //       if (!("error" in specieResponse)) {
-      //         setSpecie(specieResponse);
-      //       }
-      //     }
+          // Buscar dados da espécie usando o ID da espécie do animal
+          if (animalResponse.specie) {
+            const specieResponse = await getSpecieById(animalResponse.specie);
+            if (!("error" in specieResponse)) {
+              setSpecie(specieResponse);
+            }
+          }
 
-      //     // Buscar dados do tanque usando o tankId do animal
-      //     if (animalResponse.tankId) {
-      //       const tankResponse = await getTankById(animalResponse.tankId);
-      //       if (!("error" in tankResponse)) {
-      //         setTank(tankResponse);
-      //       }
-      //     }
-      //   }
-      // }
+          // Buscar dados do tanque usando o tankId do animal
+          if (animalResponse.tankId) {
+            const tankResponse = await getTankById(animalResponse.tankId);
+            if (!("error" in tankResponse)) {
+              setTank(tankResponse);
+            }
+          }
+        }
+      }
     } catch (error: any) {
       setErrorMessage(
         error.message || "Erro ao carregar detalhes do spawning form"
@@ -184,8 +192,15 @@ export default function SpawningDetailsPage() {
         setErrorMessage("Spawning form não encontrado.");
         return;
       }
-      // await addMonitoringRecord(spawningForm._id, newMonitoringRecord);
-
+      // Chamada correta para adicionar monitoramento
+      const result = await addMonitoringRecord(spawningForm._id, [
+        ...(spawningForm.monitoring || []),
+        newMonitoringRecord,
+      ]);
+      if (result && result.error) {
+        setErrorMessage(result.error);
+        return;
+      }
       // Recarregar os dados do spawning form
       await loadSpawningForm();
 
@@ -424,8 +439,11 @@ export default function SpawningDetailsPage() {
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Data de Nascimento:</span>
                 <span className={styles.infoValue}>
-                  {animal?.birthDate && animal.birthDate.toISOString() !== ""
-                    ? new Date(animal.birthDate).toLocaleDateString("pt-BR")
+                  {animal?.birthDate
+                    ? (typeof animal.birthDate === "string"
+                        ? new Date(animal.birthDate)
+                        : animal.birthDate
+                      ).toLocaleDateString("pt-BR")
                     : "Não informado"}
                 </span>
               </div>
@@ -460,7 +478,7 @@ export default function SpawningDetailsPage() {
           </div>
 
           <div className={styles.chartContainer}>
-            {spawningForm.monitoring.length > 0 ? (
+            {spawningForm.monitoring && spawningForm.monitoring.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={getMonitoringChartData()}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -528,24 +546,31 @@ export default function SpawningDetailsPage() {
           </div>
 
           <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Hora</th>
-                  <th>Temperatura (°C)</th>
-                  <th>Graus-Hora</th>
-                </tr>
-              </thead>
-              <tbody>
-                {spawningForm.monitoring.map((monitoring, index) => (
-                  <tr key={index}>
-                    <td>{monitoring.hour}</td>
-                    <td>{monitoring.temperature}°C</td>
-                    <td>{monitoring.hour_degree}</td>
+            {spawningForm.monitoring && spawningForm.monitoring.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Hora</th>
+                    <th>Temperatura (°C)</th>
+                    <th>Graus-Hora</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {spawningForm.monitoring.map((monitoring, index) => (
+                    <tr key={index}>
+                      <td>{monitoring.hour}</td>
+                      <td>{monitoring.temperature}°C</td>
+                      <td>{monitoring.hour_degree}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className={styles.chartPlaceholder}>
+                <h4>Nenhum registro de monitoramento</h4>
+                <p>Adicione registros para visualizar aqui.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -553,20 +578,43 @@ export default function SpawningDetailsPage() {
       {/* Modal para Adicionar Registro de Monitoramento */}
       {showAddMonitoringModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h3>Adicionar Registro de Monitoramento</h3>
+          <div
+            className={styles.modalContent}
+            // Remover o style inline de maxWidth e width para usar apenas o CSS
+          >
+            <div
+              className={styles.modalHeader}
+              style={{ borderBottom: "1px solid #e5e7eb", paddingBottom: 12 }}
+            >
+              <h3 style={{ fontWeight: 700, color: "#0a58ca", fontSize: 22 }}>
+                Adicionar Registro de Monitoramento
+              </h3>
               <button
                 onClick={() => setShowAddMonitoringModal(false)}
                 className={styles.closeButton}
+                aria-label="Fechar modal"
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: 22,
+                  color: "#888",
+                  cursor: "pointer",
+                }}
               >
                 <FaTimes />
               </button>
             </div>
 
-            <div className={styles.modalBody}>
-              <div className={styles.formGroup}>
-                <label>Hora:</label>
+            <div
+              className={styles.modalBody}
+              style={{ padding: "1.5rem 0.5rem 0.5rem 0.5rem" }}
+            >
+              <div className={styles.formGroup} style={{ marginBottom: 18 }}>
+                <label
+                  style={{ fontWeight: 500, color: "#222", marginBottom: 4 }}
+                >
+                  Hora:
+                </label>
                 <InputDefault
                   type="time"
                   value={newMonitoringRecord.hour}
@@ -574,13 +622,20 @@ export default function SpawningDetailsPage() {
                     handleMonitoringInputChange("hour", e.target.value)
                   }
                   required
-                  icon={<FaClock />}
                   placeholder="HH:MM"
+                  style={{
+                    borderRadius: 8,
+                    border: "1.5px solid #b6c1d6",
+                    padding: "0.6rem 1rem",
+                  }}
                 />
               </div>
-
-              <div className={styles.formGroup}>
-                <label>Temperatura (°C):</label>
+              <div className={styles.formGroup} style={{ marginBottom: 18 }}>
+                <label
+                  style={{ fontWeight: 500, color: "#222", marginBottom: 4 }}
+                >
+                  Temperatura (°C):
+                </label>
                 <InputDefault
                   type="text"
                   value={
@@ -592,13 +647,20 @@ export default function SpawningDetailsPage() {
                     handleMonitoringInputChange("temperature", e.target.value)
                   }
                   required
-                  icon={<FaThermometerHalf />}
                   placeholder="0,0"
+                  style={{
+                    borderRadius: 8,
+                    border: "1.5px solid #b6c1d6",
+                    padding: "0.6rem 1rem",
+                  }}
                 />
               </div>
-
-              <div className={styles.formGroup}>
-                <label>Graus-Hora:</label>
+              <div className={styles.formGroup} style={{ marginBottom: 18 }}>
+                <label
+                  style={{ fontWeight: 500, color: "#222", marginBottom: 4 }}
+                >
+                  Graus-Hora:
+                </label>
                 <InputDefault
                   type="text"
                   value={
@@ -610,20 +672,36 @@ export default function SpawningDetailsPage() {
                     handleMonitoringInputChange("hour_degree", e.target.value)
                   }
                   required
-                  icon={<BsGraphUp />}
                   placeholder="0,0"
+                  style={{
+                    borderRadius: 8,
+                    border: "1.5px solid #b6c1d6",
+                    padding: "0.6rem 1rem",
+                  }}
                 />
               </div>
             </div>
-
-            <div className={styles.modalFooter}>
+            <div
+              className={styles.modalFooter}
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 12,
+                padding: "0.5rem 1rem 1rem 1rem",
+              }}
+            >
               <Button
                 onClick={() => setShowAddMonitoringModal(false)}
                 variant="secondary"
+                style={{ minWidth: 110, borderRadius: 8 }}
               >
                 Cancelar
               </Button>
-              <Button onClick={handleAddMonitoringRecord} variant="primary">
+              <Button
+                onClick={handleAddMonitoringRecord}
+                variant="primary"
+                style={{ minWidth: 110, borderRadius: 8 }}
+              >
                 <FaSave /> Salvar
               </Button>
             </div>

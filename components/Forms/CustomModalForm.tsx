@@ -30,6 +30,8 @@ export const CustomModalForm: React.FC<CustomModalFormProps> = ({
   infoBox,
   isSubmitting = false,
 }) => {
+  // Verifica se todos os campos estão desabilitados (modo visualização)
+  const isViewMode = fields.every((field) => field.disabled);
   return (
     <div className={styles.modal}>
       <div className={styles.modalContent}>
@@ -84,15 +86,17 @@ export const CustomModalForm: React.FC<CustomModalFormProps> = ({
             onClick={onClose}
             disabled={isSubmitting}
           >
-            <FaTimes /> Cancelar
+            <FaTimes /> {isViewMode ? "Fechar" : "Cancelar"}
           </button>
-          <button
-            className={styles.saveButton}
-            onClick={onSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Salvando..." : "Salvar"}
-          </button>
+          {!isViewMode && (
+            <button
+              className={styles.saveButton}
+              onClick={onSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Salvando..." : "Salvar"}
+            </button>
+          )}
         </div>
       </div>
     </div>
