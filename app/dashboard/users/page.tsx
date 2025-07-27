@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "../animals/animals.module.css";
+import styles from "./users.module.css";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -59,7 +59,7 @@ export default function UsersPage() {
   const [filters, setFilters] = useState(defaultFilters);
 
   // Paginação
-  const itemsPerPage = 2;
+  const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -219,78 +219,78 @@ export default function UsersPage() {
         />
       )}
 
-      <div className="page-container">
-        <div className="content-container">
-          <div className="content-card">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="card-title mb-0">
-                <FaUserEdit className="me-2 text-primary" /> Gestão de Usuários
-              </h2>
-              <button className={styles.createButton} onClick={openCreateModal}>
-                <FaPlus /> Criar Novo Usuário
-              </button>
-            </div>
-            <section className={styles.filterSection}>
-              <DynamicFilters
-                filters={filterFields}
-                name="Filtro de Usuários"
-              />
-            </section>
-            {loading ? (
-              <div className="loading-container">
-                <ClockLoader color="#0a58ca" size={60} />
-                <p className="loading-text">Carregando usuários...</p>
-              </div>
-            ) : (
-              <>
-                <div className={styles.tableContainer}>
-                  {users.length === 0 ? (
-                    <div className="w-100 text-center text-muted py-4">
-                      Nenhum usuário encontrado.
-                    </div>
-                  ) : (
-                    <UserTable
-                      users={users}
-                      onEdit={openUpdateModal}
-                      onDelete={(userId: string) => {
-                        setUserToDelete(
-                          users.find((u) => u._id === userId) || null
-                        );
-                        setShowConfirmModal(true);
-                      }}
-                    />
-                  )}
-                </div>
-                {totalPages > 1 && (
-                  <div className={styles.pagination}>
-                    <button
-                      className={styles.paginationButton}
-                      onClick={() =>
-                        setCurrentPage(Math.max(1, currentPage - 1))
-                      }
-                      disabled={currentPage === 1}
-                    >
-                      <FaChevronLeft /> Anterior
-                    </button>
-                    <div className={styles.paginationInfo}>
-                      Página {currentPage} de {totalPages}
-                    </div>
-                    <button
-                      className={styles.paginationButton}
-                      onClick={() =>
-                        setCurrentPage(Math.min(totalPages, currentPage + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                    >
-                      Próxima <FaChevronRight />
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>
+            <FaUserEdit className={styles.titleIcon} /> Gestão de Usuários
+          </h2>
+          <button className={styles.createButton} onClick={openCreateModal}>
+            <FaPlus /> Criar Novo Usuário
+          </button>
         </div>
+        
+        <section className={styles.filterSection}>
+          <DynamicFilters
+            filters={filterFields}
+            name="Filtro de Usuários"
+          />
+        </section>
+
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <ClockLoader color="#0a58ca" size={60} />
+            <p className={styles.loadingText}>Carregando usuários...</p>
+          </div>
+        ) : (
+          <>
+            <div className={styles.tableContainer}>
+              {users.length === 0 ? (
+                <div className={styles.emptyState}>
+                  Nenhum usuário encontrado.
+                </div>
+              ) : (
+                <UserTable
+                  users={users}
+                  onEdit={openUpdateModal}
+                  onDelete={(userId: string) => {
+                    setUserToDelete(
+                      users.find((u) => u._id === userId) || null
+                    );
+                    setShowConfirmModal(true);
+                  }}
+                />
+              )}
+            </div>
+            
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <button
+                  className={styles.paginationButton}
+                  onClick={() =>
+                    setCurrentPage(Math.max(1, currentPage - 1))
+                  }
+                  disabled={currentPage === 1}
+                >
+                  <FaChevronLeft /> Anterior
+                </button>
+                <div className={styles.paginationInfo}>
+                  Página {currentPage} de {totalPages}
+                </div>
+                <button
+                  className={styles.paginationButton}
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Próxima <FaChevronRight />
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
+
       {/* Modal de Criação/Atualização */}
       {showModal && (
         <CustomModalForm
@@ -335,6 +335,7 @@ export default function UsersPage() {
           ]}
         />
       )}
+
       {/* Modal de confirmação de exclusão */}
       {showConfirmModal && (
         <ConfirmModal

@@ -17,7 +17,8 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete })
       header: "Nome",
       render: (user) => (
         <div className={styles.cellContent}>
-          <FaUser size={18} /> {user.username}
+          <FaUser size={18} /> 
+          <span className={styles.userName}>{user.username}</span>
         </div>
       ),
     },

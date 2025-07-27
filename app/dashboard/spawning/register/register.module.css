@@ -275,33 +275,170 @@
 
 @media (max-width: 700px) {
   .container {
-    padding: 1.2rem 0.5rem 1rem 0.5rem;
+    max-width: 95%;
+    padding: 1.5rem 1rem;
+    margin-top: 65px;
+    border-radius: 12px;
   }
+  
+  .title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form {
+    gap: 1rem;
+  }
+  
+  .formGroup label {
+    font-size: 0.95rem;
+  }
+  
+  .formGroup input,
+  .inputAutocomplete {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.95rem;
+  }
+  
   .formGroupRow {
     flex-direction: column;
     gap: 0.7rem;
   }
+  
   .formActions {
     flex-direction: column;
     gap: 0.7rem;
+    margin-top: 1.5rem;
   }
-  .suggestionsBox {
-    font-size: 0.98rem;
-  }
-  .monitoringInputs {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  .monitoringInput {
+  
+  .formActions button {
     min-width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
   }
-  .monitoringRemove {
-    margin-top: 0.5rem;
-    align-self: flex-end;
+  
+  .successMsg {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
   }
+  
+  .monitoringSection {
+    margin-top: 1rem;
+  }
+  
   .monitoringHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .monitoringHeader label {
+    font-size: 0.9rem;
+  }
+  
+  .monitoringItem {
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .monitoringInputs {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .monitoringInput {
+    min-width: 100%;
+  }
+  
+  .monitoringInput label {
+    font-size: 0.85rem;
+  }
+  
+  .monitoringInput input {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+  
+  .monitoringRemove {
+    margin-top: 0.5rem;
+    align-self: flex-end;
+  }
+  
+  .monitoringRemove button {
+    padding: 0.4rem !important;
+    min-width: 35px !important;
+    height: 35px;
+  }
+  
+  .monitoringBox {
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .monitoringEmpty {
+    font-size: 0.85rem;
+  }
+  
+  .hourDegreeValue {
+    font-size: 1rem;
+    margin-top: 1.2rem;
+  }
+  
+  .suggestionsBox {
+    font-size: 0.9rem;
+    max-height: 180px;
+  }
+  
+  .suggestionItem {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .inputReadonly {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 98%;
+    padding: 1.2rem 0.8rem;
+  }
+  
+  .title {
+    font-size: 1.6rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .formGroup input,
+  .inputAutocomplete {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .formGroup label {
+    font-size: 0.9rem;
+  }
+  
+  .formActions button {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .monitoringInput input {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .monitoringInput label {
+    font-size: 0.8rem;
+  }
+  
+  .suggestionItem {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
   }
 }

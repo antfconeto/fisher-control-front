@@ -55,6 +55,16 @@
     gap: 0.5rem;
 }
 
+.userName {
+    max-width: 300px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-weight: 500;
+    display: inline-block;
+    width: 240px;
+}
+
 .ellipsisButton {
   background: none;
   border: none;
@@ -110,8 +120,19 @@
 
 /* Media queries para dispositivos móveis */
 @media (max-width: 768px) {
-  
-    .actionsCell {
-      flex-direction: column;
-    }
+  .userName {
+    max-width: 150px;
   }
+}
+
+@media (max-width: 480px) {
+  .userName {
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 360px) {
+  .userName {
+    max-width: 100px;
+  }
+}

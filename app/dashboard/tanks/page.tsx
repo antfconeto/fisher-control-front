@@ -31,6 +31,7 @@ import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
+import { GiFishBucket } from "react-icons/gi";
 
 
 enum ModalMode {
@@ -239,7 +240,7 @@ export default function TanksPage() {
         {loading ? (
           <div className="loading-container">
             <ClockLoader color="#0a58ca" size={60} />
-            <p className="loading-text">Carregando todos os tanks...</p>
+            <p className="loading-text">Carregando todos os tanques...</p>
           </div>
         ) : (
           <div className={styles.cardsContainer}>
@@ -250,7 +251,7 @@ export default function TanksPage() {
               >
                 <div className={styles.tankCardHeader}>
                   <h3 className={styles.tankCardTitle}>
-                    <BsDropletFill className={styles.tankCardIcon} /> {tank.name}
+                    <GiFishBucket className={styles.tankCardIcon} /> {tank.name}
                   </h3>
                   <div className={styles.tankCardActions}>
                     <button

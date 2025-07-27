@@ -3,14 +3,6 @@
   width: 100%;
   margin: 0 auto;
 }
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-    margin-top: 4rem; /* Espaço para o botão do menu hambúrguer */
-    margin-left: 0; /* Remove o espaço lateral em dispositivos móveis */
-    max-width: 100%; /* Utiliza toda a largura da tela */
-  }
-}
 .header {
   display: flex;
   justify-content: space-between;
@@ -440,14 +432,11 @@
     font-size: 1.5rem;
   }
 
-  
-
   .filterContainer {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
   }
-
 
   .filterInput {
     flex-direction: column;
@@ -507,30 +496,263 @@
   }
 }
 
-@media (max-width: 480px) {
-  
-  .spawningCardHeader {
-    flex-direction: column;
-    align-items: stretch;
+/* Mobile Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+    margin-top: 4rem;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .titleIcon {
+    font-size: 1.4rem;
+  }
+
+  .createButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .filterSection {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .filterLabel {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .filterInput label {
+    font-size: 0.8rem;
+    min-width: 60px;
+  }
+
+  .filterInput input {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .cardsContainer {
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
-  .spawningCardBody {
-    padding: 0.8rem 1rem 1rem;
+  .spawningCard {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
   }
 
-  .spawningCardStat {
-    flex-direction: column;
-    text-align: center;
+  .spawningCardHeader {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .spawningCardTitle {
+    font-size: 0.9rem;
+  }
+
+  .spawningCardIcon {
+    padding: 0.3rem;
+    font-size: 0.9rem;
+  }
+
+  .spawningCardBody {
+    padding: 0.5rem 0.8rem 0.8rem;
     gap: 0.5rem;
   }
 
+  .spawningCardStat {
+    padding: 0.4rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
   .spawningCardStatIcon {
-    align-self: center;
+    font-size: 0.9rem;
+  }
+
+  .spawningCardStatLabel {
+    font-size: 0.7rem;
+  }
+
+  .spawningCardStatValue {
+    font-size: 0.8rem;
   }
 
   .spawningCardActions {
-    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  .spawningCardActions button {
+    padding: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .viewDetailsButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+
+
+  .chartSection {
+    padding: 1rem;
+  }
+
+  .chartTitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .chartContainer {
+    min-height: 200px;
+  }
+
+  .paginationContainer {
+    gap: 0.3rem;
+  }
+
+  .paginationButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .paginationInfo {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.3rem;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .titleIcon {
+    font-size: 1.2rem;
+  }
+
+  .createButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .filterSection {
+    padding: 0.8rem;
+  }
+
+  .filterLabel {
+    font-size: 0.8rem;
+  }
+
+  .filterInput label {
+    font-size: 0.7rem;
+  }
+
+  .filterInput input {
+    padding: 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .spawningCard {
+    padding: 0.8rem;
+  }
+
+  .spawningCardHeader {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .spawningCardTitle {
+    font-size: 0.8rem;
+  }
+
+  .spawningCardIcon {
+    padding: 0.2rem;
+    font-size: 0.8rem;
+  }
+
+  .spawningCardBody {
+    padding: 0.4rem 0.6rem 0.6rem;
+    gap: 0.4rem;
+  }
+
+  .spawningCardStat {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 0.3rem;
+    padding: 0.3rem;
+  }
+
+  .spawningCardStatIcon {
+    align-self: auto;
+    font-size: 0.8rem;
+  }
+
+  .spawningCardStatLabel {
+    font-size: 0.6rem;
+  }
+
+  .spawningCardStatValue {
+    font-size: 0.7rem;
+  }
+
+  .spawningCardActions {
+    justify-content: flex-end;
+    gap: 0.2rem;
+  }
+
+  .spawningCardActions button {
+    padding: 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .viewDetailsButton {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+
+
+  .chartSection {
+    padding: 0.8rem;
+  }
+
+  .chartTitle {
+    font-size: 0.9rem;
+  }
+
+  .chartContainer {
+    min-height: 150px;
+  }
+
+  .paginationContainer {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .paginationButton {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .paginationInfo {
+    font-size: 0.7rem;
   }
 }
 
@@ -584,42 +806,122 @@
 }
 @media (max-width: 900px) {
   .statsGrid {
-    display: grid;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .statCard {
     background: white;
-    border-radius: 12px;
-    width: 100%;
-    padding: 1.5rem;
+    border-radius: 10px;
+    padding: 1.2rem;
     text-wrap: wrap;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
 
+  .statIcon {
+    font-size: 1.8rem;
+    color: #0a58ca;
+    margin-bottom: 0.8rem;
+  }
+
   .statValue {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #0a58ca;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
   }
 
   .statLabel {
     color: #6c757d;
-    font-size: 0.8rem;
-
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .statCard {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .statIcon {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .statValue {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .statLabel {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .statCard {
+    padding: 0.8rem;
+    border-radius: 6px;
   }
 
   .statIcon {
     font-size: 1.2rem;
-    color: #0a58ca;
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
   }
 
+  .statValue {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .statLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.3px;
+  }
+}
+
+@media (max-width: 320px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .statCard {
+    padding: 0.6rem;
+    border-radius: 4px;
+  }
+
+  .statIcon {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .statValue {
+    font-size: 0.9rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .statLabel {
+    font-size: 0.55rem;
+    letter-spacing: 0.2px;
+  }
 }
 
 .customInput {
@@ -640,4 +942,145 @@
   border: 2px solid #0a58ca;
   width: 100%;
   outline: none;
+}
+
+/* Responsividade para input customizado */
+@media (max-width: 768px) {
+  .customInput {
+    padding: 6px 4px 6px 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .customInput {
+    padding: 4px 3px 4px 6px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .customInput {
+    padding: 3px 2px 3px 4px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 320px) {
+  .container {
+    padding: 0.2rem;
+  }
+
+  .title {
+    font-size: 0.9rem;
+  }
+
+  .titleIcon {
+    font-size: 1rem;
+  }
+
+  .createButton {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .filterSection {
+    padding: 0.6rem;
+  }
+
+  .filterLabel {
+    font-size: 0.7rem;
+  }
+
+  .filterInput label {
+    font-size: 0.6rem;
+    min-width: 50px;
+  }
+
+  .filterInput input {
+    padding: 0.2rem;
+    font-size: 0.6rem;
+  }
+
+  .spawningCard {
+    padding: 0.6rem;
+  }
+
+  .spawningCardHeader {
+    gap: 0.3rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .spawningCardTitle {
+    font-size: 0.7rem;
+  }
+
+  .spawningCardIcon {
+    padding: 0.15rem;
+    font-size: 0.7rem;
+  }
+
+  .spawningCardBody {
+    padding: 0.3rem 0.4rem 0.4rem;
+    gap: 0.3rem;
+  }
+
+  .spawningCardStat {
+    padding: 0.2rem;
+    gap: 0.2rem;
+  }
+
+  .spawningCardStatIcon {
+    font-size: 0.7rem;
+  }
+
+  .spawningCardStatLabel {
+    font-size: 0.5rem;
+  }
+
+  .spawningCardStatValue {
+    font-size: 0.6rem;
+  }
+
+  .spawningCardActions {
+    gap: 0.15rem;
+  }
+
+  .spawningCardActions button {
+    padding: 0.15rem;
+    font-size: 0.6rem;
+  }
+
+  .viewDetailsButton {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.6rem;
+  }
+
+
+
+  .chartSection {
+    padding: 0.6rem;
+  }
+
+  .chartTitle {
+    font-size: 0.8rem;
+  }
+
+  .chartContainer {
+    min-height: 120px;
+  }
+
+  .paginationContainer {
+    gap: 0.15rem;
+  }
+
+  .paginationButton {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.6rem;
+  }
+
+  .paginationInfo {
+    font-size: 0.6rem;
+  }
 }

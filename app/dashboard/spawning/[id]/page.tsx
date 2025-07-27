@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./spawningDetails.module.css";
 import {
@@ -75,6 +75,9 @@ export default function SpawningDetailsPage() {
   const [organizedMonitoring, setOrganizedMonitoring] = useState<Monitoring[]>([]);
   const [hasMonitoringError, setHasMonitoringError] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [chartHeight, setChartHeight] = useState(350);
 
   // Função para gerar e baixar PDF
   const handleDownloadPDF = async () => {
@@ -401,10 +404,48 @@ export default function SpawningDetailsPage() {
 
     return organizedMonitoring.map((monitoring, index) => ({
       hour: monitoring.hour,
-      temperature: monitoring.temperature,
-      hourDegree: monitoring.hour_degree,
+      "Temperatura": monitoring.temperature,
+      "Graus-Hora": monitoring.hour_degree,
       index,
     }));
+  };
+
+  // Fechar dropdown quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Ajustar altura do gráfico baseado no tamanho da tela
+  useEffect(() => {
+    const updateChartHeight = () => {
+      const width = window.innerWidth;
+      if (width <= 360) {
+        setChartHeight(220);
+      } else if (width <= 480) {
+        setChartHeight(250);
+      } else if (width <= 700) {
+        setChartHeight(300);
+      } else {
+        setChartHeight(350);
+      }
+    };
+
+    updateChartHeight();
+    window.addEventListener('resize', updateChartHeight);
+    return () => window.removeEventListener('resize', updateChartHeight);
+  }, []);
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
   };
 
   if (loading) {
@@ -412,7 +453,7 @@ export default function SpawningDetailsPage() {
       <div className={styles.loadingContainer}>
         <ClockLoader color="#0a58ca" size={60} />
         <p className={styles.loadingText}>
-          Carregando detalhes do spawning form...
+          Carregando detalhes da desova...
         </p>
       </div>
     );
@@ -422,8 +463,8 @@ export default function SpawningDetailsPage() {
     return (
       <div className={styles.errorContainer}>
         <BsInfoCircle size={48} />
-        <h2>Spawning Form não encontrado</h2>
-        <p>O spawning form solicitado não foi encontrado.</p>
+        <h2>Desova não encontrada</h2>
+        <p>A desova solicitada não foi encontrada.</p>
         <Button onClick={() => router.push("/dashboard/spawning")} variant="primary">
           <BsArrowLeft /> Voltar
         </Button>
@@ -490,20 +531,35 @@ export default function SpawningDetailsPage() {
             >
               <BsDownload /> {isGeneratingPDF ? 'Gerando...' : 'Baixar PDF'}
             </Button>
-            <Button
-              onClick={() => router.push(`/dashboard/spawning/update/${params.id}`)}
-              variant="primary"
-              className={styles.updateButton}
-            >
-              <BsPencil /> Atualizar
-            </Button>
-            <Button
-              onClick={() => handleDeleteSpawning()}
-              variant="danger"
-              className={styles.deleteButton}
-            >
-              <BsTrash /> Excluir
-            </Button>
+            
+            <div className={styles.dropdownContainer} ref={dropdownRef}>
+              <button
+                onClick={toggleDropdown}
+                className={styles.dropdownButton}
+              >
+                <BsPencil /> Ações
+              </button>
+              <div className={`${styles.dropdownContent} ${showDropdown ? styles.show : ''}`}>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    router.push(`/dashboard/spawning/update/${params.id}`);
+                  }}
+                  className={`${styles.dropdownItem} ${styles.update}`}
+                >
+                  <BsPencil /> Atualizar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    handleDeleteSpawning();
+                  }}
+                  className={`${styles.dropdownItem} ${styles.delete}`}
+                >
+                  <BsTrash /> Excluir
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -695,10 +751,15 @@ export default function SpawningDetailsPage() {
 
           <div className={styles.chartContainer}>
             {organizedMonitoring.length > 0 ? (
-              <ResponsiveContainer width="100%" height={350}>
+              <ResponsiveContainer width="100%" height={chartHeight}>
                 <LineChart data={getMonitoringChartData()}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <Legend />
+                  <Legend 
+                    wrapperStyle={{
+                      fontSize: chartHeight <= 250 ? '10px' : chartHeight <= 300 ? '11px' : '13px',
+                      paddingTop: '10px'
+                    }}
+                  />
                   <XAxis
                     dataKey="hour"
                     label={{
@@ -706,14 +767,17 @@ export default function SpawningDetailsPage() {
                       position: "insideBottom",
                       offset: -5,
                     }}
+                    tick={{ fontSize: chartHeight <= 250 ? 9 : chartHeight <= 300 ? 10 : 12 }}
                   />
                   <YAxis
                     yAxisId="left"
+                    orientation="left"
                     label={{
-                      value: "Temperatura (°C)",
+                      value: "Temperatura",
                       angle: -90,
                       position: "insideLeft",
                     }}
+                    tick={{ fontSize: chartHeight <= 250 ? 9 : chartHeight <= 300 ? 10 : 12 }}
                   />
                   <YAxis
                     yAxisId="right"
@@ -723,41 +787,59 @@ export default function SpawningDetailsPage() {
                       angle: 90,
                       position: "insideRight",
                     }}
+                    tick={{ fontSize: chartHeight <= 250 ? 9 : chartHeight <= 300 ? 10 : 12 }}
                   />
                   <Tooltip
-                    formatter={(value, name) => [
-                      name === "temperature" ? `${value}°C` : `${value}`,
-                      name === "temperature" ? "Temperatura" : "Graus-Hora",
-                    ]}
+                    formatter={(value, name) => {
+                      if (name === "Temperatura") {
+                        return [`${value}°C`, "Temperatura"];
+                      } else if (name === "Graus-Hora") {
+                        return [`${value}`, "Graus-Hora"];
+                      }
+                      return [value, name];
+                    }}
                     labelFormatter={(label) => `Hora: ${label}`}
+                    contentStyle={{
+                      fontSize: chartHeight <= 250 ? '11px' : chartHeight <= 300 ? '12px' : '14px',
+                      borderRadius: '8px',
+                      border: '1px solid #e0e0e0'
+                    }}
                   />
                   <Line
                     yAxisId="left"
                     type="monotone"
-                    dataKey="temperature"
+                    dataKey="Temperatura"
                     name="Temperatura"
                     stroke="#0a58ca"
-                    strokeWidth={2}
-                    dot={{ fill: "#0a58ca", strokeWidth: 2, r: 4 }}
+                    strokeWidth={chartHeight <= 250 ? 1 : chartHeight <= 300 ? 1.5 : 2}
+                    dot={{ 
+                      fill: "#0a58ca", 
+                      strokeWidth: chartHeight <= 250 ? 1 : chartHeight <= 300 ? 1.5 : 2, 
+                      r: chartHeight <= 250 ? 2 : chartHeight <= 300 ? 3 : 4 
+                    }}
                     activeDot={{
-                      r: 6,
+                      r: chartHeight <= 250 ? 4 : chartHeight <= 300 ? 5 : 6,
                       stroke: "#0a58ca",
-                      strokeWidth: 2,
+                      strokeWidth: chartHeight <= 250 ? 1 : chartHeight <= 300 ? 1.5 : 2,
                       fill: "#fff",
                     }}
                   />
                   <Line
                     yAxisId="right"
                     type="monotone"
-                    dataKey="hourDegree"
+                    dataKey="Graus-Hora"
                     name="Graus-Hora"
                     stroke="#28a745"
-                    strokeWidth={2}
-                    dot={{ fill: "#28a745", strokeWidth: 2, r: 4 }}
+                    strokeWidth={chartHeight <= 250 ? 1 : chartHeight <= 300 ? 1.5 : 2}
+                    dot={{ 
+                      fill: "#28a745", 
+                      strokeWidth: chartHeight <= 250 ? 1 : chartHeight <= 300 ? 1.5 : 2, 
+                      r: chartHeight <= 250 ? 2 : chartHeight <= 300 ? 3 : 4 
+                    }}
                     activeDot={{
-                      r: 6,
+                      r: chartHeight <= 250 ? 4 : chartHeight <= 300 ? 5 : 6,
                       stroke: "#28a745",
-                      strokeWidth: 2,
+                      strokeWidth: chartHeight <= 250 ? 1 : chartHeight <= 300 ? 1.5 : 2,
                       fill: "#fff",
                     }}
                   />

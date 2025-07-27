@@ -300,8 +300,7 @@ export default function TankDetailsPage() {
         otherClassName=""
       />
     )}
-    <div className="page-container">
-      <div className="content-container">
+      <div className={detailsStyles.contentContainer}>
         {/* Cabeçalho */}
         <motion.div
           className="content-card mb-4"
@@ -688,8 +687,7 @@ export default function TankDetailsPage() {
           onCancel={() => setShowConfirmModal(false)}
         />
       )}
-      </div>
-    </div>
+      </div>  
   </>);
 
 }

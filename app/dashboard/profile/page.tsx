@@ -121,13 +121,12 @@ export default function Profile() {
 
   return (
     <>
-      <div className="page-container">
-        <div className="content-container">
+        <div className={styles.container}>
           {/* Informações do Perfil */}
           <div className="content-card">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="card-title mb-0">
-                <UserIcon className="me-2 text-primary" /> Perfil do Usuário
+                <UserIcon className="" /> Perfil do Usuário
               </h2>
             </div>
 
@@ -263,7 +262,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Modal de Edição */}
       <Modal show={showEditModal} onHide={handleClose} centered>

@@ -48,6 +48,8 @@ export default function LoginForm() {
       style={{
         background: "#f5f8fc",
         fontFamily: 'Poppins, sans-serif',
+        padding: "1rem",
+        minHeight: "100vh"
       }}
     >
       {errorMessage && (
@@ -62,11 +64,12 @@ export default function LoginForm() {
         className="shadow-lg rounded-4 overflow-hidden d-flex flex-column flex-md-row align-items-stretch"
         style={{
           maxWidth: 900,
-          width: "95%",
+          width: "100%",
           background: "#ffffff",
           border: "1px solid #eaedf2",
           boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08)",
           animation: "slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+          minHeight: "auto"
         }}
       >
         {/* Lado da imagem */}
@@ -141,25 +144,27 @@ export default function LoginForm() {
 
         {/* Lado do formulário */}
         <div
-          className="p-5 d-flex flex-column justify-content-center"
+          className="p-4 p-md-5 d-flex flex-column justify-content-center"
           style={{ 
-            width: 450, 
-            minWidth: 280,
+            width: "100%",
+            maxWidth: 450,
             background: "#ffffff",
           }}
         >
-          <h3 className="text-primary d-flex align-items-center mb-4 fw-bold fs-2" style={{
+          <h3 className="text-primary d-flex align-items-center mb-4 fw-bold fs-2 fs-md-2" style={{
             letterSpacing: 1,
-            color: "#0a58ca"
+            color: "#0a58ca",
+            fontSize: "clamp(1.5rem, 4vw, 2rem)"
           }}>
             <span className="me-3">🐟</span> Fisher Control
           </h3>
           
           <form onSubmit={handleSubmit} autoComplete="on">
-            <div className="mb-4">
+            <div className="mb-3 mb-md-4">
               <label className="form-label fw-semibold" style={{
                 color: "#333",
-                letterSpacing: 0.5
+                letterSpacing: 0.5,
+                fontSize: "clamp(0.875rem, 3vw, 1rem)"
               }}>
                 Email
               </label>
@@ -172,31 +177,34 @@ export default function LoginForm() {
                 <span className="input-group-text border-0" style={{
                   background: "#f8f9fa",
                   color: "#6c757d",
-                  borderRight: "1px solid #eaedf2"
+                  borderRight: "1px solid #eaedf2",
+                  padding: "0.75rem 1rem"
                 }}>
                   <Mail size={18} />
                 </span>
                 <input
                   type="email"
                   onChange={(e) => setEmail(e.target.value)}
-                  className="form-control border-0 px-3 py-3"
+                  className="form-control border-0 px-3"
                   placeholder="Digite seu email"
                   autoComplete="email"
                   required
                   style={{ 
                     background: "#ffffff",
                     color: "#333",
-                    fontSize: 16,
-                    minHeight: 50
+                    fontSize: "clamp(14px, 3.5vw, 16px)",
+                    minHeight: "clamp(44px, 12vw, 50px)",
+                    padding: "0.75rem 1rem"
                   }}
                 />
               </div>
             </div>
             
-            <div className="mb-4">
+            <div className="mb-3 mb-md-4">
               <label className="form-label fw-semibold" style={{
                 color: "#333",
-                letterSpacing: 0.5
+                letterSpacing: 0.5,
+                fontSize: "clamp(0.875rem, 3vw, 1rem)"
               }}>
                 Senha
               </label>
@@ -209,22 +217,24 @@ export default function LoginForm() {
                 <span className="input-group-text border-0" style={{
                   background: "#f8f9fa",
                   color: "#6c757d",
-                  borderRight: "1px solid #eaedf2"
+                  borderRight: "1px solid #eaedf2",
+                  padding: "0.75rem 1rem"
                 }}>
                   <Lock size={18} />
                 </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="form-control border-0 px-3 py-3"
+                  className="form-control border-0 px-3"
                   placeholder="Digite sua senha"
                   autoComplete="current-password"
                   required
                   style={{ 
                     background: "#ffffff",
                     color: "#333",
-                    fontSize: 16,
-                    minHeight: 50
+                    fontSize: "clamp(14px, 3.5vw, 16px)",
+                    minHeight: "clamp(44px, 12vw, 50px)",
+                    padding: "0.75rem 1rem"
                   }}
                 />
                 <button
@@ -236,7 +246,8 @@ export default function LoginForm() {
                     background: "#f8f9fa",
                     color: "#6c757d",
                     borderLeft: "1px solid #eaedf2",
-                    transition: "all 0.3s ease"
+                    transition: "all 0.3s ease",
+                    padding: "0.75rem 1rem"
                   }}
                   onMouseOver={e => {
                     e.currentTarget.style.background = "#e9ecef";
@@ -254,7 +265,7 @@ export default function LoginForm() {
             
             <button
               type="submit"
-              className="w-100 py-3 fw-bold fs-5 mt-3 mb-4 border-0"
+              className="w-100 fw-bold border-0"
               style={{
                 borderRadius: 8,
                 background: "linear-gradient(145deg, #0a58ca 0%, #084298 100%)",
@@ -263,7 +274,11 @@ export default function LoginForm() {
                 letterSpacing: 1,
                 transition: "all 0.3s ease",
                 overflow: "hidden",
-                minHeight: 55
+                minHeight: "clamp(48px, 13vw, 55px)",
+                fontSize: "clamp(14px, 3.5vw, 18px)",
+                padding: "0.75rem 1rem",
+                marginTop: "0.5rem",
+                marginBottom: "1rem"
               }}
               disabled={loading}
               onMouseOver={e => {
@@ -279,13 +294,13 @@ export default function LoginForm() {
             </button>
           </form>
           
-          <hr className="border border-secondary border-2 opacity-25 rounded-pill my-4" />
+          <hr className="border border-secondary border-2 opacity-25 rounded-pill my-3 my-md-4" />
           
           <button
             onClick={() => {
               window.location.href = "/signup";
             }}
-            className="w-100 py-3 fw-semibold border-0"
+            className="w-100 fw-semibold border-0"
             style={{
               borderRadius: 8,
               background: "#ffffff",
@@ -294,7 +309,9 @@ export default function LoginForm() {
               letterSpacing: 0.5,
               overflow: "hidden",
               transition: "all 0.3s ease",
-              minHeight: 55
+              minHeight: "clamp(48px, 13vw, 55px)",
+              fontSize: "clamp(14px, 3.5vw, 16px)",
+              padding: "0.75rem 1rem"
             }}
             onMouseOver={e => {
               e.currentTarget.style.background = "#0a58ca";
@@ -343,13 +360,59 @@ export default function LoginForm() {
           box-shadow: 0 0 0 3px rgba(10, 88, 202, 0.1) !important;
         }
         
+        /* Mobile optimizations */
         @media (max-width: 768px) {
-          .p-5 { padding: 2rem !important; }
-          .rounded-4 { border-radius: 1rem !important; }
+          .vh-100 {
+            min-height: 100vh !important;
+            padding: 0.5rem !important;
+          }
+          
+          .shadow-lg {
+            margin: 0.5rem !important;
+            width: calc(100% - 1rem) !important;
+          }
+          
+          .p-4 {
+            padding: 1.5rem !important;
+          }
+          
+          .rounded-4 {
+            border-radius: 1rem !important;
+          }
         }
         
-        @media (max-width: 600px) {
-          .p-5 { padding: 1.5rem !important; }
+        @media (max-width: 480px) {
+          .p-4 {
+            padding: 1rem !important;
+          }
+          
+          .shadow-lg {
+            margin: 0.25rem !important;
+            width: calc(100% - 0.5rem) !important;
+          }
+          
+          .vh-100 {
+            padding: 0.25rem !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .p-4 {
+            padding: 0.75rem !important;
+          }
+          
+          .shadow-lg {
+            margin: 0.125rem !important;
+            width: calc(100% - 0.25rem) !important;
+          }
+        }
+        
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+          input[type="email"],
+          input[type="password"] {
+            font-size: 16px !important;
+          }
         }
       `}</style>
     </div>
