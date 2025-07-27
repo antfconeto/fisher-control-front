@@ -35,24 +35,11 @@ import {
   createSpawnForm,
   updateSpawnForm,
   deleteSpawnForm,
+  getSpawnStats,
+  SpawningStats,
 } from "@/actions/spawnForm";
 import { GiFishEggs } from "react-icons/gi";
-import { useAuth } from "@/contexts/authContext";
 import { useNotification } from "@/contexts/notificationContext";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-
-import dayjs from "dayjs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useUser } from "@/hooks/userHook";
@@ -157,16 +144,23 @@ export default function SpawningPage() {
   } | null>(null);
 
   useEffect(() => {
-    // Buscar stats do backend ao carregar a página
-    getDashboardStats().then((stats) => {
-      setDashboardStats({
-        totalEggWeight: stats.totalEggWeight,
-        averageWeightLoss: stats.averageWeightLoss,
-        totalSpawns: stats.totalSpawns,
-      });
-    });
+    getStats();
   }, []);
 
+  async function getStats() {
+    let stats = await getSpawnStats();
+    if ("error" in stats) {
+      setErrorMessage(stats.error);
+      return;
+    }
+    setDashboardStats({
+      totalEggWeight: stats.totalEggWeight,
+      averageWeightLoss: stats.averageWeightLoss,
+      totalSpawns: stats.totalSpawns,
+    });
+  }
+
+  
   // Funções de filtro
   const filteredSpawningForms = spawnForms.filter((form) => {
     const matchesAnimal =
@@ -532,7 +526,7 @@ export default function SpawningPage() {
                     <div className={styles.spawningCardStatContent}>
                       <div className={styles.spawningCardStatLabel}>Autor:</div>
                       <div className={styles.spawningCardStatValue}>
-                        {form.user?.name || form.userId || "Desconhecido"}
+                        {form.user?.name || "Desconhecido"}
                       </div>
                     </div>
                   </div>

@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import errorMessages from "@/utils/errorMessages.json";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const getTanks = async (
   tankName?: string

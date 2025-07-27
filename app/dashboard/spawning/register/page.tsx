@@ -7,11 +7,12 @@ import { Button } from "@/components/ui";
 import { useUser } from "@/hooks/userHook";
 import { createSpawnForm } from "@/actions/spawnForm";
 import { listAnimals } from "@/actions/animal";
-import { SpawningForm, Animal } from "@/types/types";
+import { SpawningForm, Animal, Monitoring } from "@/types/types";
 import { ErrorBox } from "@/components/ErrorBox";
 import dayjs from "dayjs";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
-const defaultForm: Omit<SpawningForm, "_id" | "userId"> = {
+const defaultForm: Omit<SpawningForm, "_id"> = {
   date: new Date(),
   animal_weight: {
     beforeSpawn: 0,
@@ -58,6 +59,7 @@ export default function RegisterSpawningPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [monitoringTimeError, setMonitoringTimeError] = useState<string | null>(null);
 
   // Autocomplete de animal
   const [animalQuery, setAnimalQuery] = useState("");
@@ -65,6 +67,11 @@ export default function RegisterSpawningPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Estado para o monitoring
+  const [monitoringItems, setMonitoringItems] = useState<Monitoring[]>([
+    { hour: "", temperature: 0, hour_degree: 0 }
+  ]);
 
   useEffect(() => {
     // Se o campo estiver vazio, buscar todos os animais (até 20)
@@ -114,6 +121,24 @@ export default function RegisterSpawningPage() {
     };
   }, []);
 
+  // Atualizar o form.monitoring quando monitoringItems mudar
+  useEffect(() => {
+    setForm(prev => ({
+      ...prev,
+      monitoring: monitoringItems.filter(item => 
+        item.hour && item.temperature > 0
+      )
+    }));
+  }, [monitoringItems]);
+
+  // Recalcular hour_degree sempre que a temperatura mudar
+  useEffect(() => {
+    const hasTemperatureChanges = monitoringItems.some(item => item.temperature > 0);
+    if (hasTemperatureChanges) {
+      setMonitoringItems(prev => recalculateHourDegrees(prev));
+    }
+  }, [monitoringItems.map(item => item.temperature).join(',')]);
+
   // Validação
   const validate = () => {
     if (!form.date) return "Data da desova é obrigatória.";
@@ -123,7 +148,49 @@ export default function RegisterSpawningPage() {
     if (!form.animal_weight.afterSpawn)
       return "Peso depois da desova é obrigatório.";
     if (!form.egg_weight) return "Peso dos ovos é obrigatório.";
+    
+    // Validação dos horários do monitoring
+    const monitoringError = validateMonitoringTimes();
+    if (monitoringError) return monitoringError;
+    
     return null;
+  };
+
+  // Função para validar se os horários estão em ordem cronológica
+  const validateMonitoringTimes = (items?: Monitoring[]): string | null => {
+    const itemsToValidate = items || monitoringItems;
+    const filledItems = itemsToValidate.filter(item => item.hour && item.temperature > 0);
+    
+    if (filledItems.length < 2) return null; // Precisa de pelo menos 2 itens para validar
+    
+    // Verificar horários duplicados
+    const times = filledItems.map(item => item.hour);
+    const uniqueTimes = new Set(times);
+    if (times.length !== uniqueTimes.size) {
+      return "Erro: Existem horários duplicados. Cada horário deve ser único.";
+    }
+    
+    for (let i = 1; i < filledItems.length; i++) {
+      const currentTime = filledItems[i].hour;
+      const previousTime = filledItems[i - 1].hour;
+      
+      if (currentTime && previousTime) {
+        const currentMinutes = convertTimeToMinutes(currentTime);
+        const previousMinutes = convertTimeToMinutes(previousTime);
+        
+        if (currentMinutes <= previousMinutes) {
+          return `Erro na ordem dos horários: ${currentTime} não pode ser igual ou anterior a ${previousTime}. Os horários devem estar em ordem cronológica crescente.`;
+        }
+      }
+    }
+    
+    return null;
+  };
+
+  // Função para converter horário (HH:MM) em minutos para comparação
+  const convertTimeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
   };
 
   // Envio do formulário
@@ -131,6 +198,7 @@ export default function RegisterSpawningPage() {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+    setMonitoringTimeError(null);
     const validation = validate();
     if (validation) {
       setError(validation);
@@ -190,6 +258,72 @@ export default function RegisterSpawningPage() {
     setAnimalQuery(animal.codeAnimal);
     setSelectedAnimal(animal);
     setShowSuggestions(false);
+  };
+
+  // Handlers para monitoring
+  const addMonitoringItem = () => {
+    setMonitoringItems(prev => {
+      const newItems = [...prev, { hour: "", temperature: 0, hour_degree: 0 }];
+      const recalculatedItems = recalculateHourDegrees(newItems);
+      
+      // Validar horários em tempo real
+      const timeError = validateMonitoringTimes(recalculatedItems);
+      setMonitoringTimeError(timeError);
+      
+      return recalculatedItems;
+    });
+  };
+
+  const removeMonitoringItem = (index: number) => {
+    setMonitoringItems(prev => {
+      const filteredItems = prev.filter((_, i) => i !== index);
+      const recalculatedItems = recalculateHourDegrees(filteredItems);
+      
+      // Validar horários em tempo real
+      const timeError = validateMonitoringTimes(recalculatedItems);
+      setMonitoringTimeError(timeError);
+      
+      return recalculatedItems;
+    });
+  };
+
+  const updateMonitoringItem = (index: number, field: keyof Monitoring, value: string | number) => {
+    setMonitoringItems(prev => {
+      const updatedItems = prev.map((item, i) => 
+        i === index 
+          ? { ...item, [field]: value }
+          : item
+      );
+      
+      // Recalcular hour_degree para todos os itens após a mudança
+      const recalculatedItems = recalculateHourDegrees(updatedItems);
+      
+      // Validar horários em tempo real
+      const timeError = validateMonitoringTimes(recalculatedItems);
+      setMonitoringTimeError(timeError);
+      
+      return recalculatedItems;
+    });
+  };
+
+  // Função para recalcular hour_degree automaticamente
+  const recalculateHourDegrees = (items: Monitoring[]): Monitoring[] => {
+    return items.map((item, index) => {
+      if (index === 0) {
+        // Primeiro item sempre tem hour_degree = 0
+        return { ...item, hour_degree: 0 };
+      } else {
+        // Para os demais itens, hour_degree = temperatura_atual + hour_degree_anterior
+        // Exemplo: 
+        // 9:00 - temp 30°C - hour_degree: 0 (primeiro)
+        // 10:00 - temp 20°C - hour_degree: 20 + 0 = 20
+        // 11:00 - temp 26°C - hour_degree: 26 + 20 = 46
+        // 12:00 - temp 19°C - hour_degree: 19 + 46 = 65
+        const previousHourDegree = items[index - 1].hour_degree || 0;
+        const currentTemperature = item.temperature || 0;
+        return { ...item, hour_degree: currentTemperature + previousHourDegree };
+      }
+    });
   };
 
   return (
@@ -354,6 +488,82 @@ export default function RegisterSpawningPage() {
             placeholder="0,0"
           />
         </div>
+
+        {/* Seção de Monitoramento */}
+        <div className={styles.formGroup}>
+          <div className={styles.monitoringHeader}>
+            <label>Monitoramento de Temperatura</label>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={addMonitoringItem}
+              style={{ padding: "0.5rem", minWidth: "auto" }}
+            >
+              <FaPlus /> Adicionar
+            </Button>
+          </div>
+          <small style={{ color: "#666", fontSize: "0.9rem", marginBottom: "1rem", display: "block" }}>
+            💡 Graus-Hora são calculados automaticamente: temperatura atual + graus-hora anterior
+          </small>
+          {monitoringTimeError && (
+            <div className={styles.monitoringTimeError}>
+              ⚠️ {monitoringTimeError}
+            </div>
+          )}
+          
+          {monitoringItems.map((item, index) => (
+            <div key={index} className={styles.monitoringItem}>
+              <div className={styles.monitoringInputs}>
+                <div className={styles.monitoringInput}>
+                  <label>Hora</label>
+                  <input
+                    type="time"
+                    value={item.hour}
+                    onChange={(e) => updateMonitoringItem(index, "hour", e.target.value)}
+                    placeholder="HH:MM"
+                  />
+                </div>
+                <div className={styles.monitoringInput}>
+                  <label>Temperatura (°C)</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={item.temperature === 0 ? "" : item.temperature.toString().replace(".", ",")}
+                    onChange={(e) => {
+                      const formatted = formatNumberInput(e.target.value, 1);
+                      updateMonitoringItem(index, "temperature", parseFloat(formatted.replace(",", ".")) || 0);
+                    }}
+                    placeholder="0,0"
+                    maxLength={5}
+                  />
+                </div>
+                <div className={styles.monitoringInput}>
+                  <label>Graus-Hora (Calculado)</label>
+                  <input
+                    type="text"
+                    value={item.hour_degree === 0 ? "0" : item.hour_degree.toString()}
+                    readOnly
+                    className={styles.inputReadonly}
+                    placeholder="0"
+                  />
+                </div>
+                {monitoringItems.length > 1 && (
+                  <div className={styles.monitoringRemove}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => removeMonitoringItem(index)}
+                      style={{ padding: "0.5rem", minWidth: "auto", backgroundColor: "#dc3545", color: "white" }}
+                    >
+                      <FaTrash />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className={styles.formGroup}>
           <label>Autor</label>
           <input

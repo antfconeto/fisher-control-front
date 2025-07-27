@@ -2,7 +2,7 @@
 import { ResponseError, SpawningForm } from "@/types/types";
 import { cookies } from "next/headers";
 
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 function getCookieValue(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -30,6 +30,17 @@ export interface SpawnFormFilters {
   page?: number;
   pageSize?: number;
 }
+
+export type SpawningStats = {
+  _id: string;
+  totalEggWeight: number;
+  totalSpawns: number;
+  averageWeightLoss: number;
+  countWeightLoss: number;
+  averageWeight: number;
+  countWeight: number;
+};
+
 
 export const getSpawnFormsWithFilters = async (
   filters: SpawnFormFilters
@@ -285,3 +296,37 @@ export const addMonitoringRecord = async (
     };
   }
 };
+
+
+export const getSpawnStats = async (): Promise<SpawningStats | ResponseError> => {
+  const token = (await cookies()).get("access_token");
+  if (!token) {
+    return {
+      error: "Token not received",
+      statusCode: 401,
+    };
+  }
+  try {
+    const response = await fetch(`${urlApi}/spawn/getSpawnStats`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      const errorMessage: ResponseError = await response.json();
+      return {
+        error: errorMessage?.error || "Erro ao buscar stats de desova",
+        statusCode: response.status,
+      };
+    }
+    const responseBody: SpawningStats = await response.json();
+    return responseBody;
+  } catch (error: any) {
+    return {
+      error: error.message || "Erro desconhecido ao buscar stats de desova",
+      statusCode: 500,
+    };
+  }
+} 

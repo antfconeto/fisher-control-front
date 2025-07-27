@@ -12,6 +12,9 @@ import {
   BsGraphUp,
   BsInfoCircle,
   BsPlus,
+  BsPencil,
+  BsTrash,
+  BsDownload,
 } from "react-icons/bs";
 import {
   FaFish,
@@ -30,7 +33,7 @@ import { ClockLoader } from "react-spinners";
 import { Button } from "@/components/ui";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
-import { Animal, SpawningForm, Specie, Tank } from "@/types/types";
+import { Animal, ResponseError, SpawningForm, Specie, Tank, Monitoring } from "@/types/types";
 import {
   LineChart,
   Line,
@@ -39,6 +42,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { InputDefault } from "@/components/Inputs/InputDefault/inputDefault";
 import { getSpawnFormById } from "@/actions/spawnForm";
@@ -47,7 +51,8 @@ import { getUserById } from "@/actions/user";
 import { getAnimalByCode } from "@/actions/animal";
 import { getSpecieById } from "@/actions/specie";
 import { getTankById } from "@/actions/tank";
-import { addMonitoringRecord } from "@/actions/spawnForm";
+import { addMonitoringRecord, deleteSpawnForm } from "@/actions/spawnForm";
+import { generateSpawningPDF } from "@/components/SpawningPDF";
 
 export default function SpawningDetailsPage() {
   const params = useParams();
@@ -66,6 +71,36 @@ export default function SpawningDetailsPage() {
     hour_degree: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [monitoringTimeError, setMonitoringTimeError] = useState<string | null>(null);
+  const [organizedMonitoring, setOrganizedMonitoring] = useState<Monitoring[]>([]);
+  const [hasMonitoringError, setHasMonitoringError] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // Função para gerar e baixar PDF
+  const handleDownloadPDF = async () => {
+    try {
+      if (!spawningForm) {
+        setErrorMessage("Dados da desova não disponíveis");
+        return;
+      }
+
+      setIsGeneratingPDF(true);
+      setErrorMessage("");
+
+      await generateSpawningPDF({
+        spawningForm,
+        user,
+        animal,
+        specie,
+        tank,
+        organizedMonitoring,
+      });
+    } catch (error: any) {
+      setErrorMessage("Erro ao gerar PDF: " + error.message);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   // Função para carregar o spawning form e dados relacionados
   const loadSpawningForm = async () => {
@@ -91,14 +126,13 @@ export default function SpawningDetailsPage() {
       };
       setSpawningForm(spawnFormWithDateConversion);
 
-      // Buscar dados do usuário
-      if (response.userId) {
-        const userResponse = await getUserById(response.userId);
-        if (!("error" in userResponse)) {
-          setUser(userResponse);
-        }
-      } else if (response.user && response.user.id) {
+
+       if (response.user && response.user.id) {
         const userResponse = await getUserById(response.user.id);
+        if((userResponse as ResponseError).error){
+          setErrorMessage((userResponse as ResponseError).error);
+          return;
+        }
         if (!("error" in userResponse)) {
           setUser(userResponse);
         }
@@ -107,6 +141,10 @@ export default function SpawningDetailsPage() {
       // Buscar dados do animal
       if (response.animalId) {
         const animalResponse = await getAnimalByCode(response.animalId);
+        if((animalResponse as ResponseError).error){
+          setErrorMessage((animalResponse as ResponseError).error);
+          return;
+        }
         if (!("error" in animalResponse)) {
           setAnimal(animalResponse);
 
@@ -141,6 +179,90 @@ export default function SpawningDetailsPage() {
       loadSpawningForm();
     }
   }, [params.id, setErrorMessage]);
+
+  // Função para converter horário (HH:MM) em minutos para comparação
+  const convertTimeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Função para organizar monitoring por horário e calcular graus-hora
+  const organizeMonitoringData = (monitoring: Monitoring[]): Monitoring[] => {
+    // Filtrar apenas itens com hora e temperatura válidos
+    const validItems = monitoring.filter(item => item.hour && item.temperature > 0);
+    
+    // Ordenar por horário
+    const sortedItems = validItems.sort((a, b) => {
+      const timeA = convertTimeToMinutes(a.hour);
+      const timeB = convertTimeToMinutes(b.hour);
+      return timeA - timeB;
+    });
+
+    // Calcular graus-hora automaticamente
+    return sortedItems.map((item, index) => {
+      if (index === 0) {
+        return { ...item, hour_degree: 0 };
+      } else {
+        const previousHourDegree = sortedItems[index - 1].hour_degree || 0;
+        const currentTemperature = item.temperature || 0;
+        return { ...item, hour_degree: currentTemperature + previousHourDegree };
+      }
+    });
+  };
+
+  // Função para validar se os horários estão em ordem cronológica
+  const validateMonitoringTimes = (monitoring: Monitoring[]): string | null => {
+    const validItems = monitoring.filter(item => item.hour && item.temperature > 0);
+    
+    if (validItems.length < 2) return null;
+    
+    // Verificar horários duplicados
+    const times = validItems.map(item => item.hour);
+    const uniqueTimes = new Set(times);
+    if (times.length !== uniqueTimes.size) {
+      return "Erro: Existem horários duplicados. Cada horário deve ser único.";
+    }
+    
+    for (let i = 1; i < validItems.length; i++) {
+      const currentTime = validItems[i].hour;
+      const previousTime = validItems[i - 1].hour;
+      
+      if (currentTime && previousTime) {
+        const currentMinutes = convertTimeToMinutes(currentTime);
+        const previousMinutes = convertTimeToMinutes(previousTime);
+        
+        if (currentMinutes <= previousMinutes) {
+          return `Erro na ordem dos horários: ${currentTime} não pode ser igual ou anterior a ${previousTime}. Os horários devem estar em ordem cronológica crescente.`;
+        }
+      }
+    }
+    
+    return null;
+  };
+
+  // Atualizar organizedMonitoring quando spawningForm mudar
+  useEffect(() => {
+    if (spawningForm && spawningForm.monitoring) {
+      const organized = organizeMonitoringData(spawningForm.monitoring);
+      setOrganizedMonitoring(organized);
+      
+      // Validar horários
+      const timeError = validateMonitoringTimes(organized);
+      setMonitoringTimeError(timeError);
+      setHasMonitoringError(!!timeError);
+    }
+  }, [spawningForm]);
+
+  // Validar horários em tempo real quando novo registro for adicionado
+  useEffect(() => {
+    if (showAddMonitoringModal && spawningForm && newMonitoringRecord.hour && newMonitoringRecord.temperature > 0) {
+      const tempMonitoring = [...(spawningForm.monitoring || []), newMonitoringRecord];
+      const timeError = validateMonitoringTimes(tempMonitoring);
+      setHasMonitoringError(!!timeError);
+    } else {
+      setHasMonitoringError(false);
+    }
+  }, [newMonitoringRecord, showAddMonitoringModal, spawningForm]);
 
   const formatTime = (time: string) => {
     return time;
@@ -181,6 +303,37 @@ export default function SpawningDetailsPage() {
     }));
   };
 
+  const handleDeleteSpawning = async () => {
+    try {
+      if (!spawningForm || !spawningForm._id) {
+        setErrorMessage("Spawning form não encontrado.");
+        return;
+      }
+
+      // Confirmar exclusão
+      const confirmDelete = window.confirm(
+        "Tem certeza que deseja excluir esta desova? Esta ação não pode ser desfeita."
+      );
+
+      if (!confirmDelete) {
+        return;
+      }
+
+      const result = await deleteSpawnForm(spawningForm._id);
+      if (result && typeof result === 'object' && 'error' in result) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      // Redirecionar para a lista de spawning forms
+      router.push("/dashboard/spawning");
+    } catch (error: any) {
+      setErrorMessage(
+        error.message || "Erro ao excluir spawning form"
+      );
+    }
+  };
+
   const handleAddMonitoringRecord = async () => {
     try {
       if (!newMonitoringRecord.hour || newMonitoringRecord.temperature === 0) {
@@ -192,15 +345,27 @@ export default function SpawningDetailsPage() {
         setErrorMessage("Spawning form não encontrado.");
         return;
       }
-      // Chamada correta para adicionar monitoramento
-      const result = await addMonitoringRecord(spawningForm._id, [
-        ...(spawningForm.monitoring || []),
-        newMonitoringRecord,
-      ]);
+
+      // Criar array temporário com o novo registro para validação
+      const tempMonitoring = [...(spawningForm.monitoring || []), newMonitoringRecord];
+      
+      // Validar horários antes de adicionar
+      const timeError = validateMonitoringTimes(tempMonitoring);
+      if (timeError) {
+        setErrorMessage(timeError);
+        return;
+      }
+
+      // Organizar e calcular graus-hora automaticamente
+      const organizedMonitoring = organizeMonitoringData(tempMonitoring);
+      
+      // Chamada para adicionar monitoramento com dados organizados
+      const result = await addMonitoringRecord(spawningForm._id, organizedMonitoring);
       if (result && result.error) {
         setErrorMessage(result.error);
         return;
       }
+      
       // Recarregar os dados do spawning form
       await loadSpawningForm();
 
@@ -232,9 +397,9 @@ export default function SpawningDetailsPage() {
   };
 
   const getMonitoringChartData = () => {
-    if (!spawningForm) return [];
+    if (!organizedMonitoring.length) return [];
 
-    return spawningForm.monitoring.map((monitoring, index) => ({
+    return organizedMonitoring.map((monitoring, index) => ({
       hour: monitoring.hour,
       temperature: monitoring.temperature,
       hourDegree: monitoring.hour_degree,
@@ -259,7 +424,7 @@ export default function SpawningDetailsPage() {
         <BsInfoCircle size={48} />
         <h2>Spawning Form não encontrado</h2>
         <p>O spawning form solicitado não foi encontrado.</p>
-        <Button onClick={() => router.back()} variant="primary">
+        <Button onClick={() => router.push("/dashboard/spawning")} variant="primary">
           <BsArrowLeft /> Voltar
         </Button>
       </div>
@@ -276,19 +441,70 @@ export default function SpawningDetailsPage() {
         />
       )}
 
+      {isGeneratingPDF && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(5px)'
+        }}>
+          <ClockLoader color="#0a58ca" size={60} />
+          <p style={{
+            marginTop: '1rem',
+            fontSize: '1.1rem',
+            color: '#0a58ca',
+            fontWeight: '500'
+          }}>
+            Gerando PDF da desova...
+          </p>
+        </div>
+      )}
+
       <div className={styles.container}>
         {/* Header */}
         <div className={styles.header}>
           <Button
-            onClick={() => router.back()}
+            onClick={() => router.push("/dashboard/spawning")}
             variant="secondary"
             className={styles.backButton}
           >
             <BsArrowLeft /> Voltar
           </Button>
           <h1 className={styles.title}>
-            <BsEgg className={styles.titleIcon} /> Detalhes do Spawning Form
+            <BsEgg className={styles.titleIcon} /> DETALHES DA DESOVA
           </h1>
+          <div className={styles.headerActions}>
+            <Button
+              onClick={handleDownloadPDF}
+              variant="secondary"
+              className={styles.downloadButton}
+              disabled={isGeneratingPDF}
+            >
+              <BsDownload /> {isGeneratingPDF ? 'Gerando...' : 'Baixar PDF'}
+            </Button>
+            <Button
+              onClick={() => router.push(`/dashboard/spawning/update/${params.id}`)}
+              variant="primary"
+              className={styles.updateButton}
+            >
+              <BsPencil /> Atualizar
+            </Button>
+            <Button
+              onClick={() => handleDeleteSpawning()}
+              variant="danger"
+              className={styles.deleteButton}
+            >
+              <BsTrash /> Excluir
+            </Button>
+          </div>
         </div>
 
         {/* Informações Principais */}
@@ -296,14 +512,14 @@ export default function SpawningDetailsPage() {
           <div className={styles.infoCard}>
             <div className={styles.infoCardHeader}>
               <BsCalendar3 className={styles.infoCardIcon} />
-              <h3>Informações do Spawning</h3>
+              <h3>Informações da Desova</h3>
             </div>
             <div className={styles.spawningInfoGrid}>
               <div className={`${styles.spawningInfoItem} ${styles.dateCard}`}>
                 <div>
                   <div className={styles.spawningInfoLabel}>
                     <BsCalendar3 className={styles.spawningInfoIcon} />
-                    Data do Spawning
+                    Data da Desova
                   </div>
                   <div className={styles.spawningInfoValue}>
                     {spawningForm.date instanceof Date
@@ -478,41 +694,69 @@ export default function SpawningDetailsPage() {
           </div>
 
           <div className={styles.chartContainer}>
-            {spawningForm.monitoring && spawningForm.monitoring.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+            {organizedMonitoring.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={getMonitoringChartData()}>
                   <CartesianGrid strokeDasharray="3 3" />
+                  <Legend />
                   <XAxis
                     dataKey="hour"
                     label={{
                       value: "Hora",
                       position: "insideBottom",
-                      offset: -10,
+                      offset: -5,
                     }}
                   />
                   <YAxis
+                    yAxisId="left"
                     label={{
                       value: "Temperatura (°C)",
                       angle: -90,
                       position: "insideLeft",
                     }}
                   />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    label={{
+                      value: "Graus-Hora",
+                      angle: 90,
+                      position: "insideRight",
+                    }}
+                  />
                   <Tooltip
                     formatter={(value, name) => [
-                      `${value}°C`,
+                      name === "temperature" ? `${value}°C` : `${value}`,
                       name === "temperature" ? "Temperatura" : "Graus-Hora",
                     ]}
                     labelFormatter={(label) => `Hora: ${label}`}
                   />
                   <Line
+                    yAxisId="left"
                     type="monotone"
                     dataKey="temperature"
+                    name="Temperatura"
                     stroke="#0a58ca"
                     strokeWidth={2}
                     dot={{ fill: "#0a58ca", strokeWidth: 2, r: 4 }}
                     activeDot={{
                       r: 6,
                       stroke: "#0a58ca",
+                      strokeWidth: 2,
+                      fill: "#fff",
+                    }}
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="hourDegree"
+                    name="Graus-Hora"
+                    stroke="#28a745"
+                    strokeWidth={2}
+                    dot={{ fill: "#28a745", strokeWidth: 2, r: 4 }}
+                    activeDot={{
+                      r: 6,
+                      stroke: "#28a745",
                       strokeWidth: 2,
                       fill: "#fff",
                     }}
@@ -545,18 +789,33 @@ export default function SpawningDetailsPage() {
             <h3>Registros de Monitoramento</h3>
           </div>
 
+          {/* Mostrar erro de validação se houver */}
+          {monitoringTimeError && (
+            <div style={{ 
+              color: "#dc3545", 
+              backgroundColor: "#f8d7da", 
+              border: "1px solid #f5c6cb", 
+              borderRadius: "6px", 
+              padding: "0.75rem", 
+              marginBottom: "1rem", 
+              fontSize: "0.9rem" 
+            }}>
+              ⚠️ {monitoringTimeError}
+            </div>
+          )}
+
           <div className={styles.tableContainer}>
-            {spawningForm.monitoring && spawningForm.monitoring.length > 0 ? (
+            {organizedMonitoring.length > 0 ? (
               <table className={styles.table}>
                 <thead>
                   <tr>
                     <th>Hora</th>
                     <th>Temperatura (°C)</th>
-                    <th>Graus-Hora</th>
+                    <th>Graus-Hora (Calculado)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {spawningForm.monitoring.map((monitoring, index) => (
+                  {organizedMonitoring.map((monitoring, index) => (
                     <tr key={index}>
                       <td>{monitoring.hour}</td>
                       <td>{monitoring.temperature}°C</td>
@@ -609,6 +868,40 @@ export default function SpawningDetailsPage() {
               className={styles.modalBody}
               style={{ padding: "1.5rem 0.5rem 0.5rem 0.5rem" }}
             >
+              {/* Mostrar dados organizados existentes */}
+              {organizedMonitoring.length > 0 && (
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <h4 style={{ color: "#0a58ca", marginBottom: "0.5rem", fontSize: "1rem" }}>
+                    Registros Existentes (Ordenados por Horário):
+                  </h4>
+                  <div style={{ 
+                    maxHeight: "150px", 
+                    overflowY: "auto", 
+                    border: "1px solid #e0e0e0", 
+                    borderRadius: "6px", 
+                    padding: "0.5rem",
+                    backgroundColor: "#f8f9fa"
+                  }}>
+                    {organizedMonitoring.map((monitoring, index) => (
+                      <div key={index} style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "0.25rem 0",
+                        fontSize: "0.9rem",
+                        borderBottom: index < organizedMonitoring.length - 1 ? "1px solid #e0e0e0" : "none"
+                      }}>
+                        <span><strong>{monitoring.hour}</strong></span>
+                        <span>{monitoring.temperature}°C</span>
+                        <span style={{ color: "#666" }}>Graus-Hora: {monitoring.hour_degree}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <small style={{ color: "#666", fontSize: "0.9rem", marginBottom: "1rem", display: "block" }}>
+                💡 Graus-Hora são calculados automaticamente: temperatura atual + graus-hora anterior
+              </small>
               <div className={styles.formGroup} style={{ marginBottom: 18 }}>
                 <label
                   style={{ fontWeight: 500, color: "#222", marginBottom: 4 }}
@@ -655,31 +948,6 @@ export default function SpawningDetailsPage() {
                   }}
                 />
               </div>
-              <div className={styles.formGroup} style={{ marginBottom: 18 }}>
-                <label
-                  style={{ fontWeight: 500, color: "#222", marginBottom: 4 }}
-                >
-                  Graus-Hora:
-                </label>
-                <InputDefault
-                  type="text"
-                  value={
-                    newMonitoringRecord.hour_degree === 0
-                      ? ""
-                      : newMonitoringRecord.hour_degree.toString()
-                  }
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleMonitoringInputChange("hour_degree", e.target.value)
-                  }
-                  required
-                  placeholder="0,0"
-                  style={{
-                    borderRadius: 8,
-                    border: "1.5px solid #b6c1d6",
-                    padding: "0.6rem 1rem",
-                  }}
-                />
-              </div>
             </div>
             <div
               className={styles.modalFooter}
@@ -699,8 +967,13 @@ export default function SpawningDetailsPage() {
               </Button>
               <Button
                 onClick={handleAddMonitoringRecord}
-                variant="primary"
-                style={{ minWidth: 110, borderRadius: 8 }}
+                variant={hasMonitoringError ? "danger" : "primary"}
+                style={{ 
+                  minWidth: 110, 
+                  borderRadius: 8,
+                  backgroundColor: hasMonitoringError ? "#dc3545" : undefined,
+                  borderColor: hasMonitoringError ? "#dc3545" : undefined
+                }}
               >
                 <FaSave /> Salvar
               </Button>

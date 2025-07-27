@@ -1,0 +1,1 @@
+export { generateSpawningPDF } from './SpawningPDF'; 

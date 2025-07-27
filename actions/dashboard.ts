@@ -6,7 +6,7 @@ import * as errorMessages from "@/utils/errorMessages.json";
 import { Animal, Specie } from "@/types/types";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export interface DashboardStats {
   totalUsers: number;

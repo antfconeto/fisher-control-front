@@ -77,7 +77,6 @@ export interface SpawningForm {
     id: string;
     name: string;
   };
-  userId?: string;
 }
 
 export type Monitoring = {
