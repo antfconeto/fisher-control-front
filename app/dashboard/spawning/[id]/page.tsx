@@ -129,41 +129,79 @@ export default function SpawningDetailsPage() {
       };
       setSpawningForm(spawnFormWithDateConversion);
 
+      // Preparar todas as chamadas em paralelo
+      const promises: Promise<{ type: string; data: any }>[] = [];
 
-       if (response.user && response.user.id) {
-        const userResponse = await getUserById(response.user.id);
-        if((userResponse as ResponseError).error){
-          setErrorMessage((userResponse as ResponseError).error);
-          return;
-        }
-        if (!("error" in userResponse)) {
-          setUser(userResponse);
-        }
+      // Buscar dados do usuário
+      if (response.user && response.user.id) {
+        promises.push(
+          getUserById(response.user.id).then(userResponse => {
+            if ((userResponse as ResponseError).error) {
+              throw new Error((userResponse as ResponseError).error);
+            }
+            return { type: 'user', data: userResponse as User };
+          })
+        );
       }
 
       // Buscar dados do animal
       if (response.animalId) {
-        const animalResponse = await getAnimalByCode(response.animalId);
-        if((animalResponse as ResponseError).error){
-          setErrorMessage((animalResponse as ResponseError).error);
-          return;
-        }
-        if (!("error" in animalResponse)) {
-          setAnimal(animalResponse);
-
-          // Buscar dados da espécie usando o ID da espécie do animal
-          if (animalResponse.specie) {
-            const specieResponse = await getSpecieById(animalResponse.specie);
-            if (!("error" in specieResponse)) {
-              setSpecie(specieResponse);
+        promises.push(
+          getAnimalByCode(response.animalId).then(animalResponse => {
+            if ((animalResponse as ResponseError).error) {
+              throw new Error((animalResponse as ResponseError).error);
             }
-          }
+            return { type: 'animal', data: animalResponse as Animal };
+          })
+        );
+      }
 
-          // Buscar dados do tanque usando o tankId do animal
-          if (animalResponse.tankId) {
-            const tankResponse = await getTankById(animalResponse.tankId);
-            if (!("error" in tankResponse)) {
-              setTank(tankResponse);
+      // Executar todas as chamadas em paralelo
+      const results = await Promise.all(promises);
+
+      // Processar resultados
+      for (const result of results) {
+        if (result.type === 'user') {
+          setUser(result.data as User);
+        } else if (result.type === 'animal') {
+          const animalData = result.data as Animal;
+          setAnimal(animalData);
+          
+          // Buscar dados relacionados ao animal em paralelo
+          const animalPromises: Promise<{ type: string; data: any } | null>[] = [];
+          
+          if (animalData.specie) {
+            animalPromises.push(
+              getSpecieById(animalData.specie).then(specieResponse => {
+                if (!("error" in specieResponse)) {
+                  return { type: 'specie', data: specieResponse as Specie };
+                }
+                return null;
+              })
+            );
+          }
+          
+          if (animalData.tankId) {
+            animalPromises.push(
+              getTankById(animalData.tankId).then(tankResponse => {
+                if (!("error" in tankResponse)) {
+                  return { type: 'tank', data: tankResponse as Tank };
+                }
+                return null;
+              })
+            );
+          }
+          
+          // Executar chamadas relacionadas ao animal em paralelo
+          const animalResults = await Promise.all(animalPromises);
+          
+          for (const animalResult of animalResults) {
+            if (animalResult) {
+              if (animalResult.type === 'specie') {
+                setSpecie(animalResult.data as Specie);
+              } else if (animalResult.type === 'tank') {
+                setTank(animalResult.data as Tank);
+              }
             }
           }
         }
