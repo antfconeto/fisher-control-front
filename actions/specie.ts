@@ -6,7 +6,7 @@ import { CustomConsole } from "@/utils/customLogger";
 import { cookies } from "next/headers";
 import errorMessages from "@/utils/errorMessages.json";
 const consoler = new CustomConsole();
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const createSpecie = async (
   specie: Specie
@@ -281,14 +281,16 @@ export const getSpecieById = async (
     };
   }
   try {
-    const response = await fetch(`${urlApi}/specie/getSpecieById`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token!.value}`,
-      },
-      body: JSON.stringify({ specieId: specieId }),
-    });
+    const response = await fetch(
+      `${urlApi}/specie/getSpecieById?specieId=${specieId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token!.value}`,
+        },
+      }
+    );
     //verify if response was ok
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();

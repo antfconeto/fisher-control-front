@@ -7,7 +7,7 @@ import { ResponseError } from "@/types/types";
 import { User } from "@/types/user";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 // ...existing imports...
 
 export const listUsersPaginated = async ({
@@ -166,6 +166,41 @@ export const deleteUser = async (
       getUserErrorMessage("deleteUser", error.statusCode || 500),
       error.statusCode || 500
     );
+  }
+};
+
+export const getUserById = async (
+  userId: string
+): Promise<User | ResponseError> => {
+  const token = (await cookies()).get("access_token");
+  if (!token) {
+    return { error: "Token não recebido", statusCode: 401 };
+  }
+  try {
+    const response = await fetch(
+      `${urlApi}/user/getUserById?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errorMessage: ResponseError = await response.json();
+      return {
+        error: errorMessage?.error || "Erro ao buscar usuário por ID",
+        statusCode: response.status,
+      };
+    }
+    const responseBody: User = await response.json();
+    return responseBody;
+  } catch (error: any) {
+    return {
+      error: error.message || "Erro desconhecido ao buscar usuário por ID",
+      statusCode: 500,
+    };
   }
 };
 

@@ -4,7 +4,7 @@ import { ResponseError } from "@/types/types";
 import { cookies } from "next/headers";
 import { decodeToken } from "@/utils/authUtils";
 import { CustomError } from "@/utils/customError";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
  * Sends a request to join a Fish Manager.
