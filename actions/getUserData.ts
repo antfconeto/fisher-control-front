@@ -9,7 +9,7 @@ import errorMessages from "@/utils/errorMessages.json";
 import { redirect } from "next/navigation";
 
 const consoler = new CustomConsole();
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const urlApi = process.env.API_URL || "http://localhost:5000";
 
 export const getUserData = async (): Promise<
   Omit<User, "password"> | ResponseError

@@ -11,7 +11,7 @@ function getCookieValue(name: string): string | null {
 }
 
 // API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.API_URL || "http://localhost:5000";
 
 // Create axios instance
 const api: AxiosInstance = axios.create({

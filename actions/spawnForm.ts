@@ -2,7 +2,7 @@
 import { ResponseError, SpawningForm } from "@/types/types";
 import { cookies } from "next/headers";
 
-const urlApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const urlApi = process.env.API_URL || "http://localhost:5000";
 
 function getCookieValue(name: string): string | null {
   if (typeof document === "undefined") return null;
