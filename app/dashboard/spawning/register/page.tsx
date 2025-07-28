@@ -381,12 +381,13 @@ export default function RegisterSpawningPage() {
           <div className={styles.formGroup}>
             <label>Peso antes da desova (kg)*</label>
             <input
-              type="text"
-              inputMode="decimal"
+            type="number"
+            min={0}
+            step={0.1}
               value={
                 form.animal_weight.beforeSpawn === 0
                   ? ""
-                  : form.animal_weight.beforeSpawn.toString().replace(".", ",")
+                  : form.animal_weight.beforeSpawn.toString()
               }
               onChange={(e) => {
                 const formatted = formatNumberInput(e.target.value, 2);
@@ -406,12 +407,13 @@ export default function RegisterSpawningPage() {
           <div className={styles.formGroup}>
             <label>Peso depois da desova (kg)*</label>
             <input
-              type="text"
-              inputMode="decimal"
+            type="number"
+            min={0}
+            step={0.1}
               value={
                 form.animal_weight.afterSpawn === 0
                   ? ""
-                  : form.animal_weight.afterSpawn.toString().replace(".", ",")
+                  : form.animal_weight.afterSpawn.toString()
               }
               onChange={(e) => {
                 const formatted = formatNumberInput(e.target.value, 2);
@@ -432,12 +434,13 @@ export default function RegisterSpawningPage() {
         <div className={styles.formGroup}>
           <label>Peso dos ovos (kg)*</label>
           <input
-            type="text"
-            inputMode="decimal"
+            type="number"
+            min={0}
+            step={0.1}
             value={
               form.egg_weight === 0
                 ? ""
-                : form.egg_weight.toString().replace(".", ",")
+                : form.egg_weight.toString()
             }
             onChange={(e) => {
               const formatted = formatNumberInput(e.target.value, 2);

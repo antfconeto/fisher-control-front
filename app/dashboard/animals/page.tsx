@@ -25,6 +25,7 @@ import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useSpecie } from "@/hooks/useSpecies";
+import { AdminOnly } from "@/components/Authorization";
 
 enum ModalMode {
   CREATE = "create",
@@ -254,9 +255,12 @@ export default function AnimalsPage() {
               <h2 className="card-title mb-0">
                 <FaFish className="me-2 text-primary" /> Gestão de Animais
               </h2>
+              <AdminOnly>
               <button className={styles.createButton} onClick={openCreateModal}>
                 <FaPlus /> Cadastrar Novo Animal
               </button>
+              </AdminOnly>
+
             </div>
             <section className={styles.filterSection}>
               <DynamicFilters filters={filterFields} name="Filtro de Animais" />

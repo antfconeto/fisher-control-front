@@ -474,6 +474,7 @@ export default function UpdateSpawningPage() {
               <input
                 type="text"
                 id="beforeSpawn"
+                inputMode="decimal"
                 value={formatNumberInput(form.animal_weight.beforeSpawn.toString())}
                 onChange={(e) =>
                   handleAnimalWeight(
@@ -484,6 +485,7 @@ export default function UpdateSpawningPage() {
                 placeholder="0,00"
                 required
                 className={styles.input}
+                step="0.01"
               />
             </div>
             <div className={styles.formGroup}>
@@ -491,6 +493,7 @@ export default function UpdateSpawningPage() {
               <input
                 type="text"
                 id="afterSpawn"
+                inputMode="decimal"
                 value={formatNumberInput(form.animal_weight.afterSpawn.toString())}
                 onChange={(e) =>
                   handleAnimalWeight(
@@ -501,6 +504,7 @@ export default function UpdateSpawningPage() {
                 placeholder="0,00"
                 required
                 className={styles.input}
+                step="0.01"
               />
             </div>
           </div>
@@ -512,6 +516,7 @@ export default function UpdateSpawningPage() {
           <input
             type="text"
             id="eggWeight"
+            inputMode="decimal"
             value={formatNumberInput(form.egg_weight.toString())}
             onChange={(e) =>
               handleChange("egg_weight", parseFloat(e.target.value.replace(",", ".")) || 0)
@@ -519,6 +524,7 @@ export default function UpdateSpawningPage() {
             placeholder="0,00"
             required
             className={styles.input}
+            step="0.01"
           />
         </div>
 
@@ -547,6 +553,7 @@ export default function UpdateSpawningPage() {
               <input
                 type="text"
                 id="quantity"
+                inputMode="decimal"
                 value={formatNumberInput(form.hormone.quantity.toString(), 1)}
                 onChange={(e) =>
                   handleChange("hormone", {
@@ -557,6 +564,7 @@ export default function UpdateSpawningPage() {
                 placeholder="0,0"
                 required
                 className={styles.input}
+                step="0.1"
               />
             </div>
           </div>
@@ -598,16 +606,19 @@ export default function UpdateSpawningPage() {
                   <label>Temperatura (°C)</label>
                   <input
                     type="text"
-                    value={item.temperature === 0 ? "" : item.temperature.toString()}
-                    onChange={(e) =>
+                    inputMode="decimal"
+                    value={item.temperature === 0 ? "" : item.temperature.toString().replace(".", ",")}
+                    onChange={(e) => {
+                      const formatted = formatNumberInput(e.target.value, 1);
                       updateMonitoringItem(
                         index,
                         "temperature",
-                        parseFloat(e.target.value.replace(",", ".")) || 0
-                      )
-                    }
+                        parseFloat(formatted.replace(",", ".")) || 0
+                      );
+                    }}
                     placeholder="0,0"
                     className={styles.input}
+                    step="0.1"
                   />
                 </div>
                 <div className={styles.formGroup}>

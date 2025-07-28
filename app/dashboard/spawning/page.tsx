@@ -44,6 +44,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useUser } from "@/hooks/userHook";
 import { getDashboardStats } from "@/actions/dashboard";
+import { AdminOnly } from "@/components/Authorization";
 
 enum ModalMode {
   CREATE = "create",
@@ -237,6 +238,7 @@ export default function SpawningPage() {
           <h2 className={styles.title}>
             <FaFish className={styles.titleIcon} /> Gestão de Desovas
           </h2>
+          <AdminOnly> 
           <Button
             className={styles.createButton}
             onClick={() => router.push("/dashboard/spawning/register")}
@@ -244,6 +246,7 @@ export default function SpawningPage() {
           >
             <FaPlus /> Registrar nova desova
           </Button>
+          </AdminOnly>
         </div>
 
         {/* Estatísticas */}
@@ -332,14 +335,8 @@ export default function SpawningPage() {
                   <h3 className={styles.spawningCardTitle}>
                     <GiFishEggs size={30} color="#0a58ca" /> Desova
                   </h3>
+                  <AdminOnly>
                   <div className={styles.spawningCardActions}>
-                    <button
-                      className={styles.actionButton}
-                      onClick={() => openViewModal(form)}
-                      title="Visualizar"
-                    >
-                      <BsEye />
-                    </button>
                     <button
                       className={styles.actionButton}
                       onClick={() => openUpdateModal(form)}
@@ -358,6 +355,7 @@ export default function SpawningPage() {
                       <BsTrash />
                     </button>
                   </div>
+                  </AdminOnly>
                 </div>
 
                 <div className={styles.spawningCardBody}>

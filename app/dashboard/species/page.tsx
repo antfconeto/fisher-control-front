@@ -17,6 +17,7 @@ import { SpecieTable } from "@/components/tables";
 import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
+import { AdminOnly } from "@/components/Authorization";
 
 enum ModalMode {
   CREATE = "create",
@@ -224,9 +225,11 @@ export default function SpeciesPage() {
               <h2 className="card-title mb-0">
                 <FaFish className="me-2 text-primary" /> Gestão de Espécies
               </h2>
-              <button className={styles.createButton} onClick={openCreateModal}>
-                <FaPlus /> Cadastrar Nova Espécie
-              </button>
+              <AdminOnly>
+                <button className={styles.createButton} onClick={openCreateModal}>
+                  <FaPlus /> Cadastrar Nova Espécie
+                </button>
+              </AdminOnly>
             </div>
             {loading || speciesFullInfo.length === 0 ? (
               <div className="loading-container">

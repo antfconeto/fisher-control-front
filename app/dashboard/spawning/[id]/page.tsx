@@ -53,6 +53,7 @@ import { getSpecieById } from "@/actions/specie";
 import { getTankById } from "@/actions/tank";
 import { addMonitoringRecord, deleteSpawnForm } from "@/actions/spawnForm";
 import { generateSpawningPDF } from "@/components/SpawningPDF";
+import { AdminOnly } from "@/components/Authorization";
 
 export default function SpawningDetailsPage() {
   const params = useParams();
@@ -569,7 +570,7 @@ export default function SpawningDetailsPage() {
             >
               <BsDownload /> {isGeneratingPDF ? 'Gerando...' : 'Baixar PDF'}
             </Button>
-            
+            <AdminOnly>
             <div className={styles.dropdownContainer} ref={dropdownRef}>
               <button
                 onClick={toggleDropdown}
@@ -598,6 +599,7 @@ export default function SpawningDetailsPage() {
                 </button>
               </div>
             </div>
+            </AdminOnly>
           </div>
         </div>
 
@@ -778,6 +780,7 @@ export default function SpawningDetailsPage() {
           <div className={styles.chartHeader}>
             <BsGraphUp className={styles.chartIcon} />
             <h3>Monitoramento de Temperatura</h3>
+            <AdminOnly>
             <Button
               onClick={() => setShowAddMonitoringModal(true)}
               variant="primary"
@@ -785,6 +788,7 @@ export default function SpawningDetailsPage() {
             >
               <BsPlus /> Adicionar Registro
             </Button>
+            </AdminOnly>
           </div>
 
           <div className={styles.chartContainer}>
@@ -1051,10 +1055,11 @@ export default function SpawningDetailsPage() {
                 </label>
                 <InputDefault
                   type="text"
+                  inputMode="decimal"
                   value={
                     newMonitoringRecord.temperature === 0
                       ? ""
-                      : newMonitoringRecord.temperature.toString()
+                      : newMonitoringRecord.temperature.toString().replace(".", ",")
                   }
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     handleMonitoringInputChange("temperature", e.target.value)
@@ -1066,6 +1071,7 @@ export default function SpawningDetailsPage() {
                     border: "1.5px solid #b6c1d6",
                     padding: "0.6rem 1rem",
                   }}
+                  step="0.1"
                 />
               </div>
             </div>

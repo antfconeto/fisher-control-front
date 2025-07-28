@@ -3,6 +3,8 @@ import { LuBook, LuFilePenLine, LuFishSymbol } from "react-icons/lu";
 import { BsPencil, BsTrash } from 'react-icons/bs';
 import styles from './specie-table.module.css';
 import { Specie } from '@/types/types';
+import { isAdmin } from '@/utils/authUtils';
+import { useAuth } from '@/contexts/authContext';
 
 interface SpecieTableProps {
   species: Specie[];
@@ -11,6 +13,7 @@ interface SpecieTableProps {
 }
 
 export const SpecieTable: React.FC<SpecieTableProps> = ({ species, onEdit, onDelete }) => {
+  const { user } = useAuth();
   const columns: TableColumn<Specie>[] = [
     {
       header: 'Nome',
@@ -37,7 +40,10 @@ export const SpecieTable: React.FC<SpecieTableProps> = ({ species, onEdit, onDel
       ),
     },
 
-    {
+
+  ];
+  if(isAdmin(user)){
+    columns.push(    {
       header: 'Ações',
       render: (species) => (
         <div className={styles.actionsCell}>
@@ -55,8 +61,7 @@ export const SpecieTable: React.FC<SpecieTableProps> = ({ species, onEdit, onDel
           </button>
         </div>
       ),
-    },
-  ];
-
+    },)
+  }
   return <CustomTable columns={columns} data={species} />;
 };

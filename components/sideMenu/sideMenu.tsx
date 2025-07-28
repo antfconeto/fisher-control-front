@@ -8,65 +8,77 @@ import Link from "next/link";
 import Image from "next/image";
 import { LuFilePenLine } from "react-icons/lu";
 import { FaRegUser } from "react-icons/fa6";
+import { isAdmin } from "@/utils/authUtils";
+import { useAuth } from "@/contexts/authContext";
 
-const menuItems = [
-  {
-    category: "Principal",
-    items: [
-      {
-        name: "Dashboard",
-        icon: <Home size={18} />,
-        link: "/dashboard",
-      },
-    ],
-  },
-  {
-    category: "Gerenciamento",
-    items: [
-      {
-        name: "Tanques",
-        icon: <Droplet size={18} />,
-        link: "/dashboard/tanks",
-      },
-      {
-        name: "Animais",
-        icon: <FishIcon size={18} />,
-        link: "/dashboard/animals",
-      },
-      {
-        name: "Espécies",
-        icon: <LuFilePenLine size={18} />,
-        link: "/dashboard/species",
-      },
-      {
-        name: "Desovas",
-        icon: <Egg size={18} />,
-        link: "/dashboard/spawning",
-      },
-      {
-        name: "Usuários",
-        icon: <FaRegUser size={18} />,
-        link: "/dashboard/users",
-      },
-    ],
-  },
-  {
-    category: "Usuário",
-    items: [
-      {
-        name: "Perfil",
-        icon: <User size={18} />,
-        link: "/dashboard/profile",
-      },
-    ],
-  },
-];
+
+
+
 
 const Sidebar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-
+  const { user } = useAuth();
+  const menuItems = [
+    {
+      category: "Principal",
+      items: [
+        {
+          name: "Dashboard",
+          icon: <Home size={18} />,
+          link: "/dashboard",
+        },
+      ],
+    },
+    {
+      category: "Gerenciamento",
+      items: [
+        {
+          name: "Tanques",
+          icon: <Droplet size={18} />,
+          link: "/dashboard/tanks",
+        },
+        {
+          name: "Animais",
+          icon: <FishIcon size={18} />,
+          link: "/dashboard/animals",
+        },
+        {
+          name: "Espécies",
+          icon: <LuFilePenLine size={18} />,
+          link: "/dashboard/species",
+        },
+        {
+          name: "Desovas",
+          icon: <Egg size={18} />,
+          link: "/dashboard/spawning",
+        },
+      ],
+    },
+    {
+      category: "Usuário",
+      items: [
+        {
+          name: "Perfil",
+          icon: <User size={18} />,
+          link: "/dashboard/profile",
+        },
+      ],
+    },
+  ];
+  if(isAdmin(user)){
+    menuItems.push({
+      category: "Usuários",
+      items: [
+        {
+          name: "Usuários",
+          icon: <FaRegUser size={18} />,  
+          link: "/dashboard/users",
+        },
+      ],
+    });
+  } 
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 992);

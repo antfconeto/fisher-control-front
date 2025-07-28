@@ -32,6 +32,7 @@ import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
 import { GiFishBucket } from "react-icons/gi";
+import { AdminOnly, ViewerOnly } from "@/components/Authorization";
 
 
 enum ModalMode {
@@ -204,9 +205,11 @@ export default function TanksPage() {
           <h2 className={styles.title}>
             <FaWater className={styles.titleIcon} /> Gestão de Tanques
           </h2>
-          <Button className={styles.createButton} onClick={openCreateModal} variant="primary">
-            <FaPlus /> Criar Novo Tanque
-          </Button>
+          <AdminOnly>
+            <Button className={styles.createButton} onClick={openCreateModal} variant="primary">
+              <FaPlus /> Criar Novo Tanque
+            </Button>
+          </AdminOnly>
         </div>
 
         {/* Filtros */}
@@ -253,22 +256,24 @@ export default function TanksPage() {
                   <h3 className={styles.tankCardTitle}>
                     <GiFishBucket className={styles.tankCardIcon} /> {tank.name}
                   </h3>
-                  <div className={styles.tankCardActions}>
-                    <button
-                      className={styles.updateButton}
-                      onClick={(e) => openUpdateModal(tank, e)}
-                      aria-label="Editar tanque"
-                    >
-                      <BsPencil />
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => { setShowConfirmModal(true); setCurrentTank(tank) }}
-                      aria-label="Excluir tanque"
-                    >
-                      <BsTrash />
-                    </button>
-                  </div>
+                  <AdminOnly>
+                    <div className={styles.tankCardActions}>
+                      <button
+                        className={styles.updateButton}
+                        onClick={(e) => openUpdateModal(tank, e)}
+                        aria-label="Editar tanque"
+                      >
+                        <BsPencil />
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) => { setShowConfirmModal(true); setCurrentTank(tank) }}
+                        aria-label="Excluir tanque"
+                      >
+                        <BsTrash />
+                      </button>
+                    </div>
+                  </AdminOnly>
                 </div>
 
                 <div className={styles.tankCardBody}>
@@ -390,26 +395,35 @@ export default function TanksPage() {
             {
               name: "capacity",
               label: "Capacidade (Litros)",
-              type: "number",
-              value: currentTank.capacity,
+              type: "text",
+              value: currentTank.capacity === 0 ? "" : currentTank.capacity.toString().replace(".", ","),
               placeholder: "Digite a capacidade em litros",
-              onChange: (value: string) => setCurrentTank({ ...currentTank, capacity: parseFloat(value) || 0 }),
+              onChange: (value: string) => {
+                const formatted = value.replace(/[^\d,\.]/g, "").replace(",", ".");
+                setCurrentTank({ ...currentTank, capacity: parseFloat(formatted) || 0 });
+              },
             },
             {
               name: "width",
               label: "Largura (metros)",
-              type: "number",
-              value: currentTank.size.width,
+              type: "text",
+              value: currentTank.size.width === 0 ? "" : currentTank.size.width.toString().replace(".", ","),
               placeholder: "Digite a largura em metros",
-              onChange: (value: string) => setCurrentTank({ ...currentTank, size: { ...currentTank.size, width: parseFloat(value) || 0 } }),
+              onChange: (value: string) => {
+                const formatted = value.replace(/[^\d,\.]/g, "").replace(",", ".");
+                setCurrentTank({ ...currentTank, size: { ...currentTank.size, width: parseFloat(formatted) || 0 } });
+              },
             },
             {
               name: "height",
               label: "Altura (metros)",
-              type: "number",
-              value: currentTank.size.height,
+              type: "text",
+              value: currentTank.size.height === 0 ? "" : currentTank.size.height.toString().replace(".", ","),
               placeholder: "Digite a altura em metros",
-              onChange: (value: string) => setCurrentTank({ ...currentTank, size: { ...currentTank.size, height: parseFloat(value) || 0 } }),
+              onChange: (value: string) => {
+                const formatted = value.replace(/[^\d,\.]/g, "").replace(",", ".");
+                setCurrentTank({ ...currentTank, size: { ...currentTank.size, height: parseFloat(formatted) || 0 } });
+              },
             },
           ]}
           onSubmit={handleSaveTank}
