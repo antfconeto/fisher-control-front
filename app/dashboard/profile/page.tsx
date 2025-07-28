@@ -2,7 +2,7 @@
 import { Button } from "@/components/buttons/buttons";
 import { useUser } from "@/hooks/userHook";
 import { Role } from "@/types/user";
-import { Check, LogOut, Mail, User as UserIcon } from "lucide-react";
+import { Check, LogOut, Mail, User as UserIcon, Trash2 } from "lucide-react";
 import { FaUser, FaCalendarAlt, FaClock, FaShieldAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { ClockLoader } from "react-spinners";
@@ -13,12 +13,16 @@ import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useState } from "react";
 import { Modal, Form } from "react-bootstrap";
+import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
+import { deleteUser } from "@/actions/user";
 
 export default function Profile() {
   const { user, loading } = useUser();
   const { sendRequest } = useRequest();
   const { errorMessage, setErrorMessage } = useError();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -50,6 +54,32 @@ export default function Profile() {
     e.preventDefault();
     handleClose();
     alert("Perfil atualizado com sucesso!");
+  }
+
+  function handleDeleteShow() {
+    setShowDeleteModal(true);
+  }
+
+  function handleDeleteClose() {
+    setShowDeleteModal(false);
+  }
+
+  async function handleDeleteUser() {
+    if (!user) return;
+    
+    setIsDeleting(true);
+    try {
+      handleDeleteClose();
+      await sendRequest(deleteUser, user._id);
+      window.location.href = "/login";
+    } catch (error: unknown) {
+      console.log(error);
+      const errorMsg =
+        error instanceof Error ? error.message : "Erro ao deletar usuário";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   function timeSince(date: Date): string {
@@ -144,13 +174,22 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-              <Button
-                variant="primary"
-                onClick={handleShow}
-                otherClassName="d-flex align-items-center"
-              >
-                <MdEdit className="me-2" size={18} /> Editar Perfil
-              </Button>
+              <div className="d-flex gap-2">
+                <Button
+                  variant="primary"
+                  onClick={handleShow}
+                  otherClassName="d-flex align-items-center"
+                >
+                  <MdEdit className="me-2" size={18} /> Editar Perfil
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteShow}
+                  otherClassName="d-flex align-items-center"
+                >
+                  <Trash2 className="me-2" size={18} /> Deletar Conta
+                </Button>
+              </div>
             </div>
 
             {/* Cards de informações */}
@@ -253,7 +292,7 @@ export default function Profile() {
             {/* Botão de Logout */}
             <div className="d-flex justify-content-center mt-3">
               <Button
-                variant="danger"
+                variant="secondary"
                 onClick={handleLogout}
                 otherClassName="d-flex align-items-center"
               >
@@ -309,6 +348,17 @@ export default function Profile() {
           </Form>
         </Modal.Body>
       </Modal>
+
+      {/* Modal de Confirmação de Deletar */}
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Deletar Conta"
+          message="Esta ação é irreversível. Ao deletar sua conta, todos os seus dados serão permanentemente removidos, você perderá acesso a todas as funcionalidades do sistema e não será possível recuperar sua conta posteriormente. Tem certeza de que deseja continuar?"
+          onConfirm={handleDeleteUser}
+          onCancel={handleDeleteClose}
+          isSubmitting={isDeleting}
+        />
+      )}
     </>
   );
 }

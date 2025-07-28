@@ -45,7 +45,7 @@ export default function SignUpForm() {
         email,
         password,
         username,
-        role: Role.ADMIN,
+        role: Role.VIEWER,
       });
       if (response) {
         const userData = response as UserLoginResponse;

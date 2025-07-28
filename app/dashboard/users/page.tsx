@@ -24,6 +24,9 @@ import { Role, User } from "@/types/user";
 import { DynamicFilters } from "@/components/dynamicFilter/dynamicFilters";
 import { FilterFieldConfig } from "@/types/components";
 import { UserTable } from "@/components/tables/user-tables/user-table";
+import { useUser } from "@/hooks/userHook";
+import { ResponseError } from "@/types/types";
+import { CustomError } from "@/utils/customError";
 
 enum ModalMode {
   CREATE = "create",
@@ -39,6 +42,7 @@ const defaultFilters = {
 
 export default function UsersPage() {
   const { errorMessage, setErrorMessage } = useErrorContext();
+  const { user: loggedInUser } = useUser();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -126,9 +130,14 @@ export default function UsersPage() {
           _id: filters._id || undefined,
         },
       });
-      if ("error" in res) throw new Error(res.error);
-      setUsers(res.users);
-      setTotalPages(res.totalPages);
+      if (res && (res as ResponseError).error) {
+        throw new CustomError((res as ResponseError).error, (res as ResponseError).statusCode)
+      }
+      
+      // Filtrar o usuário logado da lista
+      const filteredUsers = (res as { users: User[] }).users.filter(user => user._id !== loggedInUser?._id);
+      setUsers(filteredUsers);
+      setTotalPages((res as { totalPages: number }).totalPages);
     } catch (err: any) {
       setErrorMessage(err.message || "Erro ao buscar usuários");
     } finally {
@@ -170,20 +179,19 @@ export default function UsersPage() {
       return;
     }
     try {
-      if (modalMode === ModalMode.CREATE) {
-        const res = await createUser({
-          username: currentUser.username,
-          email: currentUser.email,
-          role: currentUser.role,
-        });
-        if ("error" in res) throw new Error(res.error);
-      } else if (modalMode === ModalMode.UPDATE && editingUserId) {
+      if (modalMode === ModalMode.UPDATE && editingUserId) {
         const res = await updateUser(editingUserId, {
+          _id: currentUser._id,
+          createdAt: currentUser.createdAt,
+          updatedAt: currentUser.updatedAt,
+          password: currentUser.password,
           username: currentUser.username,
           email: currentUser.email,
           role: currentUser.role,
         });
-        if ("error" in res) throw new Error(res.error);
+        if (res && (res as ResponseError).error) {
+          throw new CustomError((res as ResponseError).error, (res as ResponseError).statusCode)
+        }
       }
       setShowModal(false);
       setEditingUserId(null);
@@ -199,8 +207,9 @@ export default function UsersPage() {
     if (!userToDelete) return;
     try {
       const res = await deleteUser(userToDelete._id);
-      if (typeof res !== "boolean" && "error" in res)
-        throw new Error(res.error);
+      if (res && (res as ResponseError).error) {
+        throw new CustomError((res as ResponseError).error, (res as ResponseError).statusCode)
+      }
       setShowConfirmModal(false);
       setUserToDelete(null);
       fetchUsers();
@@ -224,9 +233,6 @@ export default function UsersPage() {
           <h2 className={styles.title}>
             <FaUserEdit className={styles.titleIcon} /> Gestão de Usuários
           </h2>
-          <button className={styles.createButton} onClick={openCreateModal}>
-            <FaPlus /> Criar Novo Usuário
-          </button>
         </div>
         
         <section className={styles.filterSection}>

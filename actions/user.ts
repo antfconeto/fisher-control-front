@@ -5,8 +5,10 @@ import { CustomError } from "@/utils/customError";
 import errorMessages from "@/utils/errorMessages.json";
 import { ResponseError } from "@/types/types";
 import { User } from "@/types/user";
+import { CookieManager, ICookiesManager } from "@/utils/cookies-manager";
 
 const consoler = new CustomConsole();
+const cookieManager:ICookiesManager = await new CookieManager()
 const urlApi = process.env.API_URL || "http://localhost:5000";
 // ...existing imports...
 
@@ -108,14 +110,17 @@ export const updateUser = async (
   if (!token) {
     return { error: "Token não recebido", statusCode: 401 };
   }
+  console.log(user);
   try {
-    const response = await fetch(`${urlApi}/user/updateUser/${id}`, {
+    const response = await fetch(`${urlApi}/user/updateUser/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token.value}`,
       },
-      body: JSON.stringify(user),
+      body: JSON.stringify({
+        user: user
+      }),
     });
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();
@@ -144,8 +149,9 @@ export const deleteUser = async (
     return { error: "Token não recebido", statusCode: 401 };
   }
   try {
-    const response = await fetch(`${urlApi}/user/deleteUser/${id}`, {
+    const response = await fetch(`${urlApi}/user/deleteUser`, {
       method: "DELETE",
+      body: JSON.stringify({ userId: id }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token.value}`,
@@ -159,6 +165,7 @@ export const deleteUser = async (
         statusCode: response.status,
       };
     }
+    await cookieManager.removeCookie("access_token")
     return true;
   } catch (error: any) {
     consoler.error(`Erro ao deletar usuário: ${error.message}`);
