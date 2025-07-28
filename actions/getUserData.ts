@@ -1,5 +1,5 @@
 "use server";
-import { ResponseError } from "@/types/types";
+import { DecodedToken, ResponseError } from "@/types/types";
 import { User } from "@/types/user";
 import { decodeToken } from "@/utils/authUtils";
 import { CustomError } from "@/utils/customError";
@@ -27,7 +27,7 @@ export const getUserData = async (): Promise<
 
   try {
     //get id from token
-    const { id } = decodeToken(token!.value);
+    const { id } = decodeToken(token!.value) as DecodedToken;
 
     if (!id) {
       consoler.error(`No user ID found in token`);
