@@ -110,7 +110,7 @@ export const updateUser = async (
   if (!token) {
     return { error: "Token não recebido", statusCode: 401 };
   }
-  console.log(id);
+
   try {
     const response = await fetch(`${urlApi}/user/updateUser/`, {
       method: "PATCH",

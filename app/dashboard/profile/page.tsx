@@ -31,7 +31,7 @@ export default function Profile() {
     username: "",
     email: "",
   });
-  const { successNotification } = useNotification();
+  const { successNotification, errorNotification } = useNotification();
 
   function handleClose() {
     setShowEditModal(false);
@@ -91,9 +91,9 @@ export default function Profile() {
       }
       window.location.href = "/login";
     } catch (error: unknown) {
- 
       const errorMsg =
         error instanceof Error ? error.message : "Erro ao deletar usuário";
+      errorNotification("Erro!", errorMsg);
       setErrorMessage(errorMsg);
     } finally {
       setIsDeleting(false);
@@ -141,9 +141,9 @@ export default function Profile() {
       await sendRequest(logoutAction);
       window.location.href = "/login";
     } catch (error: unknown) {
-      console.log(error);
       const errorMsg =
         error instanceof Error ? error.message : "Erro Desconhecido";
+      errorNotification("Erro!", errorMsg);
       setErrorMessage(errorMsg);
     }
   }

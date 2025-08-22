@@ -312,7 +312,7 @@ export const generateSpawningPDF = async ({
     pdf.save(fileName);
 
   } catch (error) {
-    console.error('Erro ao gerar PDF:', error);
+
     alert('Erro ao gerar PDF. Tente novamente.');
   } finally {
     // Remover elemento temporário

@@ -1,83 +1,84 @@
 .card {
-    background-color: #1a202c;
-    border-radius: 8px;
-    box-shadow: 10px 10px 0px #000;
-    transition: all 0.3s ease; /* Transição suave */
-    color: #ffffff;
-    width: 100%;
-    position: relative;
-  }
-  .card:hover{
-    transform: translate(-10px, -20px); /* Move o elemento suavemente */
-    box-shadow: 20px 30px 30px #000;
-  }
-  
-  .cardHeader {
-    padding: 1.5rem;
-    border-bottom: 1px solid #2d3748;
-  }
-  
-  .cardContent {
-    padding: 1.5rem;
-  }
-  
-  .cardFooter {
-    padding: 1.5rem;
-    border-top: 1px solid #2d3748;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .cardTitle {
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    margin: 0;
-  }
-  
-  .cardError {
-    width: 80%;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #f8d7da; /* Cor de fundo vermelha suave */
-    color: #721c24; /* Cor do texto */
-    border-radius: 10px;
-    border: 1px solid #f5c6cb; /* Borda para destacar */
-    position: relative; /* Posição relativa para elementos internos */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
-  }
-  
-  .cardErrorTitle {
-    margin: 0;
-    font-size: 18px;
-    font-weight: bold;
-    width: 100%;
-    text-align: center;
-    margin-left:auto;
-    margin-right: auto;
-  }
-  
-  .errorMessage {
-    margin-top: 10px;
-    font-size: 16px;
-  }
-  .cardErrorSubTitle{
-    margin: 0;
-    font-size: 18px;
-    font-weight: bold;
-    width: 100%;
-    margin-left:auto;
-    margin-right: auto;
-  }
-  
+  background-color: var(--background-light);
+  border-radius: 8px;
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  color: var(--text);
+  width: 100%;
+  position: relative;
+  border: 1px solid var(--border);
+}
 
-  .cardErrorDescription{
-    position: relative;
-    width: 95%;
-    height: auto;
-    border-radius: 25px;
-    padding:20px;
-    background-color: #7a454a;
-    color: white;
+.card:hover {
+  transform: translate(-10px, -20px);
+  box-shadow: 20px 30px 30px rgba(0, 0, 0, 0.15);
+}
+  
+.cardHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
 
-  }
+.cardContent {
+  padding: 1.5rem;
+}
+
+.cardFooter {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+  
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.cardError {
+  width: 80%;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border-radius: 10px;
+  border: 1px solid var(--error);
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+  
+.cardErrorTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.errorMessage {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.cardErrorSubTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cardErrorDescription {
+  position: relative;
+  width: 95%;
+  height: auto;
+  border-radius: 25px;
+  padding: 20px;
+  background-color: rgba(239, 68, 68, 0.8);
+  color: white;
+}

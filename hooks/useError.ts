@@ -20,7 +20,7 @@ export function useError(): ErrorHook {
     const handleError = (error: any) => {
         const message = error.response?.data?.message || error.message || 'Ocorreu um erro inesperado';
         setErrorMessage(message);
-        console.error('Erro:', error);
+
     };
 
     return { errorMessage, setErrorMessage, handleError };

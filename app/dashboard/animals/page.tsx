@@ -26,6 +26,7 @@ import { useErrorContext } from "@/contexts/errorContext";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useSpecie } from "@/hooks/useSpecies";
 import { AdminOnly } from "@/components/Authorization";
+import { useNotification } from "@/contexts/notificationContext";
 
 enum ModalMode {
   CREATE = "create",
@@ -62,6 +63,7 @@ export default function AnimalsPage() {
   );
   const { sendRequest } = useRequest<Animal | ResponseError>();
   const { errorMessage, setErrorMessage } = useErrorContext();
+  const { successNotification, errorNotification } = useNotification();
 
   //States for current animal selected
   const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
@@ -189,14 +191,12 @@ export default function AnimalsPage() {
         ? await handleCreateAnimal(currentAnimal)
         : await handleUpdateAnimal(currentAnimal);
     if (response) {
-      console.log(
-        `✅ Animal ${modalMode == ModalMode.CREATE ? "created" : "updated"
-        } with success`,
-        currentAnimal
+      successNotification(
+        "Sucesso!",
+        `Animal ${modalMode === ModalMode.CREATE ? "criado" : "atualizado"} com sucesso`
       );
       setShowModal(false);
       setCurrentAnimal(defaultAnimal);
-      //Reset filters
       setFilters(defaultFilters);
     }
   };
@@ -206,8 +206,8 @@ export default function AnimalsPage() {
       await sendRequest(createAnimal, animal);
       return true;
     } catch (err: any) {
-      console.log(`✍️✍️✍️ Error creating animal`, err);
       const errMsg = err?.error || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao criar animal: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     }
@@ -219,6 +219,7 @@ export default function AnimalsPage() {
       return true;
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao atualizar animal: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     }
@@ -227,12 +228,14 @@ export default function AnimalsPage() {
   const handleDeleteAnimal = async (): Promise<boolean> => {
     try {
       const response = await deleteAnimal(currentAnimal.codeAnimal);
+      successNotification("Sucesso!", "Animal deletado com sucesso");
       setFilters(defaultFilters);
       setCurrentPage(1);
       setShowConfirmModal(false);
       return response as boolean;
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao deletar animal: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     }

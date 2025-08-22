@@ -90,7 +90,7 @@ export const useSpawning = () => {
         setError(null);
       } catch (err) {
         setError("Erro ao carregar spawning forms");
-        console.error("Erro ao carregar spawning forms:", err);
+
       } finally {
         setLoading(false);
       }

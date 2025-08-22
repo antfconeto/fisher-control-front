@@ -6,23 +6,23 @@
   width: 100%;
   padding: 0.75rem;
   padding-left: 2.5rem;
-  background-color: #fff;
-  border: 1.5px solid #b6c1d6;
+  background-color: var(--background-light);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
-  color: #222;
+  color: var(--text);
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input::placeholder {
-  color: #a0aec0;
+  color: var(--text-secondary);
 }
 
 .input:focus {
   outline: none;
-  border-color: #0a58ca;
-  box-shadow: 0 0 0 2px #e3eaff;
-  background: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
+  background: var(--background-light);
 }
 
 .inputIcon {
@@ -30,5 +30,5 @@
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #a0aec0;
+  color: var(--text-secondary);
 }

@@ -1,8 +1,6 @@
-"use server";
-import { Animal, AnimalPagination, ResponseError, Tank } from "@/types/types";
-import { User } from "@/types/user";
-import { decodeToken } from "@/utils/authUtils";
-import { CustomError } from "@/utils/customError";
+'use server';
+import { ResponseError, Tank } from '@/types/types';
+import { CustomError } from '@/utils/customError';
 import { CustomConsole } from "@/utils/customLogger";
 import { cookies } from "next/headers";
 import errorMessages from "@/utils/errorMessages.json";
@@ -13,7 +11,7 @@ const urlApi = process.env.API_URL || "http://localhost:5000";
 export const getTanks = async (
   tankName?: string
 ): Promise<Tank[] | ResponseError> => {
-  console.log(`🔁 Initing process to list All Tanks`);
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -46,7 +44,7 @@ export const getTanks = async (
     }
     //get info as json
     const responseBody: Tank[] = await response.json();
-    console.log(`✅ Getted all tanks: `, responseBody.length);
+
     return responseBody;
   } catch (error: any) {
     // Captura de erros em qualquer ponto
@@ -65,7 +63,7 @@ export const getTanks = async (
 export const getTankById = async (
   tankId?: string
 ): Promise<Tank | ResponseError> => {
-  console.log(`🔁 Initing process to get tank with id: ${tankId}`);
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -98,7 +96,7 @@ export const getTankById = async (
     }
     //get info as json
     const responseBody: Tank = await response.json();
-    console.log(`✅ Getted tank: `, responseBody);
+
     return responseBody;
   } catch (error: any) {
     // Captura de erros em qualquer ponto
@@ -115,7 +113,7 @@ export const getTankById = async (
 };
 
 export const createTank = async (tank: Tank): Promise<Tank | ResponseError> => {
-  console.log(`🔁 Initing process to create tank`);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -145,7 +143,7 @@ export const createTank = async (tank: Tank): Promise<Tank | ResponseError> => {
     }
 
     const responseBody: Tank = await response.json();
-    console.log(`✅ Created tank: `, responseBody);
+
     return responseBody;
   } catch (error: any) {
     consoler.error(
@@ -161,7 +159,7 @@ export const createTank = async (tank: Tank): Promise<Tank | ResponseError> => {
 };
 
 export const updateTank = async (tank: Tank): Promise<Tank | ResponseError> => {
-  console.log(`🔁 Initing process to update tank`);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -191,7 +189,7 @@ export const updateTank = async (tank: Tank): Promise<Tank | ResponseError> => {
     }
 
     const responseBody: Tank = await response.json();
-    console.log(`✅ Updated tank: `, responseBody);
+
     return responseBody;
   } catch (error: any) {
     consoler.error(
@@ -209,7 +207,7 @@ export const updateTank = async (tank: Tank): Promise<Tank | ResponseError> => {
 export const deleteTank = async (
   tankId: string
 ): Promise<void | ResponseError> => {
-  console.log(`🔁 Initing process to delete tank`);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -238,7 +236,7 @@ export const deleteTank = async (
       };
     }
 
-    console.log(`✅ Deleted tank with id: ${tankId}`);
+
   } catch (error: any) {
     consoler.error(
       `Error to delete tank, error: ${error.message}, statusCode: ${

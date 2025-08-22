@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { AuthProvider } from "@/contexts/authContext";
-import { UserProvider } from "@/contexts/userContext";
-import { LoadingProvider } from "@/contexts/loadingContext";
-import GlobalLoading from "@/components/GlobalLoading/GlobalLoading";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { ErrorProvider } from "@/contexts/errorContext";
-import { NotificationProvider } from "@/contexts/notificationContext";
+import type { Metadata } from 'next';
+import './globals.css';
+import { AuthProvider } from '@/contexts/authContext';
+import { UserProvider } from '@/contexts/userContext';
+import { LoadingProvider } from '@/contexts/loadingContext';
+import GlobalLoading from '@/components/GlobalLoading/GlobalLoading';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { ErrorProvider } from '@/contexts/errorContext';
+import { NotificationProvider } from '@/contexts/notificationContext';
+import { ToastContainer } from '@/components/Notifications';
 
 export default function RootLayout({
   children,
@@ -23,6 +24,7 @@ export default function RootLayout({
                 <UserProvider>
                   {children}
                   <GlobalLoading />
+                  <ToastContainer />
                 </UserProvider>
               </NotificationProvider>
             </LoadingProvider>

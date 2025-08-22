@@ -1,8 +1,8 @@
-"use server";
-import { Animal, AnimalPagination, ResponseError } from "@/types/types";
-import { CustomError } from "@/utils/customError";
-import { CustomConsole } from "@/utils/customLogger";
-import { cookies } from "next/headers";
+'use server';
+import { Animal, AnimalPagination, ResponseError } from '@/types/types';
+import { CustomError } from '@/utils/customError';
+import { CustomConsole } from '@/utils/customLogger';
+import { cookies } from 'next/headers';
 import errorMessages from "@/utils/errorMessages.json";
 
 const consoler = new CustomConsole();
@@ -11,7 +11,7 @@ const urlApi = process.env.API_URL || "http://localhost:5000";
 export const createAnimal = async (
   animal: Animal
 ): Promise<Animal | ResponseError> => {
-  console.log(`🔁 Initing process to create Animal`, { animal: animal });
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -35,7 +35,7 @@ export const createAnimal = async (
       consoler.error(
         `Error to create animal, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getAnimalErrorMessage("createAnimal", response.status),
         statusCode: response.status,
@@ -62,7 +62,7 @@ export const createAnimal = async (
 export const updateAnimal = async (
   animal: Animal
 ): Promise<Animal | ResponseError> => {
-  console.log(`🔁 Initing process to update Animal`, { animal: animal });
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -86,7 +86,7 @@ export const updateAnimal = async (
       consoler.error(
         `Error to update animal, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getAnimalErrorMessage("updateAnimal", response.status),
         statusCode: response.status,
@@ -113,9 +113,7 @@ export const updateAnimal = async (
 export const deleteAnimal = async (
   codeAnimal: string
 ): Promise<Boolean | ResponseError> => {
-  console.log(`🔁 Initing process to delete Animal`, {
-    codeAnimal: codeAnimal,
-  });
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -139,7 +137,7 @@ export const deleteAnimal = async (
       consoler.error(
         `Error to delete animal, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getAnimalErrorMessage("deleteAnimal", response.status),
         statusCode: response.status,
@@ -175,7 +173,7 @@ export const listAnimals = async (
     _id?: string;
   }
 ): Promise<AnimalPagination | ResponseError> => {
-  console.log("🔁 Fetching all animals...", page, pageSize);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -185,7 +183,7 @@ export const listAnimals = async (
   }
   try {
     let url = `${urlApi}/animal/listAnimals`;
-    console.log(url);
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -227,7 +225,7 @@ export const listAnimals = async (
 export const getAllAnimalsFromTank = async (
   tankId: string
 ): Promise<Animal[] | ResponseError> => {
-  console.log("🔁 Fetching all animals...", tankId);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     return {
@@ -237,7 +235,7 @@ export const getAllAnimalsFromTank = async (
   }
   try {
     let url = `${urlApi}/animal/getAllAnimalsFromTank?tankId=${tankId}`;
-    console.log(url);
+
     const response = await fetch(url, {
       method: "GET",
       headers: {

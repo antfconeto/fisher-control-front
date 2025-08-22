@@ -30,7 +30,7 @@ export interface SpawnsData {
 }
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
-  console.log(`🔁 Iniciando processo para buscar estatísticas do dashboard`);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     throw new CustomError("Token não recebido", 401);
@@ -57,7 +57,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     }
 
     const responseBody: DashboardStats = await response.json();
-    console.log(`✅ Estatísticas do dashboard obtidas com sucesso`);
+
     return responseBody;
   } catch (error: any) {
     consoler.error(
@@ -75,7 +75,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 export const getSpeciesDistribution = async (): Promise<{
   specieDescription: { specie: Specie; animals: Animal[] }[];
 }> => {
-  console.log(`🔁 Iniciando processo para buscar distribuição de espécies`);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     throw new CustomError("Token não recebido", 401);
@@ -104,8 +104,7 @@ export const getSpeciesDistribution = async (): Promise<{
     const responseBody: {
       specieDescription: { specie: Specie; animals: Animal[] }[];
     } = await response.json();
-    console.log(`✅ Distribuição de espécies obtida com sucesso`);
-    console.log(responseBody);
+
     return responseBody;
   } catch (error: any) {
     consoler.error(
@@ -121,7 +120,7 @@ export const getSpeciesDistribution = async (): Promise<{
 };
 
 export const getSpawnsByMonth = async (): Promise<SpawnsData[]> => {
-  console.log(`🔁 Iniciando processo para buscar desovas por mês`);
+
   const token = (await cookies()).get("access_token");
   if (!token) {
     throw new CustomError("Token não recebido", 401);
@@ -148,7 +147,7 @@ export const getSpawnsByMonth = async (): Promise<SpawnsData[]> => {
     }
 
     const responseBody: SpawnsData[] = await response.json();
-    console.log(`✅ Desovas por mês obtidas com sucesso`);
+
     return responseBody;
   } catch (error: any) {
     consoler.error(

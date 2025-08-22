@@ -18,6 +18,7 @@ import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { AdminOnly } from "@/components/Authorization";
+import { useNotification } from "@/contexts/notificationContext";
 
 enum ModalMode {
   CREATE = "create",
@@ -45,6 +46,7 @@ export default function SpeciesPage() {
   );
   const { sendRequest } = useRequest<Specie | ResponseError>();
   const { errorMessage, setErrorMessage } = useErrorContext();
+  const { successNotification, errorNotification } = useNotification();
 
   // States for the current species
   const [currentSpecies, setCurrentSpecies] = useState<Specie>(defaultSpecies);
@@ -66,6 +68,7 @@ export default function SpeciesPage() {
       }
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao buscar espécies: ${errMsg}`);
       setErrorMessage(errMsg);
     }
   }, [setErrorMessage, itemsPerPage]);
@@ -85,10 +88,7 @@ export default function SpeciesPage() {
       );
       setSpeciesFullInfo(speciesWithQuantities);
     } catch (error) {
-      console.error(
-        "Erro ao buscar quantidades de animais por espécie:",
-        error
-      );
+      errorNotification("Erro!", "Erro ao carregar as quantidades de animais.");
       setErrorMessage("Erro ao carregar as quantidades de animais.");
     } finally {
         setLoading(false);
@@ -144,11 +144,9 @@ export default function SpeciesPage() {
         ? await handleCreateSpecies(currentSpecies)
         : await handleUpdateSpecies(currentSpecies);
     if (response) {
-      console.log(
-        `✅ Espécie ${
-          modalMode == ModalMode.CREATE ? "criada" : "atualizada"
-        } com sucesso`,
-        currentSpecies
+      successNotification(
+        "Sucesso!",
+        `Espécie ${modalMode === ModalMode.CREATE ? "criada" : "atualizada"} com sucesso`
       );
       setShowModal(false);
       setCurrentSpecies(defaultSpecies);
@@ -163,6 +161,7 @@ export default function SpeciesPage() {
       return true;
     } catch (err: any) {
       const errMsg = err?.error || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao criar espécie: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     } finally {
@@ -180,6 +179,7 @@ export default function SpeciesPage() {
       return true;
     } catch (err: any) {
       const errMsg = err?.error || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao atualizar espécie: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     } finally {
@@ -192,6 +192,7 @@ export default function SpeciesPage() {
   const handleDeleteSpecies = async (): Promise<boolean> => {
     try {
       const response = await deleteSpecie(currentSpecies._id);
+      successNotification("Sucesso!", "Espécie deletada com sucesso");
       setShowConfirmModal(false);
       setCurrentPage(1);
       setLoading(true);
@@ -199,6 +200,7 @@ export default function SpeciesPage() {
       return response as boolean;
     } catch (err: any) {
       const errMsg = err?.error || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao deletar espécie: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     } finally {

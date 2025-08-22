@@ -1,6 +1,6 @@
-import { Role } from "@/types/user";
-import { DecodedToken } from "@/types/types";
-import { jwtDecode } from "jwt-decode";
+import { Role } from '@/types/user';
+import { DecodedToken } from '@/types/types';
+import { jwtDecode } from 'jwt-decode';
 import { CustomConsole } from "./customLogger";
 import { CustomError } from "./customError";
 const consoler = new CustomConsole()
@@ -44,7 +44,7 @@ export const decodeToken = (token: string): DecodedToken | null => {
   try {
     return jwtDecode<DecodedToken>(token);
   } catch (error) {
-    console.error("Erro ao decodificar token:", error);
+
     return null;
   }
 };
@@ -60,7 +60,7 @@ export const isTokenExpired = (token: string): boolean => {
     const currentTime = Math.floor(Date.now() / 1000);
     return decoded.exp ? decoded.exp < currentTime : true;
   } catch (error) {
-    console.error("Erro ao verificar expiração do token:", error);
+
     return true;
   }
 };

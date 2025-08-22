@@ -1,7 +1,7 @@
-import { cookies } from "next/headers";
-import { decodeToken, isTokenExpired, hasRole } from "./authUtils";
-import { Role } from "@/types/user";
-import { DecodedToken } from "@/types/types";
+import { cookies } from 'next/headers';
+import { decodeToken, isTokenExpired, hasRole } from './authUtils';
+import { Role } from '@/types/user';
+import { DecodedToken } from '@/types/types';
 
 /**
  * Obtém o token do usuário a partir dos cookies no servidor
@@ -13,7 +13,7 @@ export const getServerToken = async (): Promise<string | null> => {
     const token = cookieStore.get("access_token")?.value;
     return token || null;
   } catch (error) {
-    console.error("Erro ao obter token do servidor:", error);
+
     return null;
   }
 };
@@ -28,13 +28,13 @@ export const getServerUser = async (): Promise<DecodedToken | null> => {
     if (!token) return null;
 
     if (isTokenExpired(token)) {
-      console.warn("Token expirado no servidor");
+
       return null;
     }
 
     return decodeToken(token);
   } catch (error) {
-    console.error("Erro ao obter usuário do servidor:", error);
+
     return null;
   }
 };

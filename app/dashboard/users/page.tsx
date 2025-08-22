@@ -27,6 +27,7 @@ import { UserTable } from "@/components/tables/user-tables/user-table";
 import { useUser } from "@/hooks/userHook";
 import { ResponseError } from "@/types/types";
 import { CustomError } from "@/utils/customError";
+import { useNotification } from "@/contexts/notificationContext";
 
 enum ModalMode {
   CREATE = "create",
@@ -43,6 +44,7 @@ const defaultFilters = {
 export default function UsersPage() {
   const { errorMessage, setErrorMessage } = useErrorContext();
   const { user: loggedInUser } = useUser();
+  const { successNotification, errorNotification } = useNotification();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -139,7 +141,9 @@ export default function UsersPage() {
       setUsers(filteredUsers);
       setTotalPages((res as { totalPages: number }).totalPages);
     } catch (err: any) {
-      setErrorMessage(err.message || "Erro ao buscar usuários");
+      const errMsg = err.message || "Erro ao buscar usuários";
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     } finally {
       setLoading(false);
     }
@@ -192,12 +196,15 @@ export default function UsersPage() {
         if (res && (res as ResponseError).error) {
           throw new CustomError((res as ResponseError).error, (res as ResponseError).statusCode)
         }
+        successNotification("Sucesso!", "Usuário atualizado com sucesso");
       }
       setShowModal(false);
       setEditingUserId(null);
       fetchUsers();
     } catch (err: any) {
-      setErrorMessage(err.message || "Erro ao salvar usuário");
+      const errMsg = err.message || "Erro ao salvar usuário";
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     }
   };
 
@@ -210,11 +217,14 @@ export default function UsersPage() {
       if (res && (res as ResponseError).error) {
         throw new CustomError((res as ResponseError).error, (res as ResponseError).statusCode)
       }
+      successNotification("Sucesso!", "Usuário deletado com sucesso");
       setShowConfirmModal(false);
       setUserToDelete(null);
       fetchUsers();
     } catch (err: any) {
-      setErrorMessage(err.message || "Erro ao deletar usuário");
+      const errMsg = err.message || "Erro ao deletar usuário";
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     }
   };
 

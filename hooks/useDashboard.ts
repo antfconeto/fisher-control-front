@@ -230,7 +230,7 @@ export const useDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      console.log("🔍 Iniciando busca de dados do dashboard...");
+
 
       const [statsResponse, speciesDescription] = await Promise.all([
         getDashboardStats(),
@@ -246,9 +246,9 @@ export const useDashboard = () => {
       setRecentActivities(mockData.recentActivities);
       setWaterQualityData(mockData.waterQualityData);
       setMonthlyTrends(mockData.monthlyTrends);
-      console.log("✅ Dados do dashboard atualizados com sucesso");
+
     } catch (error: any) {
-      console.error("❌ Erro ao buscar dados do dashboard:", error);
+
       setErrorMessage(error.message || "Erro ao carregar dados do dashboard");
     } finally {
       setLoading(false);

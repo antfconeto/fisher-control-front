@@ -1,9 +1,9 @@
 "use server";
-import { Specie } from "@/types/types";
-import { ResponseError } from "@/types/types";
-import { CustomError } from "@/utils/customError";
+import { Specie } from '@/types/types';
+import { ResponseError } from '@/types/types';
+import { CustomError } from '@/utils/customError';
 import { CustomConsole } from "@/utils/customLogger";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
 import errorMessages from "@/utils/errorMessages.json";
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:5000";
@@ -11,7 +11,7 @@ const urlApi = process.env.API_URL || "http://localhost:5000";
 export const createSpecie = async (
   specie: Specie
 ): Promise<Specie | ResponseError> => {
-  console.log(`🔁 Initing process to create specie`, { specie });
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -35,7 +35,7 @@ export const createSpecie = async (
       consoler.error(
         `Error to create specie, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getSpecieErrorMessage("createSpecie", response.status),
         statusCode: response.status,
@@ -62,7 +62,7 @@ export const createSpecie = async (
 export const deleteSpecie = async (
   specieId: string
 ): Promise<boolean | ResponseError> => {
-  console.log(`🔁 Initing process to delete specie`);
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -88,7 +88,7 @@ export const deleteSpecie = async (
       consoler.error(
         `Error to delete specie, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getSpecieErrorMessage("deleteSpecie", response.status),
         statusCode: response.status,
@@ -115,7 +115,7 @@ export const deleteSpecie = async (
 export const updateSpecie = async (
   specie: Specie
 ): Promise<Specie | ResponseError> => {
-  console.log(`🔁 Initing process to update specie`, { specie });
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -139,7 +139,7 @@ export const updateSpecie = async (
       consoler.error(
         `Error to update specie, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getSpecieErrorMessage("updateSpecie", response.status),
         statusCode: response.status,
@@ -164,7 +164,7 @@ export const updateSpecie = async (
 };
 
 export const getAllSpecies = async (): Promise<Specie[] | ResponseError> => {
-  console.log(`🔁 Initing process to get all specie`);
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -187,7 +187,7 @@ export const getAllSpecies = async (): Promise<Specie[] | ResponseError> => {
       consoler.error(
         `Error to get all specie, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getSpecieErrorMessage("getAllSpecies", response.status),
         statusCode: response.status,
@@ -214,7 +214,7 @@ export const getAllSpecies = async (): Promise<Specie[] | ResponseError> => {
 export const getAllQuantityAnimalsFromSpecie = async (
   specieId: string
 ): Promise<number | ResponseError> => {
-  console.log(`🔁 Initing process to get all specie`);
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -241,7 +241,7 @@ export const getAllQuantityAnimalsFromSpecie = async (
       consoler.error(
         `Error to get all specie, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getSpecieErrorMessage(
           "getAllQuantityAnimalsFromSpecie",
@@ -271,7 +271,7 @@ export const getAllQuantityAnimalsFromSpecie = async (
 export const getSpecieById = async (
   specieId: string
 ): Promise<Specie | ResponseError> => {
-  console.log(`🔁 Initing process to get specie`, { specieId });
+
   //get token from cookie
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -297,7 +297,7 @@ export const getSpecieById = async (
       consoler.error(
         `Error to retrieve specie, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(errorMessage);
+
       return {
         error: getSpecieErrorMessage("getSpecieById", response.status),
         statusCode: response.status,

@@ -47,7 +47,7 @@ export const loginAction = async (
 
     return responseBody;
   } catch (error: any) {
-    console.log(error);
+
     const statusCode = error.statusCode || 500;
     const errorMessage = error.message || "Erro desconhecido";
 

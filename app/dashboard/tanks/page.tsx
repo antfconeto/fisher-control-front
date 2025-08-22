@@ -30,6 +30,7 @@ import { Button } from "@/components/ui";
 import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useErrorContext } from "@/contexts/errorContext";
+import { useNotification } from "@/contexts/notificationContext";
 import { ErrorBox } from "@/components/ErrorBox";
 import { GiFishBucket } from "react-icons/gi";
 import { AdminOnly, ViewerOnly } from "@/components/Authorization";
@@ -54,6 +55,7 @@ export default function TanksPage() {
 
   const { tanks, loading, createTank, updateTank, deleteTank } = useTanks()
   const { setErrorMessage, errorMessage } = useErrorContext()
+  const { successNotification, errorNotification } = useNotification()
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -155,13 +157,17 @@ export default function TanksPage() {
       try {
         if (modalMode === ModalMode.CREATE) {
           await createTank(currentTank);
+          successNotification("Sucesso!", "Tanque criado com sucesso");
         } else if (modalMode === ModalMode.UPDATE && editingTankId) {
           await updateTank({ ...currentTank, _id: editingTankId });
+          successNotification("Sucesso!", "Tanque atualizado com sucesso");
         }
         setShowModal(false);
         setEditingTankId(null);
       } catch (error: any) {
-        console.error("Erro ao salvar tanque:", error);
+        const errMsg = error?.message || "Erro desconhecido";
+        errorNotification("Erro!", `Erro ao salvar tanque: ${errMsg}`);
+        setErrorMessage(errMsg);
       }
     }
   };
@@ -171,6 +177,7 @@ export default function TanksPage() {
       setShowConfirmModal(false);
       setCurrentPage(1)
       await deleteTank(currentTank._id);
+      successNotification("Sucesso!", "Tanque deletado com sucesso");
       setCurrentTank({
         _id: '',
         name: '',
@@ -181,8 +188,9 @@ export default function TanksPage() {
         }
       });
     } catch (error: any) {
-      console.error("Erro ao excluir tanque:", error);
-      setErrorMessage(error.message);
+      const errMsg = error?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao deletar tanque: ${errMsg}`);
+      setErrorMessage(errMsg);
     }
 
   };

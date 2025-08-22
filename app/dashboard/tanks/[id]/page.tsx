@@ -29,6 +29,7 @@ import { CustomModalForm } from '@/components/Forms/CustomModalForm';
 import { useRequest } from "@/hooks/useRequest";
 import { AnimalTable } from "@/components/tables";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
+import { useNotification } from "@/contexts/notificationContext";
 
 export interface TankFullInfo extends Tank {
   animals: Animal[];
@@ -44,6 +45,7 @@ export default function TankDetailsPage() {
   const router = useRouter();
   const tankId = params.id as string;
   const { errorMessage, setErrorMessage } = useErrorContext();
+  const { successNotification, errorNotification } = useNotification();
   const [loadingTank, setLoadingTank] = useState(true);
   const [tankFullInfo, setTankFullInfo] = useState<TankFullInfo | null>(null);
   const [currentAnimal, setCurrentAnimal] = useState<Animal>({
@@ -121,6 +123,7 @@ export default function TankDetailsPage() {
       }
     } catch (error: any) {
       const errMsg = error?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao processar dados de espécies: ${errMsg}`);
       setErrorMessage(errMsg);
     }
   }, [tankId, setErrorMessage, specieDescription]);
@@ -143,6 +146,7 @@ export default function TankDetailsPage() {
       setLoadingTank(false);
     } catch (error: any) {
       const errMsg = error?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao buscar dados do tanque: ${errMsg}`);
       setErrorMessage(errMsg);
     }
   };
@@ -200,12 +204,7 @@ export default function TankDetailsPage() {
     }
     const response = await handleUpdateAnimal(currentAnimal);
     if (response) {
-      console.log(
-        `✅ Animal ${
-          modalMode == ModalMode.CREATE ? "created" : "updated"
-        } with success`,
-        currentAnimal
-      );
+      successNotification("Sucesso!", "Animal atualizado com sucesso");
       setShowModal(false);
       setCurrentAnimal({
         codeAnimal: "",
@@ -230,6 +229,7 @@ export default function TankDetailsPage() {
       return true;
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao atualizar animal: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     }
@@ -238,12 +238,14 @@ export default function TankDetailsPage() {
   const handleDeleteAnimal = async (): Promise<boolean> => {
     try {
       const response = await deleteAnimal(currentAnimal.codeAnimal);
+      successNotification("Sucesso!", "Animal deletado com sucesso");
       await fetchAnimals();
       setFilters(defaultFilters);
       setShowConfirmModal(false);
       return response as boolean;
     } catch (err: any) {
       const errMsg = err?.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao deletar animal: ${errMsg}`);
       setErrorMessage(errMsg);
       return false;
     }

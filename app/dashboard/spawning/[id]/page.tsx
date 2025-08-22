@@ -32,6 +32,7 @@ import {
 import { ClockLoader } from "react-spinners";
 import { Button } from "@/components/ui";
 import { useErrorContext } from "@/contexts/errorContext";
+import { useNotification } from "@/contexts/notificationContext";
 import { ErrorBox } from "@/components/ErrorBox";
 import { Animal, ResponseError, SpawningForm, Specie, Tank, Monitoring } from "@/types/types";
 import {
@@ -59,6 +60,7 @@ export default function SpawningDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { setErrorMessage, errorMessage } = useErrorContext();
+  const { successNotification, errorNotification } = useNotification();
 
   const [spawningForm, setSpawningForm] = useState<SpawningForm | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -100,7 +102,9 @@ export default function SpawningDetailsPage() {
         organizedMonitoring,
       });
     } catch (error: any) {
-      setErrorMessage("Erro ao gerar PDF: " + error.message);
+      const errMsg = "Erro ao gerar PDF: " + error.message;
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -208,9 +212,9 @@ export default function SpawningDetailsPage() {
         }
       }
     } catch (error: any) {
-      setErrorMessage(
-        error.message || "Erro ao carregar detalhes do spawning form"
-      );
+      const errMsg = error.message || "Erro ao carregar detalhes do spawning form";
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     } finally {
       setLoading(false);
     }
@@ -367,12 +371,12 @@ export default function SpawningDetailsPage() {
         return;
       }
 
-      // Redirecionar para a lista de spawning forms
+      successNotification("Sucesso!", "Spawning form deletado com sucesso!");
       router.push("/dashboard/spawning");
     } catch (error: any) {
-      setErrorMessage(
-        error.message || "Erro ao excluir spawning form"
-      );
+      const errMsg = error.message || "Erro ao excluir spawning form";
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     }
   };
 
@@ -424,9 +428,9 @@ export default function SpawningDetailsPage() {
         alert("Registro de monitoramento adicionado com sucesso!");
       }
     } catch (error: any) {
-      setErrorMessage(
-        error.message || "Erro ao adicionar registro de monitoramento"
-      );
+      const errMsg = error.message || "Erro ao adicionar registro de monitoramento";
+      errorNotification("Erro!", errMsg);
+      setErrorMessage(errMsg);
     }
   };
 

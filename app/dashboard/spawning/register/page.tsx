@@ -11,6 +11,7 @@ import { SpawningForm, Animal, Monitoring } from "@/types/types";
 import { ErrorBox } from "@/components/ErrorBox";
 import dayjs from "dayjs";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { useNotification } from "@/contexts/notificationContext";
 
 const defaultForm: Omit<SpawningForm, "_id"> = {
   date: new Date(),
@@ -59,6 +60,7 @@ export default function RegisterSpawningPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { successNotification, errorNotification } = useNotification();
   const [monitoringTimeError, setMonitoringTimeError] = useState<string | null>(null);
 
   // Autocomplete de animal
@@ -219,10 +221,12 @@ export default function RegisterSpawningPage() {
         setError(result.error);
         return;
       }
-      setSuccess("Desova registrada com sucesso!");
-      setTimeout(() => router.push("/dashboard/spawning"), 1500);
+      successNotification("Sucesso!", "Desova registrada com sucesso!");
+      router.push("/dashboard/spawning");
     } catch (err: any) {
-      setError(err.message || "Erro ao registrar desova");
+      const errMsg = err.message || "Erro ao registrar desova";
+      errorNotification("Erro!", errMsg);
+      setError(errMsg);
     } finally {
       setIsSubmitting(false);
     }

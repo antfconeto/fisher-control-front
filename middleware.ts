@@ -21,7 +21,7 @@ export async function middleware(request: Request) {
   
   // Verifica se não há token e não está em páginas públicas
   if (!token && !pathname.includes('/login') && !pathname.includes('/signup')) {
-    console.log(token)
+
     consoler.warn(`⚠️ Token not received, redirecting for /login...`);
     return NextResponse.redirect(new URL( '/login', request.url));
   }

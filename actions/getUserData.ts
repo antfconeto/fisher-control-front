@@ -51,7 +51,7 @@ export const getUserData = async (): Promise<
       consoler.error(
         `Error to get user data, error: ${errorMessage?.error}, statusCode: ${response.status}`
       );
-      console.log(getUserErrorMessage("getData", response.status));
+
       return {
         error: getUserErrorMessage("getData", response.status),
         statusCode: response.status,

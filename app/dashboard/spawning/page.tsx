@@ -75,7 +75,7 @@ export default function SpawningPage() {
   const router = useRouter();
   const { setErrorMessage, errorMessage } = useErrorContext();
   const { user } = useUser();
-  const { successNotification } = useNotification();
+  const { successNotification, errorNotification } = useNotification();
 
   // Filtros iniciais (removido userId)
   const [filters, setFilters] = useState({
@@ -197,7 +197,9 @@ export default function SpawningPage() {
       setShowConfirmModal(false);
       reloadData();
     } catch (error: any) {
-      setErrorMessage(error.message);
+      const errMsg = error.message || "Erro desconhecido";
+      errorNotification("Erro!", `Erro ao deletar spawning form: ${errMsg}`);
+      setErrorMessage(errMsg);
     } finally {
       setIsSubmitting(false);
     }

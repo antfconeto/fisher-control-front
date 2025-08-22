@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { FaPlus, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { getUserById } from "@/actions/user";
 import { getAnimalByCode } from "@/actions/animal";
+import { useNotification } from "@/contexts/notificationContext";
 
 const defaultForm: Omit<SpawningForm, "_id"> = {
   date: new Date(),
@@ -63,6 +64,7 @@ export default function UpdateSpawningPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { successNotification, errorNotification } = useNotification();
   const [monitoringTimeError, setMonitoringTimeError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasMonitoringError, setHasMonitoringError] = useState(false);
@@ -142,7 +144,9 @@ export default function UpdateSpawningPage() {
         }
 
       } catch (error: any) {
-        setError(error.message || "Erro ao carregar dados do spawning form");
+        const errMsg = error.message || "Erro ao carregar dados do spawning form";
+        errorNotification("Erro!", errMsg);
+        setError(errMsg);
       } finally {
         setLoading(false);
       }
@@ -305,9 +309,12 @@ export default function UpdateSpawningPage() {
         setError(result.error);
         return;
       }
+        successNotification("Sucesso!", "Spawning form atualizado com sucesso!");
         router.push(`/dashboard/spawning/${params.id}`);
     } catch (error: any) {
-      setError(error.message || "Erro ao atualizar spawning form");
+      const errMsg = error.message || "Erro ao atualizar spawning form";
+      errorNotification("Erro!", errMsg);
+      setError(errMsg);
     } finally {
       setIsSubmitting(false);
     }

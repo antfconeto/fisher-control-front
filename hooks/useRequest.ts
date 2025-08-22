@@ -34,7 +34,7 @@ export function useRequest<T>() {
       return data;
 
     } catch (error: any) {
-      console.log(error);
+
       setState({
         data: null,
         error: { error: error.error || "Erro desconhecido", statusCode: error.statusCode || 500 },
