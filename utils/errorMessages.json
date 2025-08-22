@@ -17,6 +17,13 @@
         "getData": {
             "500": "Error ao tentar se comunicar com o servidor!",
             "fetch failed": "Erro ao se comunicar com os servidors"
+        },
+        "updateUser": {
+            "statusCode": { 
+                "400": "Dados incompletos para atualizar o usuário",
+                "404": "Usuário não encontrado",
+                "409": "Já existe um usuário com o email fornecido"
+            }
         }
     },
     "animalErros": {

@@ -110,7 +110,7 @@ export const updateUser = async (
   if (!token) {
     return { error: "Token não recebido", statusCode: 401 };
   }
-  console.log(user);
+  console.log(id);
   try {
     const response = await fetch(`${urlApi}/user/updateUser/`, {
       method: "PATCH",
@@ -124,10 +124,10 @@ export const updateUser = async (
     });
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();
-      consoler.error(`Erro ao atualizar usuário: ${errorMessage?.error}`);
+      consoler.error(`Erro ao atualizar usuário: ${errorMessage.statusCode}`);
       return {
-        error: getUserErrorMessage("updateUser", response.status),
-        statusCode: response.status,
+        error: getUserErrorMessage("updateUser", errorMessage.statusCode),
+        statusCode: errorMessage?.statusCode,
       };
     }
     return await response.json();

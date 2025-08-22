@@ -1,16 +1,8 @@
 .container {
   padding: 1.5rem;
+  margin-top: 4rem;
   width: 100%;
   transition: margin-left 0.3s ease;
-}
-
-@media (min-width: 768px) {
-  .container {
-    margin-left: 250px; /* Espaço para o menu lateral fixo em desktop */
-    max-width: calc(
-      100% - 250px
-    ); /* Limita a largura para não ultrapassar a tela menos o menu */
-  }
 }
 
 .header {
@@ -128,7 +120,12 @@
     margin-left: 0; /* Remove o espaço lateral em dispositivos móveis */
     max-width: 100%; /* Utiliza toda a largura da tela */
   }
-
+  .createButton {
+    width: 150px;
+    margin: 0 auto;
+    font-size: 0.8rem;
+  }
+  
   .title {
     font-size: 1.5rem;
   }

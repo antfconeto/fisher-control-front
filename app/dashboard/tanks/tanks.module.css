@@ -302,80 +302,308 @@
 /* Media queries para dispositivos móveis */
 @media (max-width: 768px) {
   .container {
-    padding: 1rem;
-    margin-top: 4rem; /* Espaço para o botão do menu hambúrguer */
-    margin-left: 0; /* Remove o espaço lateral em dispositivos móveis */
-    max-width: 100%; /* Utiliza toda a largura da tela */
+    padding: 0.75rem;
+    margin-top: 4rem;
+    margin-left: 0;
+    max-width: 100%;
   }
 
   .title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 
   .header {
     justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .filterSection {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+
+  .filterLabel {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .filterContainer {
+    flex-direction: column;
+    gap: 12px;
   }
 
   .searchInput,
   .filterInput {
     max-width: 100%;
+    width: 100%;
+    padding: 8px 12px;
+    min-width: unset;
+  }
+
+  .filterIcon {
+    margin-right: 6px;
+    min-width: 14px;
+    font-size: 1rem;
+  }
+
+  .filterInput input, 
+  .searchInput input {
+    font-size: 0.95rem;
   }
 
   .actionsCell {
     flex-direction: column;
+    gap: 0.5rem;
   }
 
   .modalFooter {
     justify-content: center;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .cardsContainer {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .filterContainer {
-    flex-direction: column;
-    gap: 15px;
+  .tankCard {
+    width: 80%;
+    margin: 0 auto;
+  }
+  /* Melhor comportamento touch para mobile */
+  .tankCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.10), 0 2px 8px rgba(0,0,0,0.06);
   }
 
-  .searchInput,
-  .filterInput {
-    width: 100%;
+  .tankCard:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 12px rgba(0, 123, 255, 0.08), 0 1px 4px rgba(0,0,0,0.04);
   }
 
   .pageTitle {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
 
   .pageTitleIcon {
-    width: 36px;
-    height: 36px;
+    width: 35px;
+    height: 35px;
     font-size: 1.1rem;
   }
 
   .tankCardTitle {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
+    gap: 6px;
   }
 
+  .tankCardTitleText {
+    font-size: 1.2rem;
+  }
 
   .tankCardStat {
-    padding: 10px;
+    padding: 8px 10px;
+    gap: 10px;
   }
 
   .tankCardStatValue {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
+  }
+
+  .tankCardStatLabel {
+    font-size: 0.85rem;
+  }
+
+  .tankCardIcon {
+    margin-right: 15px;
+    font-size: 1.1rem;
+  }
+
+  .viewDetailsButton {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    min-height: 36px;
+    gap: 5px;
+  }
+
+  .viewDetailsText {
+    font-size: 0.9rem;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .paginationButton {
+    padding: 10px 16px;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .filterSection {
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
+
+  .filterLabel {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .filterContainer {
+    gap: 10px;
+  }
+
+  .searchInput,
+  .filterInput {
+    padding: 6px 10px;
+  }
+
+  .filterInput input, 
+  .searchInput input {
+    font-size: 0.9rem;
+  }
+
+  .filterIcon {
+    margin-right: 4px;
+    min-width: 12px;
+    font-size: 0.9rem;
+  }
+
+  .cardsContainer {
+    gap: 12px;
+  }
+
+  .tankCard {
+    border-radius: 12px;
+  }
+
+  /* Comportamento touch otimizado para telas pequenas */
+  .tankCard:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.08), 0 1px 6px rgba(0,0,0,0.05);
+  }
+
+  .tankCard:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 8px rgba(0, 123, 255, 0.06), 0 0.5px 2px rgba(0,0,0,0.03);
+  }
+
+  .tankCardHeader {
+    padding: 12px 16px 8px 16px;
+  }
+
+  .tankCardBody {
+    padding: 12px 16px 8px 16px;
+    gap: 12px;
+  }
+
+  .tankCardTitle {
+    font-size: 1.1rem;
+    gap: 4px;
+  }
+
+  .tankCardTitleText {
+    font-size: 1.05rem;
+  }
+
+  .tankCardStat {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .tankCardStatIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .tankCardStatValue {
+    font-size: 1rem;
+  }
+
+  .tankCardStatLabel {
+    font-size: 0.8rem;
+  }
+
+  .tankCardFooter {
+    padding: 8px 16px 12px 16px;
+  }
+
+  .viewDetailsButton {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+    min-height: 32px;
+    gap: 4px;
+  }
+
+  .viewDetailsText {
+    font-size: 0.85rem;
+  }
+
+  .tankCardIcon {
+    font-size: 1rem;
+  }
+
   .paginationInfo {
     order: -1;
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    text-align: center;
   }
 
   .pagination {
     justify-content: center;
+    gap: 12px;
+  }
+
+  .paginationButton {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .pageTitle {
+    font-size: 1.3rem;
+  }
+
+  .pageTitleIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .modalContent {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalHeader {
+    padding: 0.75rem 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.1rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .formInput {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .formLabel {
+    font-size: 0.9rem;
   }
 }
 
@@ -399,6 +627,13 @@
   height: 100%;
   border: 1px solid #e3eafc;
   position: relative;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.tankCard:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 .tankCard:hover {
@@ -434,6 +669,15 @@
   color: #2563eb;
   font-weight: 600;
   letter-spacing: -0.01em;
+  gap: 8px;
+}
+
+.tankCardTitleText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 
@@ -498,15 +742,37 @@
   gap: 7px;
   color: #2563eb;
   font-weight: 500;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s, background 0.2s, transform 0.2s;
   font-size: 0.97rem;
-  padding: 5px 0;
+  padding: 8px 12px;
   border-radius: 7px;
   background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  min-height: 40px;
 }
+
 .viewDetailsButton:hover {
   color: #1d4ed8;
   background-color: #e0e7ff;
+  transform: translateY(-1px);
+}
+
+.viewDetailsButton:active {
+  transform: translateY(0);
+}
+
+.viewDetailsText {
+  flex: 1;
+}
+
+.viewDetailsIcon {
+  transition: transform 0.2s;
+}
+
+.viewDetailsButton:hover .viewDetailsIcon {
+  transform: translateX(2px);
 }
 
 .noResults {
@@ -973,6 +1239,44 @@
   box-shadow: 0 6px 12px rgba(108, 117, 125, 0.4);
 }
 
+/* Melhorias para botões em dispositivos móveis */
+@media (max-width: 768px) {
+  .clearFilterButton {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+
+  .saveButton,
+  .cancelButton {
+    padding: 10px 18px;
+    font-size: 0.95rem;
+  }
+
+  .modalFooter {
+    padding: 0 1rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .clearFilterButton {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+
+  .saveButton,
+  .cancelButton {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-right: 10px;
+  }
+
+  .modalFooter {
+    padding: 0 0.75rem 0.75rem;
+  }
+}
+
 /* Melhorias para elementos do card */
 .tankCardActions {
   display: flex;
@@ -993,11 +1297,21 @@
   font-size: 1rem;
   box-shadow: none;
 }
-.tankCardActions button:hover {
-  background: #e0e7ff;
-  color: #1d4ed8;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.10);
-}
+  .tankCardActions button:hover {
+    background: #e0e7ff;
+    color: #1d4ed8;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+  }
+
+  /* Melhorias para botões de ação em dispositivos touch */
+  .updateButton,
+  .deleteButton {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
 /* Para telas maiores, permitir mais colunas */
 @media (min-width: 1400px) {
@@ -1063,6 +1377,23 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* Media queries adicionais para tabelas responsivas */
+@media (max-width: 768px) {
+  .tableContainer {
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+}
+
+@media (max-width: 480px) {
+  .tableContainer {
+    border-radius: 6px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
+}
+
 /* Ajustes de responsividade para filtros */
 @media (max-width: 576px) {
   .animalFilters {
@@ -1122,6 +1453,133 @@
     font-size: 0.9rem;
   }
 }
+/* Breakpoint adicional para telas muito pequenas */
+@media (max-width: 320px) {
+  .container {
+    padding: 0.25rem;
+  }
+
+  .filterSection {
+    padding: 8px 10px;
+    margin-bottom: 12px;
+  }
+
+  .filterLabel {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+
+  .searchInput,
+  .filterInput {
+    padding: 4px 8px;
+  }
+
+  .filterInput input, 
+  .searchInput input {
+    font-size: 0.85rem;
+  }
+
+  .tankCardHeader {
+    padding: 10px 12px 6px 12px;
+  }
+
+  .tankCardBody {
+    padding: 10px 12px 6px 12px;
+    gap: 10px;
+  }
+
+  .tankCardTitle {
+    font-size: 1rem;
+    gap: 3px;
+  }
+
+  .tankCardTitleText {
+    font-size: 0.95rem;
+  }
+
+  .tankCardStat {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .tankCardStatIcon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+
+  .tankCardStatValue {
+    font-size: 0.9rem;
+  }
+
+  .tankCardStatLabel {
+    font-size: 0.75rem;
+  }
+
+  .tankCardIcon {
+    font-size: 0.9rem;
+    margin-right: 8px;
+  }
+
+  .viewDetailsButton {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    min-height: 28px;
+    gap: 3px;
+  }
+
+  .viewDetailsText {
+    font-size: 0.8rem;
+  }
+
+  .viewDetailsIcon {
+    font-size: 0.75rem;
+  }
+
+  .pageTitle {
+    font-size: 1.2rem;
+  }
+
+  .pageTitleIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .paginationButton {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .modalContent {
+    padding: 0.5rem 0.25rem;
+    margin: 0.25rem;
+    max-height: 98vh;
+  }
+
+  .modalTitle {
+    font-size: 1rem;
+    margin-left: 0.25rem;
+  }
+
+  .modalHeader {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .modalBody {
+    padding: 0.75rem;
+  }
+
+  .formInput {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .formLabel {
+    font-size: 0.85rem;
+  }
+}
+
 @media (max-width: 480px) {
   .modalContent {
     padding: 0.5rem 0.2rem 0.5rem 0.2rem;

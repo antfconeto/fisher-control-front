@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/buttons/buttons";
 import { useUser } from "@/hooks/userHook";
-import { Role } from "@/types/user";
+import { Role, User } from "@/types/user";
 import { Check, LogOut, Mail, User as UserIcon, Trash2 } from "lucide-react";
 import { FaUser, FaCalendarAlt, FaClock, FaShieldAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
@@ -14,7 +14,9 @@ import { ErrorBox } from "@/components/ErrorBox";
 import { useState } from "react";
 import { Modal, Form } from "react-bootstrap";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
-import { deleteUser } from "@/actions/user";
+import { deleteUser, updateUser } from "@/actions/user";
+import { ResponseError } from "@/types/types";
+import { useNotification } from "@/contexts/notificationContext";
 
 export default function Profile() {
   const { user, loading } = useUser();
@@ -23,10 +25,13 @@ export default function Profile() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<User, "password" | "createdAt" | "updatedAt">>({
+    _id:"",
+    role: Role.VIEWER,
     username: "",
     email: "",
   });
+  const { successNotification } = useNotification();
 
   function handleClose() {
     setShowEditModal(false);
@@ -35,6 +40,8 @@ export default function Profile() {
   function handleShow() {
     if (user) {
       setFormData({
+        _id: user._id,
+        role: user.role,
         username: user.username,
         email: user.email,
       });
@@ -44,18 +51,25 @@ export default function Profile() {
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData((prev: Omit<User, "password" | "createdAt" | "updatedAt">) => ({
       ...prev,
       [name]: value,
     }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!user) return;
+    console.log(user);
+    let response = await updateUser(user._id, formData) as User | ResponseError;
+    console.log(response);
+    if ((response as ResponseError).error) {
+      setErrorMessage((response as ResponseError).error);
+    } else {
+      successNotification("Perfil atualizado com sucesso!", "success");
+    }
     handleClose();
-    alert("Perfil atualizado com sucesso!");
   }
-
   function handleDeleteShow() {
     setShowDeleteModal(true);
   }
@@ -73,7 +87,7 @@ export default function Profile() {
       await sendRequest(deleteUser, user._id);
       window.location.href = "/login";
     } catch (error: unknown) {
-      console.log(error);
+ 
       const errorMsg =
         error instanceof Error ? error.message : "Erro ao deletar usuário";
       setErrorMessage(errorMsg);
@@ -130,16 +144,6 @@ export default function Profile() {
     }
   }
 
-  if (errorMessage) {
-    return (
-      <ErrorBox
-        errorMessage={errorMessage}
-        setErrorMessage={setErrorMessage}
-        otherClassName=""
-      />
-    );
-  }
-
   if (loading || !user) {
     return (
       <div className="loading-container">
@@ -151,6 +155,13 @@ export default function Profile() {
 
   return (
     <>
+      {errorMessage && (
+        <ErrorBox
+          errorMessage={errorMessage}
+          setErrorMessage={setErrorMessage}
+          otherClassName=""
+        />
+      )}
         <div className={styles.container}>
           {/* Informações do Perfil */}
           <div className="content-card">

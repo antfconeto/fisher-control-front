@@ -217,7 +217,7 @@ export default function SpeciesPage() {
         />
       )}
 
-      <div className="page-container">
+      <div className={styles.container}>
         <div className="content-container">
           <div className="content-card">
             {/* Header with title and create button */}

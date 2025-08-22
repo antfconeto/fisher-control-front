@@ -251,10 +251,19 @@ export default function TanksPage() {
               <div
                 key={tank._id}
                 className={styles.tankCard}
+                onClick={() => navigateToTankDetails(tank._id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    navigateToTankDetails(tank._id);
+                  }
+                }}
               >
                 <div className={styles.tankCardHeader}>
                   <h3 className={styles.tankCardTitle}>
-                    <GiFishBucket className={styles.tankCardIcon} /> {tank.name}
+                    <GiFishBucket className={styles.tankCardIcon} /> 
+                    <span className={styles.tankCardTitleText}>{tank.name}</span>
                   </h3>
                   <AdminOnly>
                     <div className={styles.tankCardActions}>
@@ -262,13 +271,19 @@ export default function TanksPage() {
                         className={styles.updateButton}
                         onClick={(e) => openUpdateModal(tank, e)}
                         aria-label="Editar tanque"
+                        title="Editar tanque"
                       >
                         <BsPencil />
                       </button>
                       <button
                         className={styles.deleteButton}
-                        onClick={(e) => { setShowConfirmModal(true); setCurrentTank(tank) }}
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          setShowConfirmModal(true); 
+                          setCurrentTank(tank); 
+                        }}
                         aria-label="Excluir tanque"
+                        title="Excluir tanque"
                       >
                         <BsTrash />
                       </button>
@@ -283,10 +298,10 @@ export default function TanksPage() {
                     </div>
                     <div className={styles.tankCardStatContent}>
                       <div className={styles.tankCardStatLabel}>
-                        Capacidade:
+                        Capacidade
                       </div>
                       <div className={styles.tankCardStatValue}>
-                        {tank.capacity} L
+                        {tank.capacity.toLocaleString('pt-BR')} L
                       </div>
                     </div>
                   </div>
@@ -297,10 +312,10 @@ export default function TanksPage() {
                     </div>
                     <div className={styles.tankCardStatContent}>
                       <div className={styles.tankCardStatLabel}>
-                        Dimensões:
+                        Dimensões
                       </div>
                       <div className={styles.tankCardStatValue}>
-                        {tank.size.width}×{tank.size.height} m
+                        {tank.size.width.toLocaleString('pt-BR')}×{tank.size.height.toLocaleString('pt-BR')} m
                       </div>
                     </div>
                   </div>
@@ -310,10 +325,10 @@ export default function TanksPage() {
                       <FaFish />
                     </div>
                     <div className={styles.tankCardStatContent}>
-                      <div className={styles.tankCardStatLabel}>Animais:</div>
+                      <div className={styles.tankCardStatLabel}>Animais</div>
                       <div className={styles.tankCardStatValue}>
                         {tankAnimals[tank._id] === undefined ? (
-                          <ClockLoader color="#0a58ca" size={20} />
+                          <ClockLoader color="#0a58ca" size={16} />
                         ) : (
                           tankAnimals[tank._id] || 0
                         )}
@@ -323,11 +338,17 @@ export default function TanksPage() {
                 </div>
 
                 <div className={styles.tankCardFooter}>
-                  <div className={styles.viewDetailsButton}
-                    onClick={() => navigateToTankDetails(tank._id)}
+                  <button 
+                    className={styles.viewDetailsButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToTankDetails(tank._id);
+                    }}
+                    aria-label={`Ver detalhes do tanque ${tank.name}`}
                   >
-                    Ver detalhes <FaChartBar />
-                  </div>
+                    <span className={styles.viewDetailsText}>Ver detalhes</span>
+                    <FaChartBar className={styles.viewDetailsIcon} />
+                  </button>
                 </div>
               </div>
             ))}
