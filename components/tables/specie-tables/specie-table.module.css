@@ -1,15 +1,17 @@
 
 
   
-.actionsCell {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  
+.cellContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
   .updateButton {
     background-color: #3182ce;
     color: white;
+    width: 90px;
+    margin-bottom:5px;
     border: none;
     border-radius: 0.25rem;
     padding: 0.4rem 0.75rem;
@@ -30,6 +32,7 @@
   .deleteButton {
     background-color: #e53e3e;
     color: white;
+    width: 90px;
     border: none;
     border-radius: 0.25rem;
     padding: 0.4rem 0.75rem;

@@ -1,8 +1,9 @@
-.container{
-  margin-top: 65px;
+.container {
+  padding: 1.5rem;
   width: 100%;
-  padding: 0 2.5rem;
+  margin-top: 2.5rem;
 }
+
 .pageBackground {
   background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
   min-height: 100vh;

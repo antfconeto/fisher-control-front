@@ -27,7 +27,7 @@ export const SpecieTable: React.FC<SpecieTableProps> = ({ species, onEdit, onDel
       header: 'Descrição',
       render: (specie) => (
         <div className={styles.cellContent}>
-          <LuFilePenLine size={18}/> {specie.description}
+          <LuFilePenLine size={18}/> {specie.description.length > 60 ? specie.description.substring(0, 60) + '...' : specie.description}
         </div>
       ),
     },

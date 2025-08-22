@@ -228,6 +228,7 @@ export default function AnimalsPage() {
     try {
       const response = await deleteAnimal(currentAnimal.codeAnimal);
       setFilters(defaultFilters);
+      setCurrentPage(1);
       setShowConfirmModal(false);
       return response as boolean;
     } catch (err: any) {
@@ -247,7 +248,7 @@ export default function AnimalsPage() {
         />
       )}
 
-      <div className="page-container">
+      <div className={styles.container}>
         <div className="content-container">
           <div className="content-card">
             {/* Cabeçalho com título e botão de criar */}

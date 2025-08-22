@@ -60,14 +60,13 @@ export default function Profile() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    console.log(user);
     let response = await updateUser(user._id, formData) as User | ResponseError;
-    console.log(response);
     if ((response as ResponseError).error) {
       setErrorMessage((response as ResponseError).error);
     } else {
       successNotification("Perfil atualizado com sucesso!", "success");
     }
+    window.location.href = "/dashboard/profile";
     handleClose();
   }
   function handleDeleteShow() {
@@ -84,7 +83,12 @@ export default function Profile() {
     setIsDeleting(true);
     try {
       handleDeleteClose();
-      await sendRequest(deleteUser, user._id);
+      let response =await deleteUser(user._id);
+      if ((response as ResponseError).error) {
+        setErrorMessage((response as ResponseError).error);
+      } else {
+        successNotification("Conta deletada com sucesso!", "success");
+      }
       window.location.href = "/login";
     } catch (error: unknown) {
  
@@ -163,14 +167,6 @@ export default function Profile() {
         />
       )}
         <div className={styles.container}>
-          {/* Informações do Perfil */}
-          <div className="content-card">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="card-title mb-0">
-                <UserIcon className="" /> Perfil do Usuário
-              </h2>
-            </div>
-
             <div className={styles.profileHeader}>
               <div className="d-flex align-items-center">
                 <div className={styles.profilePicture}>
@@ -311,7 +307,6 @@ export default function Profile() {
               </Button>
             </div>
           </div>
-        </div>
 
       {/* Modal de Edição */}
       <Modal show={showEditModal} onHide={handleClose} centered>

@@ -4,15 +4,6 @@
   transition: margin-left 0.3s ease;
 }
 
-@media (min-width: 768px) {
-  .container {
-    margin-left: 250px;
-    /* Espaço para o menu lateral fixo em desktop */
-    max-width: calc(100% - 250px);
-    /* Limita a largura para não ultrapassar a tela menos o menu */
-  }
-}
-
 .header {
   display: flex;
   justify-content: space-between;
@@ -36,6 +27,7 @@
   font-size: 2rem;
 }
 
+
 .createButton {
   background-color: #38a169;
   color: white;
@@ -50,7 +42,6 @@
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .createButton:hover {
   background-color: #2f855a;
   transform: translateY(-1px);

@@ -193,6 +193,7 @@ export default function SpeciesPage() {
     try {
       const response = await deleteSpecie(currentSpecies._id);
       setShowConfirmModal(false);
+      setCurrentPage(1);
       setLoading(true);
       await fetchSpecies();
       return response as boolean;

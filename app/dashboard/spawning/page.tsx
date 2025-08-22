@@ -171,27 +171,13 @@ export default function SpawningPage() {
     return matchesAnimal;
   });
 
-  // Paginação
-  const totalPages = Math.ceil(filteredSpawningForms.length / itemsPerPage);
-  const paginatedSpawningForms = filteredSpawningForms.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
-  // Funções de modal
   const openUpdateModal = (form: SpawningForm) => {
     setModalMode(ModalMode.UPDATE);
     setCurrentSpawningForm(form);
     setShowModal(true);
   };
 
-  const openViewModal = (form: SpawningForm) => {
-    setModalMode(ModalMode.VIEW);
-    setCurrentSpawningForm(form);
-    setShowModal(true);
-  };
-
-  // Função para recarregar dados
   const reloadData = () => {
     setCurrentPage(1);
     getStats()
@@ -207,8 +193,8 @@ export default function SpawningPage() {
         return;
       }
       successNotification("Sucesso", "Spawning form excluído com sucesso!");
+      setCurrentPage(1);
       setShowConfirmModal(false);
-      // Recarregar dados automaticamente
       reloadData();
     } catch (error: any) {
       setErrorMessage(error.message);
