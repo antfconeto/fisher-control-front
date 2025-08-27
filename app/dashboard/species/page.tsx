@@ -19,6 +19,7 @@ import { useErrorContext } from "@/contexts/errorContext";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { AdminOnly } from "@/components/Authorization";
 import { useNotification } from "@/contexts/notificationContext";
+import { useUser } from "@/hooks/userHook";
 
 enum ModalMode {
   CREATE = "create",
@@ -58,6 +59,7 @@ export default function SpeciesPage() {
   const itemsPerPage = 5;
   const [loading, setLoading] = useState(true);
   const [paginatedSpecies, setPaginatedSpecies] = useState<Specie[]>([]);
+  const {user} = useUser()
 
   const fetchSpecies = useCallback(async () => {
     try {
@@ -155,7 +157,12 @@ export default function SpeciesPage() {
 
   const handleCreateSpecies = async (species: Specie): Promise<boolean> => {
     try {
-      await sendRequest(createSpecie, species);
+      let response = await createSpecie(species, user?.role);
+      if (!(response as ResponseError).error) {
+        const errMsg = (response as ResponseError)?.error || "Erro desconhecido";
+        setErrorMessage(errMsg);
+        return false
+      }
       setLoading(true);
       await fetchSpecies();
       return true;
@@ -173,7 +180,12 @@ export default function SpeciesPage() {
 
   const handleUpdateSpecies = async (specie: Specie): Promise<boolean> => {
     try {
-      await sendRequest(updateSpecie, specie);
+      let response = await updateSpecie(specie, user?.role);
+      if (!(response as ResponseError).error) {
+        const errMsg = (response as ResponseError)?.error || "Erro desconhecido";
+        setErrorMessage(errMsg);
+        return false
+      }
       setLoading(true);
       await fetchSpecies();
       return true;
@@ -191,7 +203,12 @@ export default function SpeciesPage() {
 
   const handleDeleteSpecies = async (): Promise<boolean> => {
     try {
-      const response = await deleteSpecie(currentSpecies._id);
+      const response = await deleteSpecie(currentSpecies._id, user?.role);
+      if (!(response as ResponseError).error) {
+        const errMsg = (response as ResponseError)?.error || "Erro desconhecido";
+        setErrorMessage(errMsg);
+        return false;
+      }
       successNotification("Sucesso!", "Espécie deletada com sucesso");
       setShowConfirmModal(false);
       setCurrentPage(1);

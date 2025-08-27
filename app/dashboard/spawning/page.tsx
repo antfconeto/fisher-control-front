@@ -25,7 +25,6 @@ import {
 import { useRouter } from "next/navigation";
 import { ClockLoader } from "react-spinners";
 import { Button } from "@/components/ui";
-import { CustomModalForm } from "@/components/Forms/CustomModalForm";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { useErrorContext } from "@/contexts/errorContext";
 import { ErrorBox } from "@/components/ErrorBox";
@@ -33,10 +32,8 @@ import { SpawningForm } from "@/types/types";
 import { useSpawningPagination } from "@/hooks/useSpawningPagination";
 import {
   createSpawnForm,
-  updateSpawnForm,
   deleteSpawnForm,
   getSpawnStats,
-  SpawningStats,
 } from "@/actions/spawnForm";
 import { GiFishEggs } from "react-icons/gi";
 import { useNotification } from "@/contexts/notificationContext";
@@ -74,8 +71,8 @@ const defaultSpawningForm: Omit<SpawningForm, "_id"> = {
 export default function SpawningPage() {
   const router = useRouter();
   const { setErrorMessage, errorMessage } = useErrorContext();
-  const { user } = useUser();
   const { successNotification, errorNotification } = useNotification();
+  const {user} = useUser()
 
   // Filtros iniciais (removido userId)
   const [filters, setFilters] = useState({
@@ -187,7 +184,7 @@ export default function SpawningPage() {
   const handleDeleteSpawningForm = async () => {
     try {
       setIsSubmitting(true);
-      const result = await deleteSpawnForm(currentSpawningForm._id!);
+      const result = await deleteSpawnForm(currentSpawningForm._id!, user?.role);
       if (typeof result === "object" && "error" in result) {
         setErrorMessage(result.error);
         return;

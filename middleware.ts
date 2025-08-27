@@ -15,7 +15,6 @@ const ADMIN_ROUTES = [
 
 export async function middleware(request: Request) {
   const cookiesService = cookies();
-  consoler.process(`🚦 Processing middleware for access: ${request.url}`);
   const token = (await cookiesService).get('access_token');
   const pathname = request.url;
   
@@ -61,7 +60,6 @@ export async function middleware(request: Request) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  consoler.success(`✅🚦 Middleware access, passing...`);
   return NextResponse.next();
 }
 

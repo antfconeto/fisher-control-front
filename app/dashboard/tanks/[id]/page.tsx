@@ -17,7 +17,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { Animal, Specie, Tank } from "@/types/types";
 import { getTankById } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
-import {  deleteAnimal, getAllAnimalsFromTank, updateAnimal } from "@/actions/animal";
+import { deleteAnimal, getAllAnimalsFromTank, updateAnimal } from "@/actions/animal";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useSpecie } from "@/hooks/useSpecies";
 import { motion, AnimatePresence } from "framer-motion";
@@ -58,12 +58,12 @@ export default function TankDetailsPage() {
     tankId: "",
   });
 
-    //States for  change visibility modal
-    const [showModal, setShowModal] = useState(false);
-    const { sendRequest } = useRequest();
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-    //States for define status of modal
-    const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.UPDATE);
+  //States for  change visibility modal
+  const [showModal, setShowModal] = useState(false);
+  const { sendRequest } = useRequest();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  //States for define status of modal
+  const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.UPDATE);
   //Default filters
   const defaultFilters = {
     codeAnimal: "",
@@ -190,7 +190,7 @@ export default function TankDetailsPage() {
   };
 
 
-  
+
   const handleSaveAnimal = async () => {
     if (
       !currentAnimal.codeAnimal ||
@@ -302,306 +302,202 @@ export default function TankDetailsPage() {
         otherClassName=""
       />
     )}
-      <div className={detailsStyles.contentContainer}>
-        {/* Cabeçalho */}
-        <motion.div
-          className="content-card mb-4"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+    <div className={detailsStyles.contentContainer}>
+      {/* Cabeçalho */}
+      <motion.div
+        className="content-card mb-4"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className={detailsStyles.header}>
           <div className={detailsStyles.header}>
-            <div className={detailsStyles.header}>
-              <button
-                className={detailsStyles.backButton}
-                onClick={() => {
-                  router.push("/dashboard/tanks")
-                }}
-                aria-label="Voltar para a lista de tanques"
-              >
-                <BsArrowLeft />
-              </button>
-              <h2 className={detailsStyles.pageTitle}>
-                <GiFishBucket />{" Tanque: "}
-                {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
-              </h2>
+            <button
+              className={detailsStyles.backButton}
+              onClick={() => {
+                router.push("/dashboard/tanks")
+              }}
+              aria-label="Voltar para a lista de tanques"
+            >
+              <BsArrowLeft />
+            </button>
+            <h2 className={detailsStyles.pageTitle}>
+              <GiFishBucket />{" Tanque: "}
+              {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
+            </h2>
 
+          </div>
+        </div>
+
+        {/* Informações básicas do tanque */}
+        <div className={detailsStyles.detailCardsRow}>
+          <AnimatePresence>
+            <div className={detailsStyles.detailCard}>
+              <div className={detailsStyles.detailCardIcon}>
+                <BsDropletFill />
+              </div>
+              <div className={detailsStyles.detailCardContent}>
+                <div className={detailsStyles.detailCardLabel}>Capacidade</div>
+                <div className={detailsStyles.detailCardValue}>
+                  {tankFullInfo.capacity} L
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Informações básicas do tanque */}
-          <div className={detailsStyles.detailCardsRow}>
-            <AnimatePresence>
-              <div className={detailsStyles.detailCard}>
-                <div className={detailsStyles.detailCardIcon}>
-                  <BsDropletFill />
-                </div>
-                <div className={detailsStyles.detailCardContent}>
-                  <div className={detailsStyles.detailCardLabel}>Capacidade</div>
-                  <div className={detailsStyles.detailCardValue}>
-                    {tankFullInfo.capacity} L
-                  </div>
+            <div className={detailsStyles.detailCard}>
+              <div className={detailsStyles.detailCardIcon}>
+                <BsRulers />
+              </div>
+              <div className={detailsStyles.detailCardContent}>
+                <div className={detailsStyles.detailCardLabel}>Dimensões</div>
+                <div className={detailsStyles.detailCardValue}>
+                  {tankFullInfo.size.width}×{tankFullInfo.size.height} m
                 </div>
               </div>
-              <div className={detailsStyles.detailCard}>
-                <div className={detailsStyles.detailCardIcon}>
-                  <BsRulers />
-                </div>
-                <div className={detailsStyles.detailCardContent}>
-                  <div className={detailsStyles.detailCardLabel}>Dimensões</div>
-                  <div className={detailsStyles.detailCardValue}>
-                    {tankFullInfo.size.width}×{tankFullInfo.size.height} m
-                  </div>
-                </div>
+            </div>
+
+            <div className={detailsStyles.detailCard}>
+              <div className={detailsStyles.detailCardIcon}>
+                <FaFish />
               </div>
-
-              <div className={detailsStyles.detailCard}>
-                <div className={detailsStyles.detailCardIcon}>
-                  <FaFish />
-                </div>
-                <div className={detailsStyles.detailCardContent}>
-                  <div className={detailsStyles.detailCardLabel}>Animais</div>
-                  <div className={detailsStyles.detailCardValue}>
-                    {loadingAnimals ? (
-                      <ClockLoader color="#0a58ca" size={20} />
-                    ) : (
-                      animals.length
-                    )}
-                  </div>
-                </div>
-              </div>
-            </AnimatePresence>
-          </div>
-
-        </motion.div>
-
-        {/* Conteúdo principal em duas colunas */}
-        {loadingAnimals ?
-          <div className="loading-container">
-            <ClockLoader color="#0a58ca" size={60} />
-            <p className="loading-text">Carregando informações do tank...</p>
-          </div>
-          :
-          <div className="row g-4">
-            {/* Gráfico de pizza - espécies */}
-            {animals && animals.length > 0 && (
-              <motion.div
-                className="col-lg-6"
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className={detailsStyles.contentCard + " h-100"}>
-                  <h3 className={detailsStyles.sectionTitle}>
-                    <FaFish /> Distribuição por Espécie
-                  </h3>
-                  <motion.div
-                    style={{ height: "350px" }}
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.7, delay: 0.2 }}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={speciesData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" angle={-20} textAnchor="end" interval={0} height={60} />
-                        <YAxis allowDecimals={false} label={{ value: 'Quantidade', angle: -90, position: 'insideLeft', offset: 10 }} />
-                        <Tooltip formatter={(value) => [`${value} animais`, 'Quantidade']} />
-                        <Bar dataKey="value" fill="#2563eb">
-                          {speciesData.map((entry, index) => (
-                            <Cell key={`cell-bar-${index}`} fill={dynamicColors[index % dynamicColors.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </motion.div>
-                  <div className={detailsStyles.infoBox} style={{ marginTop: '-1rem', marginBottom: '1.2rem' }}>
-                    <h4 className={detailsStyles.infoTitle} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <FaInfoCircle style={{ color: '#2563eb' }} /> Sobre o gráfico
-                    </h4>
-                    <ul className={detailsStyles.infoList}>
-                      <li className={detailsStyles.infoListItem}>
-                        Este gráfico mostra a quantidade de animais de cada espécie presentes neste tanque.
-                      </li>
-                      <li className={detailsStyles.infoListItem}>
-                        Use os filtros acima para refinar a visualização por espécie ou código.
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Lista de animais */}
-            {animals && animals.length > 0 && (
-              <motion.div
-                className="col-lg-6"
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className={detailsStyles.contentCard + " h-100"}>
-                  <h3 className={detailsStyles.sectionTitle}>
-                    <FaFish /> Animais neste Tanque
-                  </h3>
-                  {/* Filtros de pesquisa */}
-                  <DynamicFilters
-                    name="Filtros de animais"
-                    filters={[
-                      {
-                        key: 'codeAnimal',
-                        label: 'Código',
-                        icon: BsSearch,
-                        type: 'text',
-                        placeholder: 'Buscar por código',
-                        value: filters.codeAnimal,
-                        onChange: (value: string | number) => {
-                          setCurrentPage(1);
-                          setFilters((prev) => ({
-                            ...prev,
-                            codeAnimal: value as string,
-                          }));
-                        },
-                        size: 'medium',
-                      },
-                      {
-                        key: 'specie',
-                        label: 'Espécie',
-                        icon: BsFilter,
-                        type: 'select',
-                        value: filters.specie,
-                        onChange: (value: string | number) => {
-                          setCurrentPage(1);
-                          setFilters((prev) => ({
-                            ...prev,
-                            specie: value as string,
-                          }));
-                        },
-                        selectOptions: [
-                          { label: 'Todas as espécies', value: '' },
-                          ...species.map((specie) => ({ label: specie.name, value: specie._id }))
-                        ],
-                        size: 'medium',
-                      },
-                    ]}
-                  />
-                  {/* Status de filtragem */}
-                  <div className={detailsStyles.filterStatus}>
-                    {animals.length === tankFullInfo.animals.length ? (
-                      <span>Mostrando todos os animais</span>
-                    ) : (
-                      <span>
-                        Mostrando {paginatedAnimals.length} de {animals.length} animais
-                      </span>
-                    )}
-                    {(filters.codeAnimal || filters.specie) && (
-                      <button
-                        className={detailsStyles.clearFilterButton}
-                        onClick={() => {
-                          setFilters(defaultFilters);
-                        }}
-                      >
-                        Limpar filtros
-                      </button>
-                    )}
-                  </div>
-                  <motion.div
-                    className="table-responsive"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    <AnimalTable
-                      animals={paginatedAnimals}
-                      tanks={[tankFullInfo]}
-                      species={species}
-                      onDelete={(codeAnimal: string) => {
-                        setCurrentAnimal({
-                          ...currentAnimal,
-                          codeAnimal: codeAnimal,
-                        });
-                        setShowConfirmModal(true);
-                      }}
-                      onEdit={(animal: Animal) => {
-                        setCurrentAnimal(animal);
-                        setShowModal(true);
-                        setModalMode(ModalMode.UPDATE);
-                      }}
-                    />
-                  </motion.div>
-                  {/* Paginação */}
-                  {totalPages > 0 && (
-                    <div className={detailsStyles.pagination}>
-                      <button
-                        className={detailsStyles.paginationButton}
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(1, prev - 1))
-                        }
-                        disabled={currentPage === 1}
-                        aria-label="Página anterior"
-                      >
-                        <FaChevronLeft /> Anterior
-                      </button>
-                      <div className={detailsStyles.paginationInfo}>
-                        Página {currentPage} de {totalPages}
-                      </div>
-                      <button
-                        className={detailsStyles.paginationButton}
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
-                          )
-                        }
-                        disabled={currentPage === totalPages}
-                        aria-label="Próxima página"
-                      >
-                        Próxima <FaChevronRight />
-                      </button>
-                    </div>
+              <div className={detailsStyles.detailCardContent}>
+                <div className={detailsStyles.detailCardLabel}>Animais</div>
+                <div className={detailsStyles.detailCardValue}>
+                  {loadingAnimals ? (
+                    <ClockLoader color="#0a58ca" size={20} />
+                  ) : (
+                    animals.length
                   )}
-
                 </div>
-              </motion.div>
-            )}
-            {/* Mensagem quando não há animais */}
-            <AnimatePresence>
-              {(!animals || animals.length === 0) && (
+              </div>
+            </div>
+          </AnimatePresence>
+        </div>
+
+      </motion.div>
+
+      {/* Conteúdo principal em duas colunas */}
+      {loadingAnimals ?
+        <div className="loading-container">
+          <ClockLoader color="#0a58ca" size={60} />
+          <p className="loading-text">Carregando informações do tank...</p>
+        </div>
+        :
+        <div className="row g-4">
+          {/* Gráfico de pizza - espécies */}
+          {animals && animals.length > 0 && (
+            <motion.div
+              className="col-lg-6"
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className={detailsStyles.contentCard + " h-100"}>
+                <h3 className={detailsStyles.sectionTitle}>
+                  <FaFish /> Distribuição por Espécie
+                </h3>
                 <motion.div
-                  className="col-12"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  style={{ height: "350px" }}
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.7, delay: 0.2 }}
                 >
-                  <div className={detailsStyles.noResults}>
-                    <BsInfoCircle size={32} />
-                    <h3>Nenhum animal cadastrado</h3>
-                    <p>Este tanque ainda não possui animais registrados.</p>
-                  </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={speciesData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" angle={-20} textAnchor="end" interval={0} height={60} />
+                      <YAxis allowDecimals={false} label={{ value: 'Quantidade', angle: -90, position: 'insideLeft', offset: 10 }} />
+                      <Tooltip formatter={(value) => [`${value} animais`, 'Quantidade']} />
+                      <Bar dataKey="value" fill="#2563eb">
+                        {speciesData.map((entry, index) => (
+                          <Cell key={`cell-bar-${index}`} fill={dynamicColors[index % dynamicColors.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </motion.div>
-              )}
+                <div className={detailsStyles.infoBox} style={{ marginTop: '-1rem', marginBottom: '1.2rem' }}>
+                  <h4 className={detailsStyles.infoTitle} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FaInfoCircle style={{ color: '#2563eb' }} /> Sobre o gráfico
+                  </h4>
+                  <ul className={detailsStyles.infoList}>
+                    <li className={detailsStyles.infoListItem}>
+                      Este gráfico mostra a quantidade de animais de cada espécie presentes neste tanque.
+                    </li>
+                    <li className={detailsStyles.infoListItem}>
+                      Use os filtros acima para refinar a visualização por espécie ou código.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-              {/* Mensagem quando não há resultados na busca */}
-              {animals.length === 0 && (
-                <motion.div
-                  className="col-12"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-
-                  <div className={detailsStyles.noResults}>
-                    <BsInfoCircle size={32} />
-                    <h3>Nenhum animal encontrado</h3>
-                    <p>
-
-                      Não foram encontrados animais com os critérios selecionados.
-
-                    </p>
+          {/* Lista de animais */}
+          {animals && animals.length > 0 && (
+            <motion.div
+              className="col-lg-6"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className={detailsStyles.contentCard + " h-100"}>
+                <h3 className={detailsStyles.sectionTitle}>
+                  <FaFish /> Animais neste Tanque
+                </h3>
+                {/* Filtros de pesquisa */}
+                <DynamicFilters
+                  name="Filtros de animais"
+                  filters={[
+                    {
+                      key: 'codeAnimal',
+                      label: 'Código',
+                      icon: BsSearch,
+                      type: 'text',
+                      placeholder: 'Buscar por código',
+                      value: filters.codeAnimal,
+                      onChange: (value: string | number) => {
+                        setCurrentPage(1);
+                        setFilters((prev) => ({
+                          ...prev,
+                          codeAnimal: value as string,
+                        }));
+                      },
+                      size: 'medium',
+                    },
+                    {
+                      key: 'specie',
+                      label: 'Espécie',
+                      icon: BsFilter,
+                      type: 'select',
+                      value: filters.specie,
+                      onChange: (value: string | number) => {
+                        setCurrentPage(1);
+                        setFilters((prev) => ({
+                          ...prev,
+                          specie: value as string,
+                        }));
+                      },
+                      selectOptions: [
+                        { label: 'Todas as espécies', value: '' },
+                        ...species.map((specie) => ({ label: specie.name, value: specie._id }))
+                      ],
+                      size: 'medium',
+                    },
+                  ]}
+                />
+                {/* Status de filtragem */}
+                <div className={detailsStyles.filterStatus}>
+                  {animals.length === tankFullInfo.animals.length ? (
+                    <span>Mostrando todos os animais</span>
+                  ) : (
+                    <span>
+                      Mostrando {paginatedAnimals.length} de {animals.length} animais
+                    </span>
+                  )}
+                  {(filters.codeAnimal || filters.specie) && (
                     <button
                       className={detailsStyles.clearFilterButton}
                       onClick={() => {
@@ -610,77 +506,181 @@ export default function TankDetailsPage() {
                     >
                       Limpar filtros
                     </button>
-                  </div>
-
+                  )}
+                </div>
+                <motion.div
+                  className="table-responsive"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <AnimalTable
+                    animals={paginatedAnimals}
+                    tanks={[tankFullInfo]}
+                    species={species}
+                    onDelete={(codeAnimal: string) => {
+                      setCurrentAnimal({
+                        ...currentAnimal,
+                        codeAnimal: codeAnimal,
+                      });
+                      setShowConfirmModal(true);
+                    }}
+                    onEdit={(animal: Animal) => {
+                      setCurrentAnimal(animal);
+                      setShowModal(true);
+                      setModalMode(ModalMode.UPDATE);
+                    }}
+                  />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        }
-        {/* Modal de Atualização */}
-        {showModal && (
-          <CustomModalForm
-            title={"Atualizar Animal"}
-            onClose={() => setShowModal(false)}
-            onSubmit={handleSaveAnimal}
-            fields={[
-              {
-                name: "codeAnimal",
-                label: "Código do Animal",
-                type: "text",
-                value: currentAnimal.codeAnimal,
-                placeholder: "Digite o código do animal",
-                onChange: () => {},
-                disabled: true,
-              },
-              {
-                name: "specie",
-                label: "Espécie",
-                type: "select",
-                options: [
-                  ...species.map((specie) => ({
-                    label: specie.name,
-                    value: specie._id,
-                  })),
-                  {
-                    label: "Selecione a Espécie",
-                    value: "",
-                  },
-                ],
-                value: currentAnimal.specie,
-                placeholder: "Digite a espécie do animal",
-                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, specie: val }),
-              },
-              {
-                name: "birthDate",
-                label: "Data de Nascimento",
-                type: "date",
-                value: new Date(currentAnimal.birthDate).toISOString().split("T")[0],
-                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, birthDate: new Date(val) }),
-              },
-              {
-                name: "gender",
-                label: "Gênero",
-                type: "select",
-                value: currentAnimal.gender === "M" ? "Macho" : "Fêmea",
-                options: [
-                  { label: "Macho", value: "Macho" },
-                  { label: "Fêmea", value: "Fêmea" },
-                ],
-                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, gender: val === "Macho" ? "M" : "F" }),
-              },
-              {
-                name: "matriz_code",
-                label: "Código da Matriz",
-                type: "text",
-                value: currentAnimal.matriz_code,
-                placeholder: "Digite o código da matriz (opcional)",
-                onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, matriz_code: val }),
-              },
-            ]}
-          />
-        )}
-              {/* Confirm Delete Modal */}
+                {/* Paginação */}
+                {totalPages > 0 && (
+                  <div className={detailsStyles.pagination}>
+                    <button
+                      className={detailsStyles.paginationButton}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(1, prev - 1))
+                      }
+                      disabled={currentPage === 1}
+                      aria-label="Página anterior"
+                    >
+                      <FaChevronLeft /> Anterior
+                    </button>
+                    <div className={detailsStyles.paginationInfo}>
+                      Página {currentPage} de {totalPages}
+                    </div>
+                    <button
+                      className={detailsStyles.paginationButton}
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(totalPages, prev + 1)
+                        )
+                      }
+                      disabled={currentPage === totalPages}
+                      aria-label="Próxima página"
+                    >
+                      Próxima <FaChevronRight />
+                    </button>
+                  </div>
+                )}
+
+              </div>
+            </motion.div>
+          )}
+          {/* Mensagem quando não há animais */}
+          <AnimatePresence>
+            {(!animals || animals.length === 0) && (
+              <motion.div
+                className="col-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className={detailsStyles.noResults}>
+                  <BsInfoCircle size={32} />
+                  <h3>Nenhum animal cadastrado</h3>
+                  <p>Este tanque ainda não possui animais registrados.</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Mensagem quando não há resultados na busca */}
+            {animals.length === 0 && (
+              <motion.div
+                className="col-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+
+                <div className={detailsStyles.noResults}>
+                  <BsInfoCircle size={32} />
+                  <h3>Nenhum animal encontrado</h3>
+                  <p>
+
+                    Não foram encontrados animais com os critérios selecionados.
+
+                  </p>
+                  <button
+                    className={detailsStyles.clearFilterButton}
+                    onClick={() => {
+                      setFilters(defaultFilters);
+                    }}
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      }
+      {/* Modal de Atualização */}
+      {showModal && (
+        <CustomModalForm
+          title={"Atualizar Animal"}
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSaveAnimal}
+          fields={[
+            {
+              name: "codeAnimal",
+              label: "Código do Animal",
+              type: "text",
+              value: currentAnimal.codeAnimal,
+              placeholder: "Digite o código do animal",
+              onChange: () => { },
+              disabled: true,
+            },
+            {
+              name: "specie",
+              label: "Espécie",
+              type: "select",
+              options: [
+                ...species.map((specie) => ({
+                  label: specie.name,
+                  value: specie._id,
+                })),
+                {
+                  label: "Selecione a Espécie",
+                  value: "",
+                },
+              ],
+              value: currentAnimal.specie,
+              placeholder: "Digite a espécie do animal",
+              onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, specie: val }),
+            },
+            {
+              name: "birthDate",
+              label: "Data de Nascimento",
+              type: "date",
+              value: new Date(currentAnimal.birthDate).toISOString().split("T")[0],
+              onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, birthDate: new Date(val) }),
+            },
+            {
+              name: "gender",
+              label: "Gênero",
+              type: "select",
+              value: currentAnimal.gender === "M" ? "Macho" : "Fêmea",
+              options: [
+                { label: "Macho", value: "Macho" },
+                { label: "Fêmea", value: "Fêmea" },
+              ],
+              onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, gender: val === "Macho" ? "M" : "F" }),
+            },
+            {
+              name: "matriz_code",
+              label: "Código da Matriz",
+              type: "text",
+              value: currentAnimal.matriz_code,
+              placeholder: "Digite o código da matriz (opcional)",
+              onChange: (val: string) => setCurrentAnimal({ ...currentAnimal, matriz_code: val }),
+            },
+          ]}
+        />
+      )}
+      {/* Confirm Delete Modal */}
       {showConfirmModal && (
         <ConfirmModal
           title="Confirmar Exclusão"
@@ -689,7 +689,7 @@ export default function TankDetailsPage() {
           onCancel={() => setShowConfirmModal(false)}
         />
       )}
-      </div>  
+    </div>
   </>);
 
 }

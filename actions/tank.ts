@@ -4,6 +4,7 @@ import { CustomError } from '@/utils/customError';
 import { CustomConsole } from "@/utils/customLogger";
 import { cookies } from "next/headers";
 import errorMessages from "@/utils/errorMessages.json";
+import { Role } from '@/types/user';
 
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:5000";
@@ -112,7 +113,7 @@ export const getTankById = async (
   }
 };
 
-export const createTank = async (tank: Tank): Promise<Tank | ResponseError> => {
+export const createTank = async (tank: Tank, userRole?: Role): Promise<Tank | ResponseError> => {
 
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -127,6 +128,7 @@ export const createTank = async (tank: Tank): Promise<Tank | ResponseError> => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ tank }),
     });
@@ -158,7 +160,7 @@ export const createTank = async (tank: Tank): Promise<Tank | ResponseError> => {
   }
 };
 
-export const updateTank = async (tank: Tank): Promise<Tank | ResponseError> => {
+export const updateTank = async (tank: Tank, userRole?: Role): Promise<Tank | ResponseError> => {
 
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -173,6 +175,7 @@ export const updateTank = async (tank: Tank): Promise<Tank | ResponseError> => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ tank }),
     });
@@ -205,7 +208,8 @@ export const updateTank = async (tank: Tank): Promise<Tank | ResponseError> => {
 };
 
 export const deleteTank = async (
-  tankId: string
+  tankId: string,
+  userRole?: Role
 ): Promise<void | ResponseError> => {
 
   const token = (await cookies()).get("access_token");
@@ -221,6 +225,7 @@ export const deleteTank = async (
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ tankId }),
     });

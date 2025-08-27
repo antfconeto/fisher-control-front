@@ -19,10 +19,11 @@
             "fetch failed": "Erro ao se comunicar com os servidors"
         },
         "updateUser": {
-            "statusCode": { 
+            "statusCode": {
                 "400": "Dados incompletos para atualizar o usuário",
                 "404": "Usuário não encontrado",
-                "409": "Já existe um usuário com o email fornecido"
+                "409": "Já existe um usuário com o email fornecido",
+                "403": "Acesso a operação negada"
             }
         }
     },
@@ -31,14 +32,24 @@
             "statusCode": {
                 "400": "Dados incompletos",
                 "404": "Animal não encontrado",
-                "409": "Já existe um animal com o Código fornecido"
+                "409": "Já existe um animal com o Código fornecido",
+                "403": "Acesso a operação negada"
             }
         },
         "updateAnimal": {
             "statusCode": {
                 "400": "Dados incompletos para atualizar o animal",
                 "404": "Animal não encontrado",
-                "409": "Já existe um animal com o Código fornecido"
+                "409": "Já existe um animal com o Código fornecido",
+                "403": "Acesso a operação negada"
+            }
+        },
+        "deleteAnimal": {
+            "statusCode": {
+                "400": "Dados incompletos para deletar o animal",
+                "404": "Animal não encontrado",
+                "409": "Já existe um animal com o Código fornecido",
+                "403": "Acesso a operação negada"
             }
         },
         "listAnimals": {
@@ -62,14 +73,16 @@
         "createSpecie": {
             "statusCode": {
                 "400": "Dados incompletos",
-                "409": "Já existe uma especie com o mesmo nome fornecido"
+                "409": "Já existe uma especie com o mesmo nome fornecido",
+                "403": "Acesso a operação negada"
             }
         },
         "updateSpecie": {
             "statusCode": {
                 "400": "Dados incompletos para atualizar a especie",
                 "404": "Especie não encontrado",
-                "409": "Já existe uma especie com o nome fornecido"
+                "409": "Já existe uma especie com o nome fornecido",
+                "403": "Acesso a operação negada"
             }
         },
         "getSpecieById": {

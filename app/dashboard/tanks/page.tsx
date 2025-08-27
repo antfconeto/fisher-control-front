@@ -34,6 +34,7 @@ import { useNotification } from "@/contexts/notificationContext";
 import { ErrorBox } from "@/components/ErrorBox";
 import { GiFishBucket } from "react-icons/gi";
 import { AdminOnly, ViewerOnly } from "@/components/Authorization";
+import { useUser } from "@/hooks/userHook";
 
 
 enum ModalMode {
@@ -58,6 +59,7 @@ export default function TanksPage() {
   const { successNotification, errorNotification } = useNotification()
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
+  const {user} = useUser()
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [nameFilter, setNameFilter] = useState("");
@@ -156,10 +158,10 @@ export default function TanksPage() {
     ) {
       try {
         if (modalMode === ModalMode.CREATE) {
-          await createTank(currentTank);
+          await createTank(currentTank, user?.role);
           successNotification("Sucesso!", "Tanque criado com sucesso");
         } else if (modalMode === ModalMode.UPDATE && editingTankId) {
-          await updateTank({ ...currentTank, _id: editingTankId });
+          await updateTank({ ...currentTank, _id: editingTankId }, user?.role);
           successNotification("Sucesso!", "Tanque atualizado com sucesso");
         }
         setShowModal(false);
@@ -176,7 +178,7 @@ export default function TanksPage() {
     try {
       setShowConfirmModal(false);
       setCurrentPage(1)
-      await deleteTank(currentTank._id);
+      await deleteTank(currentTank._id, user?.role);
       successNotification("Sucesso!", "Tanque deletado com sucesso");
       setCurrentTank({
         _id: '',

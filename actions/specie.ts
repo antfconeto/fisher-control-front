@@ -5,11 +5,13 @@ import { CustomError } from '@/utils/customError';
 import { CustomConsole } from "@/utils/customLogger";
 import { cookies } from 'next/headers';
 import errorMessages from "@/utils/errorMessages.json";
+import { Role } from '@/types/user';
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:5000";
 
 export const createSpecie = async (
-  specie: Specie
+  specie: Specie,
+  userRole?: Role
 ): Promise<Specie | ResponseError> => {
 
   //get token from cookie
@@ -26,6 +28,7 @@ export const createSpecie = async (
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ specie: specie }),
     });
@@ -60,7 +63,8 @@ export const createSpecie = async (
 };
 
 export const deleteSpecie = async (
-  specieId: string
+  specieId: string,
+  userRole?: Role
 ): Promise<boolean | ResponseError> => {
 
   //get token from cookie
@@ -79,6 +83,7 @@ export const deleteSpecie = async (
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token!.value}`,
+          'x-role': userRole ?? 'undefined'
         },
       }
     );
@@ -113,7 +118,8 @@ export const deleteSpecie = async (
 };
 
 export const updateSpecie = async (
-  specie: Specie
+  specie: Specie,
+  userRole?: Role
 ): Promise<Specie | ResponseError> => {
 
   //get token from cookie
@@ -130,6 +136,7 @@ export const updateSpecie = async (
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ specie: specie }),
     });

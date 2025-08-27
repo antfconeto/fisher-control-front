@@ -2,7 +2,6 @@
 import { cookies } from "next/headers";
 import { CustomConsole } from "@/utils/customLogger";
 import { CustomError } from "@/utils/customError";
-import * as errorMessages from "@/utils/errorMessages.json";
 import { Animal, Specie } from "@/types/types";
 
 const consoler = new CustomConsole();

@@ -101,6 +101,41 @@ export const createUser = async (
   }
 };
 
+export const getAccessToken = async (
+  userId: string
+): Promise<string | ResponseError> => {
+  consoler.process("🔁 Pegando um novo token de usuário");
+  const token = (await cookies()).get("access_token");
+  if (!token) {
+    return { error: "Token não recebido", statusCode: 401 };
+  }
+  try {
+    const response = await fetch(`${urlApi}/user/getAccessToken`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: JSON.stringify(userId),
+    });
+    if (!response.ok) {
+      const errorMessage: ResponseError = await response.json();
+      consoler.error(`Erro ao pegar um token de usuário: ${errorMessage?.error}`);
+      return {
+        error: getUserErrorMessage("getAccessToken", response.status),
+        statusCode: response.status,
+      };
+    }
+    return (await response.json()).token;
+  } catch (error: any) {
+    consoler.error(`Erro ao pegar um token de usuário: ${error.message}`);
+    throw new CustomError(
+      getUserErrorMessage("getAccessToken", error.statusCode || 500),
+      error.statusCode || 500
+    );
+  }
+};
+
 export const updateUser = async (
   id: string,
   user: Partial<User>

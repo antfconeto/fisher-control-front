@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Tank } from "@/types/types";
 import { getTanks, createTank, updateTank, deleteTank } from "@/actions/tank";
 import { useErrorContext } from "@/contexts/errorContext";
+import { Role } from "@/types/user";
 
 export const useTanks = () => {
   const [tanks, setTanks] = useState<Tank[]>([]);
@@ -20,10 +21,10 @@ export const useTanks = () => {
     }
   };
 
-  const handleCreateTank = async (tank: Tank) => {
+  const handleCreateTank = async (tank: Tank, userRole?: Role) => {
     try {
       setLoading(true);
-      const response = await createTank(tank);
+      const response = await createTank(tank, userRole);
       if ('error' in response) {
         setErrorMessage(response.error);
         return null;
@@ -39,10 +40,10 @@ export const useTanks = () => {
     }
   };
 
-  const handleUpdateTank = async (tank: Tank) => {
+  const handleUpdateTank = async (tank: Tank, userRole?: Role) => {
     try {
       setLoading(true);
-      const response = await updateTank(tank);
+      const response = await updateTank(tank, userRole);
       if ('error' in response) {
         setErrorMessage(response.error);
         return null;
@@ -58,10 +59,10 @@ export const useTanks = () => {
     }
   };
 
-  const handleDeleteTank = async (tankId: string) => {
+  const handleDeleteTank = async (tankId: string, userRole?: Role) => {
     try {
       setLoading(true);
-      const response = await deleteTank(tankId);
+      const response = await deleteTank(tankId, userRole);
       if (response && 'error' in response) {
         setErrorMessage(response.error);
         return false;

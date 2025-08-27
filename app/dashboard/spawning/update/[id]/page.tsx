@@ -303,8 +303,8 @@ export default function UpdateSpawningPage() {
         monitoring: recalculateHourDegrees(monitoringItems),
       };
 
-      const result = await updateSpawnForm(updatedForm);
-      
+      const result = await updateSpawnForm(updatedForm, user?.role);
+
       if ("error" in result) {
         setError(result.error);
         return;

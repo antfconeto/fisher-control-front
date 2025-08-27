@@ -4,12 +4,14 @@ import { CustomError } from '@/utils/customError';
 import { CustomConsole } from '@/utils/customLogger';
 import { cookies } from 'next/headers';
 import errorMessages from "@/utils/errorMessages.json";
+import { Role } from '@/types/user';
 
 const consoler = new CustomConsole();
 const urlApi = process.env.API_URL || "http://localhost:5000";
 
 export const createAnimal = async (
-  animal: Animal
+  animal: Animal,
+  userRole?:Role
 ): Promise<Animal | ResponseError> => {
 
   //get token from cookie
@@ -21,14 +23,17 @@ export const createAnimal = async (
     };
   }
   try {
+
     const response = await fetch(`${urlApi}/animal/createAnimal`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ animal: animal }),
     });
+
     //verify if response was ok
     if (!response.ok) {
       const errorMessage: ResponseError = await response.json();
@@ -60,7 +65,8 @@ export const createAnimal = async (
 };
 
 export const updateAnimal = async (
-  animal: Animal
+  animal: Animal,
+  userRole?:Role
 ): Promise<Animal | ResponseError> => {
 
   //get token from cookie
@@ -77,6 +83,7 @@ export const updateAnimal = async (
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ animal: animal }),
     });
@@ -111,7 +118,8 @@ export const updateAnimal = async (
 };
 
 export const deleteAnimal = async (
-  codeAnimal: string
+  codeAnimal: string,
+  userRole?:Role
 ): Promise<Boolean | ResponseError> => {
 
   //get token from cookie
@@ -128,6 +136,7 @@ export const deleteAnimal = async (
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token!.value}`,
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ animalCode: codeAnimal }),
     });
@@ -223,7 +232,8 @@ export const listAnimals = async (
 };
 
 export const getAllAnimalsFromTank = async (
-  tankId: string
+  tankId: string,
+  userRole?: Role
 ): Promise<Animal[] | ResponseError> => {
 
   const token = (await cookies()).get("access_token");

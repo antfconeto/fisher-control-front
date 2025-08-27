@@ -1,5 +1,6 @@
 "use server";
 import { ResponseError, SpawningForm } from "@/types/types";
+import { Role } from "@/types/user";
 import { cookies } from "next/headers";
 
 const urlApi = process.env.API_URL || "http://localhost:5000";
@@ -80,7 +81,8 @@ export const getSpawnFormsWithFilters = async (
 };
 
 export const createSpawnForm = async (
-  spawnForm: SpawningForm
+  spawnForm: SpawningForm,
+  userRole?:Role
 ): Promise<SpawningForm | ResponseError> => {
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -95,6 +97,7 @@ export const createSpawnForm = async (
       headers: {
         Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ spawnForm }),
     });
@@ -116,7 +119,8 @@ export const createSpawnForm = async (
 };
 
 export const updateSpawnForm = async (
-  spawnForm: SpawningForm
+  spawnForm: SpawningForm,
+  userRole?: Role
 ): Promise<SpawningForm | ResponseError> => {
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -131,6 +135,7 @@ export const updateSpawnForm = async (
       headers: {
         Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ spawnForm }),
     });
@@ -153,7 +158,8 @@ export const updateSpawnForm = async (
 };
 
 export const deleteSpawnForm = async (
-  spawnFormId: string
+  spawnFormId: string,
+  userRole?: Role
 ): Promise<boolean | ResponseError> => {
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -170,6 +176,7 @@ export const deleteSpawnForm = async (
         headers: {
           Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
+          'x-role': userRole ?? 'undefined'
         },
       }
     );
@@ -263,7 +270,8 @@ export const getCountSpawn = async (): Promise<number | ResponseError> => {
 
 export const addMonitoringRecord = async (
   spawnFormId: string,
-  monitoring: any[]
+  monitoring: any[],
+  userRole?: Role
 ): Promise<any> => {
   const token = (await cookies()).get("access_token");
   if (!token) {
@@ -278,6 +286,7 @@ export const addMonitoringRecord = async (
       headers: {
         Authorization: `Bearer ${token.value}`,
         "Content-Type": "application/json",
+        'x-role': userRole ?? 'undefined'
       },
       body: JSON.stringify({ spawnFormId, monitoring }),
     });

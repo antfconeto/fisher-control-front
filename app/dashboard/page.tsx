@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { FiUsers, FiDroplet } from "react-icons/fi";
 import { FaFish, FaEgg, FaChartLine } from "react-icons/fa";

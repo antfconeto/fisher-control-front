@@ -216,7 +216,7 @@ export default function RegisterSpawningPage() {
           name: user?.username || "",
         },
         userId: user?._id || "",
-      } as any);
+      } as any, user?.role);
       if ("error" in result) {
         setError(result.error);
         return;

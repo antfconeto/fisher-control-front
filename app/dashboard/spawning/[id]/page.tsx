@@ -406,7 +406,7 @@ export default function SpawningDetailsPage() {
       const organizedMonitoring = organizeMonitoringData(tempMonitoring);
       
       // Chamada para adicionar monitoramento com dados organizados
-      const result = await addMonitoringRecord(spawningForm._id, organizedMonitoring);
+      const result = await addMonitoringRecord(spawningForm._id, organizedMonitoring, user?.role);
       if (result && result.error) {
         setErrorMessage(result.error);
         return;
