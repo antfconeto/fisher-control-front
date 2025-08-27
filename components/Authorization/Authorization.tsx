@@ -4,6 +4,7 @@ import React, { ReactNode } from "react";
 import { useAuth } from "@/contexts/authContext";
 import { Role } from "@/types/user";
 import { hasRole } from "@/utils/authUtils";
+import { useUser } from "@/hooks/userHook";
 
 interface AuthorizationProps {
   children: ReactNode;
@@ -22,7 +23,7 @@ export const Authorization: React.FC<AuthorizationProps> = ({
   requiredRole,
   fallback = null,
 }) => {
-  const { user } = useAuth();
+  const { user } = useUser();
 
   if (hasRole(user, requiredRole)) {
     return <>{children}</>;

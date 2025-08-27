@@ -9,9 +9,7 @@ import Image from "next/image";
 import { LuFilePenLine } from "react-icons/lu";
 import { FaRegUser } from "react-icons/fa6";
 import { isAdmin } from "@/utils/authUtils";
-import { useAuth } from "@/contexts/authContext";
-
-
+import { useUser } from "@/hooks/userHook";
 
 
 
@@ -19,7 +17,7 @@ const Sidebar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user } = useUser();
   const menuItems = [
     {
       category: "Principal",

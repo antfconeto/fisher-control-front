@@ -1,8 +1,9 @@
-import { Role } from '@/types/user';
+import { Role, User } from '@/types/user';
 import { DecodedToken } from '@/types/types';
 import { jwtDecode } from 'jwt-decode';
 import { CustomConsole } from "./customLogger";
 import { CustomError } from "./customError";
+import { userAgent } from 'next/server';
 const consoler = new CustomConsole()
 
 /**
@@ -11,7 +12,7 @@ const consoler = new CustomConsole()
  * @param requiredRole - Role necessária para acesso
  * @returns boolean indicando se o usuário tem permissão
  */
-export const hasRole = (user: DecodedToken | null, requiredRole: Role): boolean => {
+export const hasRole = (user: User | null, requiredRole: Role): boolean => {
   if (!user) return false;
   return user.role === requiredRole;
 };
@@ -21,7 +22,7 @@ export const hasRole = (user: DecodedToken | null, requiredRole: Role): boolean 
  * @param user - Objeto do usuário
  * @returns boolean indicando se o usuário é admin
  */
-export const isAdmin = (user: DecodedToken | null): boolean => {
+export const isAdmin = (user: User | null): boolean => {
   return hasRole(user, Role.ADMIN);
 };
 
@@ -30,7 +31,7 @@ export const isAdmin = (user: DecodedToken | null): boolean => {
  * @param user - Objeto do usuário
  * @returns boolean indicando se o usuário é viewer
  */
-export const isViewer = (user: DecodedToken | null): boolean => {
+export const isViewer = (user: User | null): boolean => {
   return hasRole(user, Role.VIEWER);
 };
 
