@@ -6,7 +6,7 @@ import styles from './animal-table.module.css';
 import { Animal, Specie, Tank } from '@/types/types';
 import { useEffect, useRef, useState } from 'react';
 import { isAdmin } from '@/utils/authUtils';
-import { useAuth } from '@/contexts/authContext';
+import { useUser } from '@/hooks/userHook';
 
 interface AnimalTableProps {
   animals: Animal[];
@@ -19,7 +19,7 @@ interface AnimalTableProps {
 export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, tanks, species, onEdit, onDelete }) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const { user } = useUser();
   // Fecha o menu ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

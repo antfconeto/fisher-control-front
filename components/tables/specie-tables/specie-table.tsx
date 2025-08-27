@@ -5,6 +5,7 @@ import styles from './specie-table.module.css';
 import { Specie } from '@/types/types';
 import { isAdmin } from '@/utils/authUtils';
 import { useAuth } from '@/contexts/authContext';
+import { useUser } from '@/hooks/userHook';
 
 interface SpecieTableProps {
   species: Specie[];
@@ -13,7 +14,7 @@ interface SpecieTableProps {
 }
 
 export const SpecieTable: React.FC<SpecieTableProps> = ({ species, onEdit, onDelete }) => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const columns: TableColumn<Specie>[] = [
     {
       header: 'Nome',
