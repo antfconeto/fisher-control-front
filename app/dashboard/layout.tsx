@@ -1,5 +1,16 @@
 import Sidebar from "@/components/sideMenu/sideMenu";
 import "./dashboard.css";
+import { Metadata } from "next";
+
+
+
+export const metadata: Metadata = {
+  title: 'Dashboard - Fisher Control',
+  description: 'Painel de controle do sistema de pesca',
+  icons: {
+    icon: '/favicon.ico',
+  },
+}
 
 export default function Layout({
   children,
@@ -7,13 +18,9 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br">
-      <body>
-        <div className="dashboard-container">
-          <Sidebar />
-          <main className="dashboard-content">{children}</main>
-        </div>
-      </body>
-    </html>
+    <div className="dashboard-container">
+      <Sidebar />
+      <main className="dashboard-content">{children}</main>
+    </div>
   );
 }

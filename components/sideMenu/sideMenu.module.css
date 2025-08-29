@@ -1,80 +1,150 @@
 /* Sidebar.css */
+.navMenu {
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.navItem {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
 .sideItem {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border-radius: 10px;
-  margin: 6px 12px !important;
+  border-radius: 12px;
+  margin: 6px 12px;
   overflow: hidden;
+  text-decoration: none;
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sideItem:hover {
+  color: white;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .iconItem {
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   display: flex;
   align-items: center;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  padding: 12px 16px;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
   border-left: 0px solid transparent;
   font-size: 0.95rem;
 }
 
-.sideItem:hover .iconItem {
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: translateX(3px);
-  color: white;
+.iconSpan {
+  margin-right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.itemText {
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.sideItem:hover .iconSpan {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.sideItem:hover .itemText {
+  font-weight: 600;
 }
 
 .activeItem {
   background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.15),
-    rgba(255, 255, 255, 0.05)
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 100%
   );
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .activeItem .iconItem {
-  border-left: 4px solid white;
-  color: white;
+  border-left: 4px solid rgba(255, 255, 255, 0.9);
   font-weight: 600;
+}
+
+.activeItem .iconSpan {
+  opacity: 1;
+  color: white;
+}
+
+.activeItem .itemText {
+  font-weight: 600;
+  color: white;
 }
 
 /* Logo e cabeçalho */
 .logoContainer {
-  padding: 1.5rem 1rem;
+  padding: 2rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.2),
-    rgba(0, 0, 0, 0.05)
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 100%
   );
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
 }
 
 .logo {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
   color: white;
   display: flex;
   align-items: center;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .logoIcon {
-  margin-right: 12px;
+  margin-right: 16px;
   background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.1)
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.08) 100%
   );
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.logoIcon:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Estilos para Desktop */
@@ -82,20 +152,26 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 260px;
+  width: 280px;
   z-index: 500;
   height: 100vh;
   overflow-y: auto;
-  background: linear-gradient(145deg, #0a58ca 0%, #084298 100%);
-  background-image: linear-gradient(145deg, #0a58ca 0%, #084298 100%),
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><path fill="rgba(255, 255, 255, 0.03)" d="M769 229L1037 260.9M927 880L731 737 520 660 309 538 40 599 295 764 126.5 879.5 40 599-197 493 102 382-31 229 126.5 79.5-69-63"></path></svg>');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(
+    160deg,
+    #1e3a8a 0%,
+    #1e40af 25%,
+    #1d4ed8 50%,
+    #2563eb 75%,
+    #3b82f6 100%
+  );
+  box-shadow: 
+    8px 0 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .desktopSidebar::before {
@@ -105,12 +181,30 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 60%
-  );
+  background: 
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.02) 50%,
+      transparent 70%
+    );
   pointer-events: none;
+  z-index: 1;
+}
+
+.desktopSidebar > * {
+  position: relative;
+  z-index: 2;
 }
 
 .desktopSidebar::-webkit-scrollbar {

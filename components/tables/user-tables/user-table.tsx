@@ -1,9 +1,10 @@
 import { CustomTable, TableColumn } from "@/components/tables/customTable";
-import { FaUserEdit, FaTrash, FaUser } from "react-icons/fa";
+import { FaUserEdit, FaTrash, FaUser, FaEllipsisV } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { IoNewspaperOutline } from "react-icons/io5";
 import styles from "@/components/tables/user-tables/user-table.module.css";
 import { User } from "@/types/user";
+import { useEffect, useRef, useState } from 'react';
 
 interface UserTableProps {
   users: User[];
@@ -12,6 +13,25 @@ interface UserTableProps {
 }
 
 export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete }) => {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    }
+    if (openMenuId !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
   const columns: TableColumn<User>[] = [
     {
       header: "Nome",
@@ -48,19 +68,31 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete })
     {
       header: "Ações",
       render: (user) => (
-        <div className={styles.actionsCell}>
+        <div className={styles.actionsCell} style={{ position: 'relative' }}>
           <button
-            className={styles.updateButton}
-            onClick={() => onEdit(user)}
+            className={styles.ellipsisButton}
+            aria-label="Mais opções"
+            onClick={() => setOpenMenuId(openMenuId === user._id ? null : user._id)}
+            tabIndex={0}
           >
-            <FaUserEdit /> Atualizar
+            <FaEllipsisV />
           </button>
-          <button
-            className={styles.deleteButton}
-            onClick={() => onDelete(user._id)}
-          >
-            <FaTrash /> Deletar
-          </button>
+          {openMenuId === user._id && (
+            <div className={styles.actionMenu} ref={menuRef}>
+              <button
+                className={styles.menuItem}
+                onClick={() => { setOpenMenuId(null); onEdit(user); }}
+              >
+                <FaUserEdit /> Atualizar
+              </button>
+              <button
+                className={styles.menuItem}
+                onClick={() => { setOpenMenuId(null); onDelete(user._id); }}
+              >
+                <FaTrash /> Deletar
+              </button>
+            </div>
+          )}
         </div>
       ),
     },

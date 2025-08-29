@@ -68,7 +68,7 @@ export default function UsersPage() {
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const {user} = useUser();
   // Filtros dinâmicos
   const filterFields: FilterFieldConfig[] = [
     {
@@ -131,7 +131,7 @@ export default function UsersPage() {
           email: filters.email || undefined,
           _id: filters._id || undefined,
         },
-      });
+      }, user?.role!);
       if (res && (res as ResponseError).error) {
         throw new CustomError((res as ResponseError).error, (res as ResponseError).statusCode)
       }
@@ -150,24 +150,11 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    if(user){
+      fetchUsers();
+    }
     // eslint-disable-next-line
-  }, [currentPage, filters]);
-
-  // Modal handlers
-  const openCreateModal = useCallback(() => {
-    setModalMode(ModalMode.CREATE);
-    setCurrentUser({
-      _id: "",
-      username: "",
-      email: "",
-      createdAt: new Date(),
-      role: Role.VIEWER,
-      password: "",
-      updatedAt: new Date(),
-    });
-    setShowModal(true);
-  }, []);
+  }, [currentPage, filters, user]);
 
   const openUpdateModal = (user: User) => {
     setModalMode(ModalMode.UPDATE);

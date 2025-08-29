@@ -4,7 +4,7 @@ import { CustomConsole } from "@/utils/customLogger";
 import { CustomError } from "@/utils/customError";
 import errorMessages from "@/utils/errorMessages.json";
 import { ResponseError } from "@/types/types";
-import { User } from "@/types/user";
+import { Role, User } from "@/types/user";
 import { CookieManager, ICookiesManager } from "@/utils/cookies-manager";
 
 const consoler = new CustomConsole();
@@ -25,18 +25,20 @@ export const listUsersPaginated = async ({
     role?: string;
     _id?: string;
   };
-}): Promise<{ users: User[]; totalPages: number } | ResponseError> => {
+}, userRole:Role): Promise<{ users: User[]; totalPages: number } | ResponseError> => {
   consoler.process("🔁 Iniciando busca paginada de usuários");
   const token = (await cookies()).get("access_token");
   if (!token) {
     return { error: "Token não recebido", statusCode: 401 };
   }
   try {
+   
     const response = await fetch(`${urlApi}/user/listUsersPaginated`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token.value}`,
+        'x-role': userRole
       },
       body: JSON.stringify({
         page,

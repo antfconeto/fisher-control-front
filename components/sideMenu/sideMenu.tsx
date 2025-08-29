@@ -1,7 +1,7 @@
 "use client";
 import { Droplet, FishIcon, Home, User, Egg, Menu, X } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { Nav } from "react-bootstrap";
+
 import styles from "./sideMenu.module.css";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -131,28 +131,24 @@ const Sidebar = () => {
         {menuItems.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             <div className={styles.menuCategory}>{section.category}</div>
-            <Nav className={`flex-column ${styles.navMenu}`}>
+            <div className={styles.navMenu}>
               {section.items.map((item, index) => (
-                <Nav.Item key={index} className="w-100">
+                <div key={index} className={styles.navItem}>
                   <Link
                     href={item.link}
                     prefetch={true}
-                    passHref
-                    legacyBehavior
+                    className={`${styles.sideItem} ${
+                      isActive(item.link) ? styles.activeItem : ""
+                    }`}
                   >
-                    <Nav.Link
-                      className={`text-white ${styles.sideItem} ${
-                        isActive(item.link) ? styles.activeItem : ""
-                      }`}
-                    >
-                      <div className={styles.iconItem}>
-                        <span className="me-3">{item.icon}</span> {item.name}
-                      </div>
-                    </Nav.Link>
+                    <div className={styles.iconItem}>
+                      <span className={styles.iconSpan}>{item.icon}</span> 
+                      <span className={styles.itemText}>{item.name}</span>
+                    </div>
                   </Link>
-                </Nav.Item>
+                </div>
               ))}
-            </Nav>
+            </div>
           </div>
         ))}
       </div>

@@ -45,7 +45,6 @@ export default function SpeciesPage() {
     }),
     []
   );
-  const { sendRequest } = useRequest<Specie | ResponseError>();
   const { errorMessage, setErrorMessage } = useErrorContext();
   const { successNotification, errorNotification } = useNotification();
 
@@ -158,7 +157,7 @@ export default function SpeciesPage() {
   const handleCreateSpecies = async (species: Specie): Promise<boolean> => {
     try {
       let response = await createSpecie(species, user?.role);
-      if (!(response as ResponseError).error) {
+      if ((response as ResponseError).error) {
         const errMsg = (response as ResponseError)?.error || "Erro desconhecido";
         setErrorMessage(errMsg);
         return false
@@ -181,7 +180,7 @@ export default function SpeciesPage() {
   const handleUpdateSpecies = async (specie: Specie): Promise<boolean> => {
     try {
       let response = await updateSpecie(specie, user?.role);
-      if (!(response as ResponseError).error) {
+      if ((response as ResponseError).error) {
         const errMsg = (response as ResponseError)?.error || "Erro desconhecido";
         setErrorMessage(errMsg);
         return false
@@ -204,7 +203,7 @@ export default function SpeciesPage() {
   const handleDeleteSpecies = async (): Promise<boolean> => {
     try {
       const response = await deleteSpecie(currentSpecies._id, user?.role);
-      if (!(response as ResponseError).error) {
+      if ((response as ResponseError).error) {
         const errMsg = (response as ResponseError)?.error || "Erro desconhecido";
         setErrorMessage(errMsg);
         return false;

@@ -1,13 +1,14 @@
 import { useAuth } from "@/contexts/authContext";
 import { Role } from "@/types/user";
 import { hasRole, isAdmin, isViewer } from "@/utils/authUtils";
+import { useUser } from "./userHook";
 
 /**
  * Hook personalizado para verificação de autorização
  * Pode ser usado tanto no cliente quanto no servidor
  */
 export const useAuthorization = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
 
   return {
     /**
@@ -41,7 +42,7 @@ export const useAuthorization = () => {
  * Hook específico para verificar se o usuário é admin
  */
 export const useAdminAuth = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   return isAdmin(user);
 };
 
@@ -49,6 +50,6 @@ export const useAdminAuth = () => {
  * Hook específico para verificar se o usuário é viewer
  */
 export const useViewerAuth = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   return isViewer(user);
 }; 

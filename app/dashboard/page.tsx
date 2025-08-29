@@ -32,7 +32,7 @@ export default function Dashboard() {
   const dynamicColors = generateColors(speciesData.length);
   if (loading) {
     return (
-      <div className="page-container">
+      <div className="page-container" style={{marginTop:80}}>
         <div className="content-container">
           <div className="content-card">
             <div className="loading-container">
@@ -51,7 +51,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="page-container">
+      <div className="page-container" style={{marginTop:80}}>
         <div className="content-container">
           <div className="content-card mb-4">
             <div className="d-flex justify-content-between align-items-center mb-4">

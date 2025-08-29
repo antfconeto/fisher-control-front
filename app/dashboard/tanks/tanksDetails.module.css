@@ -1,5 +1,5 @@
 .contentContainer {
-  width: 100%;
+  width: 80%;
   margin-top: 65px;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -26,6 +26,25 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+}
+
+.animalsGraph{
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.animalTable{
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.animalsInfo {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
 }
 
 .detailCardsRow {
@@ -408,9 +427,16 @@
 @media (max-width: 1024px) {
   .contentContainer {
     padding: 16px;
-    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    flex-direction: column;
   }
   
+  .animalsInfo{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
   .contentCard {
     padding: 18px;
     gap: 16px;

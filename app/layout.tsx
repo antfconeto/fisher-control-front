@@ -9,6 +9,14 @@ import { ErrorProvider } from '@/contexts/errorContext';
 import { NotificationProvider } from '@/contexts/notificationContext';
 import { ToastContainer } from '@/components/Notifications';
 
+export const metadata: Metadata = {
+  title: 'Fisher Control',
+  description: 'Sistema de controle de pesca',
+  icons: {
+    icon: '/favicon.ico',
+  },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -382,11 +382,11 @@ export default function TankDetailsPage() {
           <p className="loading-text">Carregando informações do tank...</p>
         </div>
         :
-        <div className="row g-4">
+        <div className={detailsStyles.animalsInfo}>
           {/* Gráfico de pizza - espécies */}
           {animals && animals.length > 0 && (
             <motion.div
-              className="col-lg-6"
+              className={detailsStyles.animalsGraph}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
@@ -438,7 +438,7 @@ export default function TankDetailsPage() {
           {/* Lista de animais */}
           {animals && animals.length > 0 && (
             <motion.div
-              className="col-lg-6"
+              className={detailsStyles.animalTable}
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}

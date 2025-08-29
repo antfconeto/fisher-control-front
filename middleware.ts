@@ -44,10 +44,7 @@ export async function middleware(request: Request) {
       // Decodifica o token para verificar a role
       const decodedToken = decodeToken(token.value);
       
-      if (!decodedToken || decodedToken.role !== Role.ADMIN) {
-        consoler.warn(`⚠️ User is not admin, redirecting for /dashboard...`);
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
+
       
       consoler.success(`✅ Admin access granted for: ${pathname}`);
     } catch (error) {
