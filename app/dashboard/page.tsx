@@ -16,7 +16,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useDashboard } from "@/hooks/useDashboard";
-import {generateColors} from "@/utils/graphUtils"
+import { generateColors } from "@/utils/graphUtils"
 
 
 
@@ -32,7 +32,7 @@ export default function Dashboard() {
   const dynamicColors = generateColors(speciesData.length);
   if (loading) {
     return (
-      <div className="page-container" style={{marginTop:80}}>
+      <div className="page-container" style={{ marginTop: 80 }}>
         <div className="content-container">
           <div className="content-card">
             <div className="loading-container">
@@ -51,7 +51,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="page-container" style={{marginTop:80}}>
+      <div className="page-container" style={{ marginTop: 80 }}>
         <div className="content-container">
           <div className="content-card mb-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -60,7 +60,7 @@ export default function Dashboard() {
                 Control
               </h2>
             </div>
-            
+
 
             {/* Cards de informações */}
             <Row className="mb-4">
@@ -131,77 +131,41 @@ export default function Dashboard() {
                   <Card.Header className="bg-white">
                     <h5 className="mb-0">Distribuição por Espécie</h5>
                   </Card.Header>
-  <Card.Body className="d-flex justify-content-center align-items-center">
-        <ResponsiveContainer width="100%" height={300}>
-          {!speciesData || speciesData.length === 0 ? (
-            <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-              <span className="text-muted fs-5">Sem dados</span>
-            </div>
-          ) : (
-            <PieChart>
-              <Pie
-                data={speciesData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                nameKey="name"
-                label={({ name, percent }) =>
-                  `${name}: ${(percent * 100).toFixed(0)}%`
-                }
-              >
-                {speciesData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={dynamicColors[index % dynamicColors.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value, name, props) => [
-                  `${value} animais`,
-                  props.payload.name,
-                ]}
-              />
-            </PieChart>
-          )}
-        </ResponsiveContainer>
-      </Card.Body>
-                </Card>
-              </Col>
-
-              <Col lg={6} md={12} className="mb-3">
-                <Card className="h-100 shadow-sm">
-                  <Card.Header className="bg-white">
-                    <h5 className="mb-0">Desovas por Mês</h5>
-                  </Card.Header>
-                  <Card.Body>
+                  <Card.Body className="d-flex justify-content-center align-items-center">
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={[]}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                          dataKey="month"
-                          tickFormatter={(month) => {
-                            const months = [
-                              'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-                              'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
-                            ];
-                            return months[month - 1];
-                          }}
-                        />
-                        <YAxis />
-                        <Tooltip
-                          labelFormatter={(month) => {
-                            const months = [
-                              'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-                            ];
-                            return months[month - 1];
-                          }}
-                        />
-                        <Bar dataKey="spawns" fill="#FFBB28" name="Desovas" />
-                      </BarChart>
+                      {!speciesData || speciesData.length === 0 ? (
+                        <div className="w-100 h-100 d-flex justify-content-center align-items-center">
+                          <span className="text-muted fs-5">Sem dados</span>
+                        </div>
+                      ) : (
+                        <PieChart>
+                          <Pie
+                            data={speciesData}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ name, percent }) =>
+                              `${name}: ${(percent * 100).toFixed(0)}%`
+                            }
+                          >
+                            {speciesData.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={dynamicColors[index % dynamicColors.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value, name, props) => [
+                              `${value} animais`,
+                              props.payload.name,
+                            ]}
+                          />
+                        </PieChart>
+                      )}
                     </ResponsiveContainer>
                   </Card.Body>
                 </Card>

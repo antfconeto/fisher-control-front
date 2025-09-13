@@ -1,6 +1,3 @@
-
-
-  
 .actionsCell {
     display: flex;
     gap: 0.5rem;
@@ -108,8 +105,54 @@
 
 /* Media queries para dispositivos móveis */
 @media (max-width: 768px) {
-  
-    .actionsCell {
-      flex-direction: column;
-    }
+  .actionsCell {
+    flex-direction: column;
+    gap: 0.3rem;
   }
+  
+  .updateButton,
+  .deleteButton {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    min-width: 60px;
+    justify-content: center;
+  }
+  
+  .ellipsisButton {
+    padding: 0.25rem 0.4rem;
+    font-size: 1rem;
+  }
+  
+  .actionMenu {
+    min-width: 100px;
+    right: -10px;
+  }
+  
+  .menuItem {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actionsCell {
+    gap: 0.25rem;
+  }
+  
+  .updateButton,
+  .deleteButton {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    min-width: 50px;
+  }
+  
+  .actionMenu {
+    min-width: 90px;
+    right: -15px;
+  }
+  
+  .menuItem {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.7rem;
+  }
+}

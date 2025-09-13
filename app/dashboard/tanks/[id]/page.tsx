@@ -302,7 +302,7 @@ export default function TankDetailsPage() {
         otherClassName=""
       />
     )}
-    <div className={detailsStyles.contentContainer}>
+    <div className={detailsStyles.container}>
       {/* Cabeçalho */}
       <motion.div
         className="content-card mb-4"
@@ -311,22 +311,21 @@ export default function TankDetailsPage() {
         transition={{ duration: 0.5 }}
       >
         <div className={detailsStyles.header}>
-          <div className={detailsStyles.header}>
-            <button
-              className={detailsStyles.backButton}
-              onClick={() => {
-                router.push("/dashboard/tanks")
-              }}
-              aria-label="Voltar para a lista de tanques"
-            >
-              <BsArrowLeft />
-            </button>
-            <h2 className={detailsStyles.pageTitle}>
-              <GiFishBucket />{" Tanque: "}
-              {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
-            </h2>
+        <button
+            className={detailsStyles.backButton}
+            onClick={() => {
+              router.push("/dashboard/tanks")
+            }}
+            aria-label="Voltar para a lista de tanques"
+          >
+            <BsArrowLeft />
+            <span>Voltar</span>
+          </button>
+          <h2 className={detailsStyles.pageTitle}>
+            <GiFishBucket />{" Tanque: "}
+            {tankFullInfo.name || `Tanque ${tankFullInfo.name}`}
+          </h2>
 
-          </div>
         </div>
 
         {/* Informações básicas do tanque */}
