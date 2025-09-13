@@ -20,6 +20,7 @@ import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { AdminOnly } from "@/components/Authorization";
 import { useNotification } from "@/contexts/notificationContext";
 import { useUser } from "@/hooks/userHook";
+import { useMedia } from "@/hooks/useMediaQuery";
 
 enum ModalMode {
   CREATE = "create",
@@ -59,6 +60,7 @@ export default function SpeciesPage() {
   const [loading, setLoading] = useState(true);
   const [paginatedSpecies, setPaginatedSpecies] = useState<Specie[]>([]);
   const {user} = useUser()
+  const { isMobile, isTablet, isSmallMobile } = useMedia();
 
   const fetchSpecies = useCallback(async () => {
     try {
@@ -246,7 +248,7 @@ export default function SpeciesPage() {
               </h2>
               <AdminOnly>
                 <button className={styles.createButton} onClick={openCreateModal}>
-                  <FaPlus /> Cadastrar Nova Espécie
+                  <FaPlus />{isMobile ? "": "Cadastrar Nova Espécie"}
                 </button>
               </AdminOnly>
             </div>

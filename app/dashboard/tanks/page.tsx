@@ -273,7 +273,7 @@ export default function TanksPage() {
                 <div className={styles.tankCardHeader}>
                   <h3 className={styles.tankCardTitle}>
                     <GiFishBucket className={styles.tankCardIcon} /> 
-                    <span className={styles.tankCardTitleText}>{tank.name}</span>
+                    <span className={styles.tankCardTitleText}>{tank.name.length > 10 ? tank.name.slice(0, 10) + "..." : tank.name }</span>
                   </h3>
                   <AdminOnly>
                     <div className={styles.tankCardActions}>

@@ -28,6 +28,7 @@ import { useSpecie } from "@/hooks/useSpecies";
 import { AdminOnly } from "@/components/Authorization";
 import { useNotification } from "@/contexts/notificationContext";
 import { useUser } from "@/hooks/userHook";
+import { useMedia } from "@/hooks/useMediaQuery";
 
 enum ModalMode {
   CREATE = "create",
@@ -41,6 +42,9 @@ export default function AnimalsPage() {
   //States for define status of modal
   const [modalMode, setModalMode] = useState<ModalMode>(ModalMode.CREATE);
   const { user } = useUser();
+  
+  // Hook para detectar breakpoints
+  const { isMobile, isTablet, isSmallMobile } = useMedia();
 
   useEffect(()=>{
     console.log(`User role: ${user?.role}`)
@@ -66,15 +70,14 @@ export default function AnimalsPage() {
     }),
     []
   );
-  const { sendRequest } = useRequest<Animal | ResponseError>();
   const { errorMessage, setErrorMessage } = useErrorContext();
   const { successNotification, errorNotification } = useNotification();
 
   //States for current animal selected
   const [currentAnimal, setCurrentAnimal] = useState<Animal>(defaultAnimal);
 
-  //Total items per page
-  const itemsPerPage = 5;
+  //Total items per page - responsivo baseado no tamanho da tela
+  const itemsPerPage = isSmallMobile ? 3 : isMobile ? 4 : 5;
   //Animals filtered
   const { animals, setCurrentPage, currentPage, loading, totalPages } =
     useAnimalsPagination({ filters, itemsPerPage });
@@ -274,7 +277,7 @@ export default function AnimalsPage() {
               </h2>
               <AdminOnly>
               <button className={styles.createButton} onClick={openCreateModal}>
-                <FaPlus /> Cadastrar Novo Animal
+                <FaPlus /> {isMobile ? "": "Cadastrar Novo Animal"}
               </button>
               </AdminOnly>
 

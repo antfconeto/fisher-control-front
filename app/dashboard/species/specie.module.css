@@ -110,19 +110,15 @@
   text-align: center;
 }
 
-/* Modal styles */
-
-/* Media queries para dispositivos móveis */
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
-    margin-top: 4rem; /* Espaço para o botão do menu hambúrguer */
-    margin-left: 0; /* Remove o espaço lateral em dispositivos móveis */
-    max-width: 100%; /* Utiliza toda a largura da tela */
+    margin-top: 4rem;
+    margin-left: 0; 
+    max-width: 100%;
   }
   .createButton {
-    width: 150px;
-    margin: 0 auto;
+    margin: 10 auto;
     font-size: 0.8rem;
   }
   

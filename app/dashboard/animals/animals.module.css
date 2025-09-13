@@ -41,6 +41,8 @@
   font-weight: 500;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  min-height: 2.5rem;
 }
 .createButton:hover {
   background-color: #2f855a;
@@ -109,12 +111,83 @@
   text-align: center;
 }
 
+/* No data container */
+.noDataContainer {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #718096;
+  background-color: #f7fafc;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.noDataText {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin: 0;
+}
+
+/* Info box styles */
+.infoTitle {
+  color: #2d3748;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.infoList {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+.infoList li {
+  margin-bottom: 0.5rem;
+}
+
+/* Loading improvements */
+.loadingContainer {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.loadingText {
+  margin-top: 1rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Focus and accessibility improvements */
+.createButton:focus,
+.paginationButton:focus {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
+
+/* Better hover states for mobile */
+@media (hover: hover) {
+  .createButton:hover {
+    background-color: #2f855a;
+    transform: translateY(-1px);
+  }
+  
+  .paginationButton:hover:not(:disabled) {
+    background-color: #3182ce;
+    transform: translateY(-1px);
+  }
+}
+
 /* Modal styles */
 
 /* Media queries para dispositivos móveis */
 @media (max-width: 768px) {
   .container {
-    padding: 1rem;
+    padding: 0.75rem;
     margin-top: 4rem;
     /* Espaço para o botão do menu hambúrguer */
     margin-left: 0;
@@ -125,10 +198,36 @@
 
   .title {
     font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .titleIcon {
+    font-size: 1.5rem;
   }
 
   .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .createButton {
+    width: 40px;
     justify-content: center;
+    padding: 5px 5px;
+    font-size: 0.9rem;
+  }
+
+  .filterSection {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .tableContainer {
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
   }
 
   .searchInput,
@@ -138,21 +237,107 @@
 
   .actionsCell {
     flex-direction: column;
+    gap: 0.25rem;
   }
 
   .modalFooter {
     justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .paginationButton {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
   }
 }
 
+/* Tablets */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .header {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .createButton {
+    min-width: auto;
+  }
+  
+  .filterSection {
+    padding: 0.875rem;
+  }
+}
+
+/* Dispositivos móveis pequenos */
 @media (max-width: 480px) {
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .titleIcon {
+    font-size: 1.25rem;
+  }
+
+  .createButton {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .filterSection {
+    padding: 0.5rem;
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .paginationInfo {
     order: -1;
     width: 100%;
     margin-bottom: 0.5rem;
+    font-size: 0.875rem;
   }
 
   .pagination {
     justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .paginationButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Landscape em dispositivos móveis */
+@media (max-width: 768px) and (orientation: landscape) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+
+
+  .pagination {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .paginationInfo {
+    order: 0;
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .paginationButton {
+    width: auto;
   }
 }

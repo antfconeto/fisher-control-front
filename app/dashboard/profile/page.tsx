@@ -2,7 +2,7 @@
 import { Button } from "@/components/buttons/buttons";
 import { useUser } from "@/hooks/userHook";
 import { Role, User } from "@/types/user";
-import { Check, LogOut, Mail, User as UserIcon, Trash2 } from "lucide-react";
+import { Check, LogOut, Mail, User as UserIcon, Trash2, Settings } from "lucide-react";
 import { FaUser, FaCalendarAlt, FaClock, FaShieldAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { ClockLoader } from "react-spinners";
@@ -12,7 +12,7 @@ import { logoutAction } from "@/actions/logoutAction";
 import { useError } from "@/hooks/useError";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useState } from "react";
-import { Modal, Form } from "react-bootstrap";
+import { Modal, Form, Dropdown } from "react-bootstrap";
 import { ConfirmModal } from "@/components/Forms/ConfirmModal/ConfirmModal";
 import { deleteUser, updateUser } from "@/actions/user";
 import { ResponseError } from "@/types/types";
@@ -181,22 +181,36 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-              <div className="d-flex gap-2">
-                <Button
-                  variant="primary"
-                  onClick={handleShow}
-                  otherClassName="d-flex align-items-center"
+              <Dropdown>
+                <Dropdown.Toggle 
+                  variant="primary" 
+                  id="profile-actions-dropdown"
+                  className={`${styles.actionDropdownToggle} d-flex align-items-center`}
                 >
-                  <MdEdit className="me-2" size={18} /> Editar Perfil
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={handleDeleteShow}
-                  otherClassName="d-flex align-items-center"
-                >
-                  <Trash2 className="me-2" size={18} /> Deletar Conta
-                </Button>
-              </div>
+                  <Settings className="me-2" size={18} />
+                  Ações
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu className={styles.actionDropdownMenu}>
+                  <Dropdown.Item 
+                    onClick={handleShow}
+                    className={`${styles.actionDropdownItem} ${styles.editAction}`}
+                  >
+                    <MdEdit className="me-2" size={18} />
+                    Editar Perfil
+                  </Dropdown.Item>
+                  
+                  <Dropdown.Divider />
+                  
+                  <Dropdown.Item 
+                    onClick={handleDeleteShow}
+                    className={`${styles.actionDropdownItem} ${styles.deleteAction}`}
+                  >
+                    <Trash2 className="me-2" size={18} />
+                    Deletar Conta
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
 
             {/* Cards de informações */}
