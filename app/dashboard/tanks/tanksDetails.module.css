@@ -41,17 +41,16 @@
   gap: 16px;
   width: 100%;
 }
-.animalTable{
+.animalTable {
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 .animalsInfo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
   width: 100%;
 }
@@ -463,12 +462,7 @@
   }
   
   .animalsInfo {
-    grid-template-columns: 1fr 1fr;
     gap: 24px;
-  }
-  
-  .animalTable {
-    width: 50%;
   }
 }
 
@@ -488,19 +482,8 @@
     margin-top: 80px;
   }
   
-  .animalsInfo{
-    display: flex;
-    flex-direction: column;
+  .animalsInfo {
     gap: 16px;
-  }
-  
-  .animalsGraph {
-    order: 1;
-  }
-  
-  .animalTable {
-    order: 2;
-    width: 100%;
   }
   .contentCard {
     padding: 18px;
